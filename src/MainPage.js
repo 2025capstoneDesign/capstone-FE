@@ -1,0 +1,108 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./App.css"; // CSS 파일
+import { Link } from "react-router-dom";
+
+export default function MainPage() {
+  const [file, setFile] = useState(null);
+  const [record, setRecord] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // 파일 업로드&결과 페이지로 전달
+  const handleFileUpload = (event, setFile) => {
+    const uploadedFile = event.target.files[0] || null;
+    setFile(uploadedFile);
+  };
+
+  const handleConvert = () => {
+    navigate("/result", { state: { file, record } });
+  };
+
+  return (
+    <div className="container">
+      {/* 상단바 */}
+      <div className="topbar">
+        <button className="menu-btn" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+          &#9776;
+        </button>
+        <div className="title">필기탈출 AI</div>
+        <Link to = {`/login`}>
+          <button className="account-btn">
+            <svg className="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="white">
+              <path d="M304 128a80 80 0 1 0 -160 0 80 80 0 1 0 160 0zM96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 
+              128zM49.3 464l349.5 0c-8.9-63.3-63.3-112-129-112h-91.4c-65.7 0-120.1 48.7-129 112zM0 482.3C0 383.8 
+              79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 
+              0 498.7 0 482.3z" />
+            </svg>
+          </button>
+        </Link>
+      </div>
+
+      {/* 사이드바 */}
+      <div className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
+        <ul>
+          <li>메뉴 1</li>
+          <li>메뉴 2</li>
+          <li>메뉴 3</li>
+        </ul>
+      </div>
+
+      {/* 메인 컨텐츠 */}
+      <main className="main-content">
+        <div className="upload-section">
+          <svg className="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M7.685 3c1.364 0 2.633.582 3.533 1.573l.168.195.01-.008a4.7 4.7 0 0 1 
+                      2.128-.797l.289-.025.263-.007c1.633 0 3.125.835 4.009 2.187l.054.088.103.012c2.552.35 
+                      4.524 2.473 4.739 5.082l.014.238.005.234c0 3.02-2.346 5.484-5.284 5.6l-.216.004h-4.417V22H12v-4.624H6.315c-2.514 
+                      0-4.577-1.963-4.796-4.465l-.014-.223-.005-.218c0-1.315.511-2.548 1.4-3.458l.078-.077-.03-.144a5 5 0 0 
+                      1-.054-.39l-.016-.197-.008-.298C2.87 5.197 5.025 3 7.685 3m0 1.081c-2.06 0-3.732 1.71-3.732 3.825q0 
+                      .351.061.694l.047.226.114.472-.357.33a3.85 3.85 0 0 0-1.235 2.842c0 2.048 1.57 3.717 3.54 3.82l.192.005H12v-5.508l-2.52 
+                      2.5-.795-.787 3.857-3.821 3.856 3.821-.794.787-2.521-2.499v5.506H17.5c2.367 0 4.303-1.908 4.412-4.31l.005-.212c0-2.265-1.635-4.167-3.794-4.478l-.21-.025-.424-.04-.216-.366a3.71 
+                      3.71 0 0 0-3.197-1.85 3.65 3.65 0 0 0-2.034.616l-.197.142-.676.517-.504-.684a3.7 3.7 0 0 0-2.98-1.523">
+            </path>
+          </svg>
+
+          {/* 강의록 업로드 */}
+          <div className="file-upload">
+            <label className="upload-btn">
+              강의록 파일 선택
+              <input type="file" className="hidden" onChange={(e) => handleFileUpload(e, setFile)} />
+              <svg className="upload-btn-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                <path d="m17 9 1 1-6 6-6-6 1-1 5 5.17z"></path>
+              </svg>
+            </label>
+            <div className="file-name">{file ? file.name : "선택된 파일 없음"}</div>
+          </div>
+
+          {/* 음성 업로드 */}
+          <div className="file-upload">
+            <label className="upload-btn">
+              음성 파일 선택
+              <input type="file" className="hidden" onChange={(e) => handleFileUpload(e, setRecord)} />
+              <svg className="upload-btn-icon" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                <path d="m17 9 1 1-6 6-6-6 1-1 5 5.17z"></path>
+              </svg>
+            </label>
+            <div className="file-name">{record ? record.name : "선택된 파일 없음"}</div>
+          </div>
+
+          {/* 지원 파일 형식 */}
+          <div className="file-types">
+            <p><strong>강의록, 음성</strong> 파일을 추가해주세요</p>
+            <ul>
+                <p>지원하는 형식 : </p>
+                <li>PDF</li>
+                <li>PPT</li>
+                <li>DOC</li>
+                <li>MP3</li>
+            </ul>
+          </div>
+        </div>
+
+          {/* 변환 버튼 */}
+          <button className="convert-btn" onClick={handleConvert}>변환</button>
+        </main>
+    </div>
+  );
+}

@@ -1,38 +1,191 @@
-.App {
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background:#cccccc76
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* 상단 바 */
+.topbar {
+  background-color: #444;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.title {
+  flex-grow: 1;
+  font-size: 24px;
+  font-weight: bold;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.account-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  width: 40px;
+  height: 40px;
+  background: #555;
+  border-radius: 20%;
+  border: none;
+  cursor: pointer;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.account-btn:hover {
+  background-color: #7d7b7b;
+}
+
+/* 사이드바 */
+.sidebar {
+  width: 200px;
+  background-color: #444;
   color: white;
+  position: fixed;
+  top: 50px;
+  left: -200px;
+  height: 100%;
+  transition: left 0.3s;
 }
 
-.App-link {
-  color: #61dafb;
+.sidebar.open {
+  left: 0;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 15px;
+  cursor: pointer;
+}
+
+.sidebar li:hover {
+  background-color: #666;
+}
+
+/* 메인 컨텐츠 */
+.main-content {
+  padding: 20px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.upload-section {
+  border: 2px dashed #666;
+  min-width: 960px;
+  padding: 80px 40px;
+  margin-bottom: 20px;
+}
+
+.upload-icon {
+  width: 50px;
+  height: 50px;
+  fill: gray;
+}
+
+/* 파일 업로드 버튼 */
+.file-upload {
+  display: flex;
+  margin: 20px;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; 
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  border: none;
+  width: 160px;
+  text-align: center;
+}
+
+.upload-btn:hover {
+  background-color: #0056b3;
+}
+
+.upload-btn-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.hidden {
+  display: none;
+}
+
+.file-name {
+  font-size: 14px;
+  color: #333;
+}
+
+/* 파일 타입 */
+.file-types{
+  margin: 40px;
+}
+
+.file-types p{
+  margin: 5px;
+}
+
+.file-types ul{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+}
+
+.file-types li{
+  display: inline-block;
+  background-color: #ff000029;
+  list-style: none;
+  margin-left: 8px;
+  padding: 2px;
+  width: 40px;
+  border-radius: 15%;
+}
+
+/* 변환 버튼 */
+.convert-btn {
+  background-color: green;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.convert-btn:hover {
+  background-color: darkgreen;
 }
