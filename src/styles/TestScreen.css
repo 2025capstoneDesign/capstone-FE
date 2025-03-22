@@ -1,0 +1,140 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.header {
+  padding: 1rem;
+  background-color: white;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.back-button {
+  text-decoration: none;
+  color: #444;
+  font-size: 16px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background-color: #e9ecef;
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background-color: #dee2e6;
+}
+
+.pdf-container {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  flex: 1;
+}
+
+.pdf-viewer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 0; /* PDF 뷰어가 컨테이너를 벗어나지 않도록 */
+}
+
+/* PDF 문서 컨테이너 스타일 */
+.pdf-viewer .react-pdf__Document {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+/* PDF 페이지 스타일 */
+.pdf-viewer .react-pdf__Page {
+  max-width: 100%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* PDF 페이지 캔버스 스타일 */
+.pdf-viewer .react-pdf__Page canvas {
+  max-width: 100%;
+  height: auto !important;
+}
+
+/* 페이지 컨트롤 영역 */
+.page-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+.page-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.page-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.page-button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.page-info {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.summary-section {
+  width: 300px;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+.summary-section h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.summary-content {
+  color: #666;
+  line-height: 1.6;
+}
+
+/* 로딩 상태 스타일 */
+.react-pdf__message {
+  padding: 2rem;
+  text-align: center;
+  color: #666;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .pdf-container {
+    flex-direction: column;
+  }
+
+  .summary-section {
+    width: auto;
+    margin-top: 1rem;
+  }
+}
