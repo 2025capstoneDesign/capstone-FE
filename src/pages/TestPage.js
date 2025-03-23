@@ -1,9 +1,10 @@
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Document, Page } from "react-pdf";
 import { summaryData } from "../data/summaryData";
 import "../styles/TestScreen.css";
 import ReactMarkdown from "react-markdown";
+import Header, { AccountButton } from "../components/common/Header/Header";
 
 export default function TestPage() {
   const location = useLocation();
@@ -32,11 +33,12 @@ export default function TestPage() {
 
   return (
     <div className="container">
-      <div className="header">
-        <Link to="/" className="back-button">
-          ← 돌아가기
-        </Link>
-      </div>
+      <Header
+        title="필기보조 AI"
+        showBackButton={true}
+        showMenuButton={false}
+        rightContent={<AccountButton />}
+      />
 
       <div className="pdf-container">
         <div className="pdf-viewer">

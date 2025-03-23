@@ -1,0 +1,32 @@
+.topbar {
+  background-color: #444;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.right-section {
+  display: flex;
+  align-items: center;
+}
+
+.back-button {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.back-button:hover {
+  color: #ddd;
+}
+
+/* ... 기존 CSS 스타일 유지 ... */
