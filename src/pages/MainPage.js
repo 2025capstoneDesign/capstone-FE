@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/MainPage.css"; // CSS 파일
-import Header, { AccountButton } from "../components/common/Header/Header";
+import Header, { AccountButton } from "../components/common/Header/Header.js";
 
 import { pdfjs } from "react-pdf";
 

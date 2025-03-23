@@ -2,22 +2,13 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background:#cccccc76
+  background: #cccccc76;
 }
 
 .container {
   display: flex;
   flex-direction: column;
   height: 100vh;
-}
-
-/* 상단 바 */
-.topbar {
-  background-color: #444;
-  color: white;
-  display: flex;
-  align-items: center;
-  padding: 10px;
 }
 
 .menu-btn {
@@ -119,7 +110,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px; 
+  gap: 8px;
   padding: 10px 20px;
   background-color: #007bff;
   color: white;
@@ -150,15 +141,15 @@ body {
 }
 
 /* 파일 타입 */
-.file-types{
+.file-types {
   margin: 40px;
 }
 
-.file-types p{
+.file-types p {
   margin: 5px;
 }
 
-.file-types ul{
+.file-types ul {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -166,7 +157,7 @@ body {
   margin: 0;
 }
 
-.file-types li{
+.file-types li {
   display: inline-block;
   background-color: #ff000029;
   list-style: none;

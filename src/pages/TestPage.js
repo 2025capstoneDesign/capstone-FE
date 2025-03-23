@@ -4,7 +4,7 @@ import { Document, Page } from "react-pdf";
 import { summaryData } from "../data/summaryData";
 import "../styles/TestScreen.css";
 import ReactMarkdown from "react-markdown";
-import Header, { AccountButton } from "../components/common/Header/Header";
+import Header, { AccountButton } from "../components/common/Header/Header.js";
 
 export default function TestPage() {
   const location = useLocation();
