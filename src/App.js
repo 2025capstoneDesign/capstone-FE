@@ -4,10 +4,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ResultPage from "./pages/ResultPage";
 import TestPage from "./pages/TestPage";
 import TestPageForApp from "./pages/TestPageForApp";
-import { pdfjs } from "react-pdf";
-
-// Worker 버전을 명시적으로 지정
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`;
 
 function App() {
   // public 폴더 내의 PDF 파일 경로 수정

@@ -5,12 +5,12 @@ import { Link } from "react-router-dom";
 
 import { pdfjs } from "react-pdf";
 
-// Worker 버전을 명시적으로 지정
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`;
-
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url
+).toString();
 export default function MainPage() {
   const [file, setFile] = useState(null);
-  const dummyPdfFile = "/sample.pdf";
   const [record, setRecord] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
@@ -22,8 +22,7 @@ export default function MainPage() {
   };
 
   const handleConvert = () => {
-    // 파일이 선택되었으면 선택된 파일을, 아니면 기본 PDF 사용
-    const pdfToUse = file || dummyPdfFile;
+    const pdfToUse = file;
     navigate("/test", {
       state: { pdfFile: pdfToUse },
     });
