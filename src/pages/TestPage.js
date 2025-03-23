@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Document, Page } from "react-pdf";
 import { summaryData } from "../data/summaryData";
 import "../styles/TestScreen.css";
+import ReactMarkdown from "react-markdown";
 
 export default function TestPage() {
   const location = useLocation();
@@ -77,7 +78,8 @@ export default function TestPage() {
         <div className="summary-section">
           <h3>페이지 요약</h3>
           <div className="summary-content">
-            {summaryData[pageNumber] || "해당 페이지의 요약 내용이 없습니다."}
+            {<ReactMarkdown>{summaryData[pageNumber]}</ReactMarkdown> ||
+              "해당 페이지의 요약 내용이 없습니다."}
           </div>
         </div>
       </div>
