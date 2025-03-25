@@ -9,6 +9,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.mjs",
   import.meta.url
 ).toString();
+
 export default function MainPage() {
   const [file, setFile] = useState(null);
   const [record, setRecord] = useState(null);
@@ -47,6 +48,13 @@ export default function MainPage() {
   };
 
   const handleConvert = () => {
+    if (!file) {
+      setError("PDF 파일을 업로드해주세요.");
+      // 4.5초 후 에러 메시지 제거
+      setTimeout(() => setError(""), 4500);
+      return;
+    }
+
     const pdfToUse = file;
     navigate("/test", {
       state: { pdfFile: pdfToUse },
