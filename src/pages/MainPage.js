@@ -12,13 +12,38 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 export default function MainPage() {
   const [file, setFile] = useState(null);
   const [record, setRecord] = useState(null);
+  const [error, setError] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
-  // 파일 업로드&결과 페이지로 전달
-  const handleFileUpload = (event, setFile) => {
-    const uploadedFile = event.target.files[0] || null;
-    setFile(uploadedFile);
+  // 허용된 파일 확장자
+  const allowedDocumentTypes = [".pdf", ".ppt", ".pptx", ".doc", ".docx"];
+  const allowedAudioTypes = [".mp3"];
+
+  // 파일 업로드 & 유효성 검사
+  const handleFileUpload = (event, setFileState, isAudio = false) => {
+    const uploadedFile = event.target.files[0];
+    if (!uploadedFile) return;
+
+    const fileExtension =
+      "." + uploadedFile.name.split(".").pop().toLowerCase();
+    const allowedTypes = isAudio ? allowedAudioTypes : allowedDocumentTypes;
+
+    if (!allowedTypes.includes(fileExtension)) {
+      setError(
+        `지원하지 않는 파일 형식입니다. ${
+          isAudio ? "음성" : "문서"
+        } 파일은 ${allowedTypes.join(", ")} 형식만 가능합니다.`
+      );
+      event.target.value = ""; // 파일 입력 초기화
+      setFileState(null);
+      // 3초 후 에러 메시지 제거
+      setTimeout(() => setError(""), 3000);
+      return;
+    }
+
+    setError("");
+    setFileState(uploadedFile);
   };
 
   const handleConvert = () => {
@@ -66,6 +91,16 @@ export default function MainPage() {
             ></path>
           </svg>
 
+          {/* 에러 메시지 표시 */}
+          {error && (
+            <div
+              className="error-message"
+              style={{ color: "red", marginBottom: "10px" }}
+            >
+              {error}
+            </div>
+          )}
+
           {/* 강의록 업로드 */}
           <div className="file-upload">
             <label className="upload-btn">
@@ -73,7 +108,8 @@ export default function MainPage() {
               <input
                 type="file"
                 className="hidden"
-                onChange={(e) => handleFileUpload(e, setFile)}
+                accept=".pdf,.ppt,.pptx,.doc,.docx"
+                onChange={(e) => handleFileUpload(e, setFile, false)}
               />
               <svg
                 className="upload-btn-icon"
@@ -96,7 +132,8 @@ export default function MainPage() {
               <input
                 type="file"
                 className="hidden"
-                onChange={(e) => handleFileUpload(e, setRecord)}
+                accept=".mp3"
+                onChange={(e) => handleFileUpload(e, setRecord, true)}
               />
               <svg
                 className="upload-btn-icon"
