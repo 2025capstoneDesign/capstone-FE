@@ -5,8 +5,6 @@ import ResultPage from "./pages/ResultPage";
 import TestPage from "./pages/TestPage";
 
 function App() {
-  // public 폴더 내의 PDF 파일 경로 수정ublic 폴더 기준 경로
-
   return (
     <BrowserRouter>
       <div className="APP">
@@ -18,7 +16,6 @@ function App() {
         </Routes>
       </div>
     </BrowserRouter>
-    // <TestPageForApp pdfFile={pdfFile} />
   );
 }
 

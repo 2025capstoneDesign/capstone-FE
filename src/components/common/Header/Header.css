@@ -31,11 +31,8 @@
   background: #7d7b7b !important;
 }
 
-.back-button svg{
+.back-button svg {
   width: 16px;
   fill: white;
   margin-right: 12px;
 }
-
-
-/* ... 기존 CSS 스타일 유지 ... */
