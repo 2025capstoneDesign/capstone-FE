@@ -49,14 +49,17 @@ body {
 
 /* 사이드바 */
 .sidebar {
-  width: 200px;
+  width: 250px;
   background-color: #444;
   color: white;
   position: fixed;
   top: 50px;
-  left: -200px;
+  left: -250px;
   height: 100%;
   transition: left 0.3s;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar.open {
@@ -66,15 +69,40 @@ body {
 .sidebar ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .sidebar li {
-  padding: 15px;
+  padding: 12px 20px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  transition: background-color 0.2s;
 }
 
 .sidebar li:hover {
-  background-color: #666;
+  background-color: #555;
+}
+
+.sidebar-title {
+  font-weight: 500;
+  color: #aaa;
+  font-size: 13px !important;
+  padding: 20px 20px 10px !important;
+  cursor: default !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sidebar-title:hover {
+  background-color: transparent !important;
+}
+
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
 }
 
 /* 메인 컨텐츠 */
