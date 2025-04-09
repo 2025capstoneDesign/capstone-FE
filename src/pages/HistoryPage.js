@@ -7,17 +7,18 @@ import "../styles/HistoryPage.css";
 export default function HistoryPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   // 검색 기능
-  const filteredPdfs = pdfData.filter(pdf => 
-    pdf.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pdf.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPdfs = pdfData.filter(
+    (pdf) =>
+      pdf.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pdf.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // PDF 열기 (뷰어로 이동)
   const openPdf = (pdf) => {
     navigate("/test", {
-      state: { pdfUrl: pdf.file, pdfTitle: pdf.title }
+      state: { pdfUrl: pdf.file, pdfTitle: pdf.title },
     });
   };
 
@@ -28,7 +29,7 @@ export default function HistoryPage() {
         showBackButton={true}
         showMenuButton={false}
       />
-      
+
       <div className="history-container">
         <div className="search-bar">
           <input
@@ -37,18 +38,18 @@ export default function HistoryPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button 
-            className={`clear-search ${!searchTerm ? 'hidden-button' : ''}`}
+          <button
+            className={`clear-search ${!searchTerm ? "hidden-button" : ""}`}
             onClick={() => setSearchTerm("")}
           >
             ✕
           </button>
         </div>
-        
+
         <div className="pdf-list">
           {filteredPdfs.length > 0 ? (
-            filteredPdfs.map(pdf => (
-              <div key={pdf.id} className="pdf-card" onClick={() => openPdf(pdf)}>
+            filteredPdfs.map((pdf) => (
+              <div key={pdf.id} className="pdf-card">
                 <div className="pdf-thumbnail">
                   <div className="pdf-icon">PDF</div>
                 </div>
@@ -59,16 +60,22 @@ export default function HistoryPage() {
                   <p className="pdf-pages">{pdf.pages}페이지</p>
                 </div>
                 <div className="pdf-actions">
-                  <button className="view-btn" onClick={(e) => {
-                    e.stopPropagation();
-                    openPdf(pdf);
-                  }}>
+                  <button
+                    className="view-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openPdf(pdf);
+                    }}
+                  >
                     열람
                   </button>
-                  <button className="download-btn" onClick={(e) => {
-                    e.stopPropagation();
-                    window.open(pdf.file, '_blank');
-                  }}>
+                  <button
+                    className="download-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(pdf.file, "_blank");
+                    }}
+                  >
                     다운로드
                   </button>
                 </div>
