@@ -18,7 +18,7 @@ export default function HistoryPage() {
   // PDF 열기 (뷰어로 이동)
   const openPdf = (pdf) => {
     navigate("/test", {
-      state: { pdfUrl: pdf.file, pdfTitle: pdf.title },
+      state: { pdfFile: pdf.file, pdfTitle: pdf.title },
     });
   };
 
