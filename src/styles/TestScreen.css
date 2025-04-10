@@ -47,6 +47,9 @@ body {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   min-width: 0; /* PDF 뷰어가 컨테이너를 벗어나지 않도록 */
+  position: relative;
+  max-height: calc(100vh - 10rem); /* 최대 높이 설정 */
+  overflow: auto; /* 내용이 넘치면 스크롤 */
 }
 
 /* PDF 문서 컨테이너 스타일 */
@@ -54,14 +57,19 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center; /* 수직 중앙 정렬 */
   margin-bottom: 1rem;
-  min-height: 300px; /* 최소 높이 고정 (깜빡임 방지) */
+  min-height: 600px; /* 높이 더 증가 */
+  flex: 1;
+  overflow: auto; /* 컨텐츠가 넘치면 스크롤 표시 */
+  width: 100%; /* 전체 너비 사용 */
 }
 
 /* PDF 페이지 스타일 */
 .pdf-viewer .react-pdf__Page {
   max-width: 100%;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin: 0 auto; /* 좌우 중앙 정렬 */
 }
 
 /* PDF 페이지 캔버스 스타일 */
@@ -80,6 +88,9 @@ body {
   background-color: #f8f9fa;
   border-radius: 4px;
   margin-top: 1rem;
+  position: sticky;
+  bottom: 1rem;
+  z-index: 10;
 }
 
 .page-button {

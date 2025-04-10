@@ -51,7 +51,7 @@ export default function TestPage() {
               pageNumber={pageNumber}
               renderTextLayer={false}
               renderAnnotationLayer={false}
-              scale={1.0}
+              scale={1.5}
               width={undefined}
             />
           </Document>
