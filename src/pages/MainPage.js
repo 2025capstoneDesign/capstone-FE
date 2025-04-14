@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/MainPage.css"; // CSS 파일
 import Header, { AccountButton } from "../components/common/Header/Header.js";
-
+import axios from "axios";
 import { pdfjs } from "react-pdf";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -14,6 +14,7 @@ export default function MainPage() {
   const [file, setFile] = useState(null);
   const [record, setRecord] = useState(null);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -47,18 +48,39 @@ export default function MainPage() {
     setFileState(uploadedFile);
   };
 
-  const handleConvert = () => {
+  const handleConvert = async () => {
     if (!file) {
-      setError("PDF 파일을 업로드해주세요.");
+      setError("강의 교안 파일을 업로드해주세요.");
       // 4.5초 후 에러 메시지 제거
       setTimeout(() => setError(""), 4500);
       return;
     }
 
-    const pdfToUse = file;
-    navigate("/test", {
-      state: { pdfFile: pdfToUse },
-    });
+    setIsLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/lecture/upload-lecture-file`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("업로드 성공:", response.data);
+      navigate("/test", { state: { pdfFile: file } });
+    } catch (error) {
+      console.error("업로드 실패:", error);
+      setError("파일 업로드에 실패했습니다. 다시 시도해주세요.");
+      setTimeout(() => setError(""), 4500);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -128,6 +150,13 @@ export default function MainPage() {
 
       {/* 메인 컨텐츠 */}
       <main className="main-content">
+        {isLoading && (
+          <div className="loading-overlay">
+            <div className="loading-spinner"></div>
+            <p>파일을 업로드하는 중입니다...</p>
+          </div>
+        )}
+
         <div className="upload-section">
           <svg
             className="upload-icon"
@@ -160,7 +189,7 @@ export default function MainPage() {
           {/* 강의록 업로드 */}
           <div className="file-upload">
             <label className="upload-btn">
-              강의록 파일 선택
+              강의교안 파일 선택
               <input
                 type="file"
                 className="hidden"
@@ -208,7 +237,7 @@ export default function MainPage() {
           {/* 지원 파일 형식 */}
           <div className="file-types">
             <p>
-              <strong>강의록, 음성</strong> 파일을 추가해주세요
+              <strong>강의교안, 음성</strong> 파일을 추가해주세요
             </p>
             <ul>
               <p>지원하는 형식 : </p>
@@ -221,8 +250,12 @@ export default function MainPage() {
         </div>
 
         {/* 변환 버튼 */}
-        <button className="convert-btn" onClick={handleConvert}>
-          변환
+        <button
+          className="convert-btn"
+          onClick={handleConvert}
+          disabled={isLoading}
+        >
+          {isLoading ? "변환 중..." : "변환"}
         </button>
       </main>
     </div>
