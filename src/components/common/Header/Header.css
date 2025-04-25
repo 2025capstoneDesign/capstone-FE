@@ -3,28 +3,34 @@
   color: white;
   display: flex;
   align-items: center;
-  padding: 10px;
+  justify-content: space-between;
+  padding: 12px;
+  height: 50px;
 }
 
 .left-section {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
 }
 
 .right-section {
   display: flex;
   align-items: center;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .back-button {
   color: white !important;
   background: #555 !important;
   text-decoration: none;
-  font-size: 16px !important;
+  font-size: 15px !important;
   font-weight: 600;
   display: flex;
   align-items: center;
+  padding: 6px 10px;
 }
 
 .back-button:hover {
@@ -34,5 +40,27 @@
 .back-button svg {
   width: 16px;
   fill: white;
-  margin-right: 12px;
+  margin-right: 8px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  flex: 2;
+  text-align: center;
+}
+
+.menu-btn {
+  font-size: 22px;
+  padding: 6px;
+}
+
+.account-btn {
+  width: 36px;
+  height: 36px;
+}
+
+.account-btn svg {
+  width: 22px;
+  height: 22px;
 }
