@@ -1,5 +1,5 @@
 import React from 'react';
-import LogoImage from '../assets/images/logo.png';
+import LogoImage from '../assets/images/logo2.png';
 
 function Header() {
   return (
@@ -11,7 +11,7 @@ function Header() {
               <img  
                 src={LogoImage} 
                 alt="로고" 
-                className="w-[60px] px-2 h-auto text-xl"
+                className="w-[50px] h-[43px] object-contain text-xl"
               />
               필기요정
             </a>

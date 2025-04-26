@@ -151,7 +151,7 @@ function Convert() {
             <div className="flex-1 flex flex-col h-[450px]">
               {/* 파일 업로드 영역 */}
               <div 
-                className="flex-1 bg-[#F9F7F7] border-4 border-[#DEE5E5] rounded-xl p-8 text-center cursor-pointer hover:border-blue-500 transition-colors flex flex-col items-center justify-center"
+                className="flex-1 bg-[#F9F7F7] border-4 border-[#DEE5E5] rounded-xl p-8 text-center cursor-pointer hover:border-[#5B7F7C] transition-colors flex flex-col items-center justify-center"
                 onClick={handleUploadClick}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -171,8 +171,8 @@ function Convert() {
               </div>
 
               {/* 파일 형식 아이콘들 */}
-              <div className="mt-4 flex flex-col gap-4">
-                <div className="flex justify-center gap-8">
+              <div className="grid grid-flow-col grid-cols-5 gap-4 my-12">
+                 <div className="flex gap-4">
                   <div className="flex flex-col items-center gap-2 border-3 border-gray-200 rounded-lg p-4">
                     <img src={word_icon} alt="Word" className="w-12 h-12 object-contain" />
                     <span>Word</span>
@@ -185,18 +185,46 @@ function Convert() {
                     <img src={ppt_icon} alt="PPT" className="w-12 h-12 object-contain" />
                     <span>PPT</span>
                   </div>
-                </div>
-                <div className="flex justify-center gap-8">
+                  <div className="flex flex-col items-center gap-2 border-3 border-gray-200 rounded-lg p-4">
+                    <img src={wav_icon} alt="WAV" className="w-12 h-12 object-contain" />
+                    <span>WAV</span>
+                  </div>
                   <div className="flex flex-col items-center gap-2 border-3 border-gray-200 rounded-lg p-4">
                     <img src={mp3_icon} alt="MP3" className="w-12 h-12 object-contain" />
                     <span>MP3</span>
+                  </div>
+                </div>
+
+                {/* <div className="flex gap-36">
+                  <div className="flex flex-col items-center gap-2 border-3 border-gray-200 rounded-lg p-4">
+                    <img src={word_icon} alt="Word" className="w-12 h-12 object-contain" />
+                    <span>Word</span>
                   </div>
                   <div className="flex flex-col items-center gap-2 border-3 border-gray-200 rounded-lg p-4">
                     <img src={wav_icon} alt="WAV" className="w-12 h-12 object-contain" />
                     <span>WAV</span>
                   </div>
                 </div>
+
+                <div className="flex gap-36">
+                  <div className="flex flex-col items-center gap-2 border-3 border-gray-200 rounded-lg p-4">
+                    <img src={pdf_icon} alt="PDF" className="w-12 h-12 object-contain" />
+                    <span>PDF</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2 border-3 border-gray-200 rounded-lg p-4">
+                    <img src={mp3_icon} alt="MP3" className="w-12 h-12 object-contain" />
+                    <span>MP3</span>
+                  </div>
+                </div>
+
+                <div className="flex">
+                <div className="flex flex-col items-center gap-2 border-3 border-gray-200 rounded-lg p-4">
+                    <img src={ppt_icon} alt="PPT" className="w-12 h-12 object-contain" />
+                    <span>PPT</span>
+                  </div>
+                </div> */}
               </div>
+
             </div>
 
             {/* 오른쪽 업로드된 파일 목록 */}
