@@ -1,26 +1,27 @@
-import MainPage from "./pages/MainPage";
-import LoginPage from "./pages/LoginPage";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ResultPage from "./pages/ResultPage";
-import TestPage from "./pages/TestPage";
-import SignupPage from "./pages/SignupPage";
-import HistoryPage from "./pages/HistoryPage";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './components/Main/Home';
+import Convert from './components/Convert/Convert';
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 function App() {
   return (
-    <BrowserRouter>
-      <div className="APP">
-        <Routes>
-          <Route exact path="/" element={<MainPage />} />
-          <Route exact path="/login" element={<LoginPage />} />
-          <Route exact path="/signup" element={<SignupPage />} />
-          <Route exact path="/result" element={<ResultPage />} />
-          <Route exact path="/test" element={<TestPage />} />
-          <Route exact path="/history" element={<HistoryPage />} />
-        </Routes>
+    <Router>
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 flex my-16 flex-col">
+          <div className="flex-1 w-full mx-auto">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/convert" element={<Convert />} />
+            </Routes>
+          </div>
+        </main>
+        <Footer />
       </div>
-    </BrowserRouter>
+    </Router>
   );
 }
 
-export default App;
+export default App; 
