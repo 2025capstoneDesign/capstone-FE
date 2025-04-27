@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import LogoImage from "../assets/images/logo2.png";
+import LogoImage from "../assets/images/logo3.png";
 
 function Header() {
   return (
@@ -15,9 +15,9 @@ function Header() {
             <img
               src={LogoImage}
               alt="로고"
-              className="w-[50px] h-[43px] object-contain text-xl"
+              className="w-[120px] h-[43px] object-fit text-xl"
             />
-            필기요정
+            {/* 필기요정 */}
           </Link>
           {/* </div> */}
           <Link

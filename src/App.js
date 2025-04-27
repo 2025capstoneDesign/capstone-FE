@@ -12,9 +12,9 @@ import Register from "./components/auth/Register";
 function App() {
   return (
     <Router>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-white">
         <Header />
-        <main className="flex-1 flex my-16 flex-col">
+        <main className="flex-1 flex flex-col">
           <div className="flex-1 w-full mx-auto">
             <Routes>
               <Route path="/" element={<Home />} />
@@ -26,7 +26,7 @@ function App() {
             </Routes>
           </div>
         </main>
-        <Footer />
+        {/* <Footer /> */}
       </div>
     </Router>
   );

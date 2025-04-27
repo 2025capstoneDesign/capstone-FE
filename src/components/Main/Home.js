@@ -32,7 +32,7 @@ function Home() {
   );
 
   return (
-    <section className="min-w-[1280px] ">
+    <section className="min-w-[1280px] mt-[70px]">
       {/* <div className="mx-4 mb-16">
         <h1 className="text-6xl font-bold my-8">필기요정 소개</h1>
         <p className="text-gray-500 text-xl">
@@ -45,8 +45,9 @@ function Home() {
       <Banner />
 
       {/* 기능 소개 섹션 */}
-      <div className="mt-24 mb-16 max-w-[1480px] mx-auto">
-        <h2 className="mx-4 text-5xl font-semibold mb-12">기능을 살펴보세요</h2>
+      <div className="mt-28 mb-28 max-w-[1480px] mx-auto">
+        <h2 className="text-[42px] font-semibold text-center">기능을 살펴보세요</h2>
+        <p className="text-gray-400 text-xl text-center mb-12">필기 요정이 제공하는 다양한 기능들을 체험해보세요</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <FeatureCard
             image={convert_icon}

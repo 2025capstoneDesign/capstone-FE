@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import qs from "qs";
-import "../../css/Auth.css";
+import loginImage from "../../assets/images/login2.png";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -56,36 +56,53 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-container">
-      <h2>로그인</h2>
-      <form onSubmit={handleLogin} className="auth-form">
-        <div className="form-group">
-          <label htmlFor="username">아이디</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">비밀번호</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" className="auth-button">
-          로그인
-        </button>
-      </form>
-      <p className="auth-link">
-        아직 회원이 아니신가요? <Link to="/register">회원가입 하러 가기</Link>
-      </p>
+    <div className="flex h-screen w-full min-w-[1480px]">
+      <div className="w-1/2 bg-[#FBF8EF] flex items-center justify-center h-screen">
+        <img src={loginImage} alt="로그인 이미지" className="w-full h-full object-fit" />
+      </div>
+      <div className="w-1/2 bg-white flex flex-col items-center justify-center p-16 h-screen">
+        <h2 className="text-4xl font-bold text-gray-800 mb-14">로그인</h2>
+        <form onSubmit={handleLogin} className="w-full max-w-xl space-y-8">
+          <div className="space-y-4">
+            <label htmlFor="username" className="block text-xl font-medium text-gray-700">
+              아이디
+            </label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              className="w-full px-6 py-4 text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#455E5C]"
+            />
+          </div>
+          <div className="space-y-4">
+            <label htmlFor="password" className="block text-xl font-medium text-gray-700">
+              비밀번호
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-6 py-4 text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#455E5C]"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full py-4 px-8 text-xl bg-[#5B7F7C] text-white rounded-md hover:bg-[#455E5C] focus:outline-none focus:ring-2 focus:ring-[#455E5C] focus:ring-offset-2 transition-colors"
+          >
+            로그인
+          </button>
+        </form>
+        <p className="text-lg text-gray-600 mt-8">
+          아직 회원이 아니신가요?{" "}
+          <Link to="/register" className="text-[#5B7F7C] hover:text-[#455E5C] font-medium">
+            회원가입 하러 가기
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };
