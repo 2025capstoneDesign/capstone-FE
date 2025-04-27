@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+:root {
+  --primary-color: #1e3a8a;
+  --secondary-color: #f3f4f6;
+}
+
+body {
+  @apply bg-white text-gray-900;
+}
+
+.container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.btn-primary {
+  @apply bg-primary text-white px-6 py-2 rounded-full font-semibold 
+         hover:bg-opacity-90 transition-all duration-200;
+}
+
+.card {
+  @apply border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow;
+}
+
+/* 배너 스타일 */
+.banner-gradient {
+  background: linear-gradient(90deg, #112D4E 0%, #3F72AF 29%, #8DAACF 61%, #DBE2EF 87%, #F9F7F7 100%);
+}
+
+.banner-overlay {
+  @apply absolute inset-0 bg-black/10;
+  backdrop-filter: blur(4px);
+} 
