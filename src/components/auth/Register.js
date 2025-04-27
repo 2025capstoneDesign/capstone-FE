@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 import "./Auth.css";
 
 const Register = () => {
@@ -7,7 +8,6 @@ const Register = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    name: "",
   });
   const navigate = useNavigate();
 
@@ -19,27 +19,61 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // 여기에 회원가입 로직 추가
-    console.log("회원가입 시도:", formData);
+
+    // 비밀번호 확인
+    if (formData.password !== formData.confirmPassword) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    try {
+      console.log("회원가입 시도:", {
+        email: formData.email,
+        password: formData.password,
+      });
+      console.log("API URL:", process.env.REACT_APP_API_URL);
+
+      // mock API 처리
+      if (process.env.REACT_APP_API_URL === "mock") {
+        console.log("Mock API: 회원가입 성공");
+        localStorage.setItem("token", "mock_access_token");
+        alert("회원가입이 완료되었습니다.");
+        navigate("/");
+        return;
+      }
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/register`,
+        {
+          email: formData.email,
+          password: formData.password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("회원가입 응답:", response.data);
+
+      if (response.status === 200 || response.status === 201) {
+        localStorage.setItem("token", response.data.access_token);
+        alert("회원가입이 완료되었습니다.");
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("회원가입 에러:", error.response?.data || error.message);
+      alert("회원가입에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
   return (
     <div className="auth-container">
       <h2>회원가입</h2>
       <form onSubmit={handleSubmit} className="auth-form">
-        <div className="form-group">
-          <label htmlFor="name">이름</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
         <div className="form-group">
           <label htmlFor="email">이메일</label>
           <input
@@ -78,7 +112,7 @@ const Register = () => {
         </button>
       </form>
       <p className="auth-link">
-        이미 회원이신가요? <Link to="/login">로그인</Link>
+        이미 회원이신가요? <Link to="/login">로그인 하러 가기</Link>
       </p>
     </div>
   );

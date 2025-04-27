@@ -1,29 +1,71 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+import qs from "qs";
 import "./Auth.css";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // 여기에 로그인 로직 추가
-    console.log("로그인 시도:", { email, password });
+
+    try {
+      console.log("로그인 시도:", { username, password });
+      console.log("API URL:", process.env.REACT_APP_API_URL);
+
+      // mock API 처리
+      if (process.env.REACT_APP_API_URL === "mock") {
+        console.log("Mock API: 로그인 성공");
+        localStorage.setItem("token", "mock_access_token");
+        navigate("/");
+        return;
+      }
+
+      const formData = qs.stringify({
+        username,
+        password,
+      });
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/login`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+
+      console.log("로그인 응답:", response.data);
+
+      if (response.data.access_token) {
+        // 로그인 성공 시 access_token을 localStorage에 저장
+        localStorage.setItem("token", response.data.access_token);
+        // 홈 화면으로 이동
+        navigate("/");
+      } else {
+        alert("로그인 응답에 토큰이 없습니다.");
+      }
+    } catch (error) {
+      console.error("로그인 에러:", error.response?.data || error.message);
+      alert("로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.");
+    }
   };
 
   return (
     <div className="auth-container">
       <h2>로그인</h2>
-      <form onSubmit={handleSubmit} className="auth-form">
+      <form onSubmit={handleLogin} className="auth-form">
         <div className="form-group">
-          <label htmlFor="email">이메일</label>
+          <label htmlFor="username">아이디</label>
           <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
@@ -42,7 +84,7 @@ const Login = () => {
         </button>
       </form>
       <p className="auth-link">
-        아직 회원이 아니신가요? <Link to="/register">회원가입</Link>
+        아직 회원이 아니신가요? <Link to="/register">회원가입 하러 가기</Link>
       </p>
     </div>
   );
