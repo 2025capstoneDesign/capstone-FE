@@ -1,4 +1,6 @@
-/* ────────── 기본 리셋 및 전체 레이아웃 ────────── */
+/* /src/styles/TestPage.css */
+
+/* 기본 리셋 및 전체 레이아웃 */
 * {
   margin: 0;
   padding: 0;
@@ -19,7 +21,7 @@ body {
   width: 100%;
 }
 
-/* ────────── 헤더 영역 ────────── */
+/* 헤더 스타일 */
 .app-header {
   display: flex;
   justify-content: space-between;
@@ -51,7 +53,7 @@ body {
   cursor: pointer;
 }
 
-/* ────────── 서브 헤더 ────────── */
+/* 서브 헤더 스타일 */
 .sub-header {
   display: flex;
   justify-content: space-between;
@@ -101,7 +103,7 @@ body {
   background-color: #f5f5f5;
 }
 
-/* ────────── 메인 콘텐츠 레이아웃 ────────── */
+/* 메인 콘텐츠 레이아웃 */
 .main-content {
   display: flex;
   flex: 1;
@@ -110,7 +112,7 @@ body {
   height: calc(100vh - 130px);
 }
 
-/* ────────── PDF 슬라이드 영역 ────────── */
+/* 왼쪽 PDF 슬라이드 컨테이너 */
 .slide-container {
   flex: 1.7;
   position: relative;
@@ -164,70 +166,70 @@ body {
 .pdf-page {
   max-height: calc(100vh - 230px);
   margin: 10px 0;
-  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-/* ―― 페이지 전환 페이드 / 슬라이드 ―― */
-.pdf-page.transition-left {
-  opacity: 0;
-  transform: translateX(-8%);
-}
-.pdf-page.transition-right {
-  opacity: 0;
-  transform: translateX(8%);
+/* PDF 페이지 네비게이션 */
+.page-navigation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  display: flex;
 }
 
-/* ────────── 페이지 네비게이션 (리렌더링 없는 Hover) ────────── */
 .nav-area {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 15%;
+  width: 30%;
   display: flex;
   align-items: center;
-  justify-content: center;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-.left-area {
+.nav-area.left {
   left: 0;
+  justify-content: flex-start;
 }
-.right-area {
+
+.nav-area.right {
   right: 0;
+  justify-content: flex-end;
 }
 
 .nav-arrow-icon {
   font-size: 42px;
-  color: rgba(105, 105, 105, 0.8);
+  color: rgba(105, 105, 105, 0.9);
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-  opacity: 0; /* 기본 투명 */
-  transition: opacity 0.2s;
+  transition: transform 0.5s, color 0.5s;
   user-select: none;
+  opacity: 0;
+  margin: 0 50px;
 }
 
 .nav-area:hover .nav-arrow-icon {
   opacity: 1;
+  transform: scale(1.2);
+  color: rgba(138, 138, 138, 0.9);
 }
 
-.nav-arrow-icon.disabled {
-  color: rgba(105, 105, 105, 0.3);
-}
-
-/* 페이지 번호 배지 */
 .page-info {
   position: absolute;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.4);
-  color: #fff;
+  color: white;
   padding: 8px 15px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 500;
 }
 
-/* ────────── 요약 패널 ────────── */
+/* 오른쪽 요약 패널 스타일 */
 .summary-container {
   flex: 0.6;
   display: flex;
@@ -243,7 +245,7 @@ body {
   background-color: #fffaec;
 }
 
-/* 탭 영역 */
+/* 탭 컨테이너 스타일 */
 .tab-container {
   display: flex;
   align-items: center;
@@ -265,17 +267,20 @@ body {
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.2s;
   position: relative;
   color: #666;
 }
+
 .tab:hover {
   color: #333;
 }
+
 .tab.active {
   color: #80cbc4;
   font-weight: 600;
 }
+
 .tab.active::after {
   content: "";
   position: absolute;
@@ -286,16 +291,18 @@ body {
   background-color: #80cbc4;
 }
 
-/* 하이라이트 색 선택 버튼 */
+/* 색상 선택 버튼 스타일 */
 .color-selector {
   display: flex;
   gap: 10px;
   transition: opacity 0.3s;
 }
+
 .color-selector.visible {
   opacity: 1;
   visibility: visible;
 }
+
 .color-selector.hidden {
   opacity: 0;
   visibility: hidden;
@@ -309,9 +316,11 @@ body {
   cursor: pointer;
   transition: transform 0.2s, border-color 0.2s;
 }
+
 .color-btn:hover {
   transform: scale(1.1);
 }
+
 .color-btn.selected {
   border-color: #333;
   transform: scale(1.2);
@@ -320,14 +329,16 @@ body {
 .color-btn.red {
   background-color: #ffb433;
 }
+
 .color-btn.blue {
   background-color: #80cbc4;
 }
+
 .color-btn.green {
   background-color: #bababa;
 }
 
-/* 콘텐츠 컨테이너 */
+/* 콘텐츠 컨테이너 스타일 */
 .content-container {
   flex: 1;
   overflow-y: auto;
@@ -335,48 +346,68 @@ body {
   scroll-behavior: smooth;
 }
 
-/* AI 요약 */
+/* AI 콘텐츠 스타일 */
 .ai-content {
   font-size: 15px;
   line-height: 1.6;
 }
+
 .ai-content h1,
 .ai-content h2,
 .ai-content h3 {
-  margin: 20px 0 12px;
+  margin-bottom: 12px;
+  margin-top: 20px;
   color: #333;
 }
+
 .ai-content p {
   margin-bottom: 16px;
 }
+
 .ai-content ul,
 .ai-content ol {
-  margin: 0 0 16px 20px;
+  margin-left: 20px;
+  margin-bottom: 16px;
 }
 
-/* 음성 원본 */
+/* 음성 원본 콘텐츠 스타일 */
 .voice-content {
   padding: 15px 0;
 }
+
+/* 페이지별 음성 섹션 스타일 */
 .voice-page-section {
   margin-bottom: 25px;
-  transition: background-color 0.3s, border-left 0.3s;
+  transition: background-color 0.3s ease, border-left 0.3s ease;
   padding: 10px;
   border-radius: 8px;
   border-left: 3px solid transparent;
 }
+
+/* 현재 활성화된 페이지 섹션 스타일 - 색상별 */
 .voice-page-section.active-page-section {
   background-color: rgba(255, 180, 51, 0.05);
   border-left: 3px solid #ffb433;
   scroll-margin-top: 20px;
 }
+
+.voice-page-section.active-page-section.red {
+  background-color: rgba(255, 180, 51, 0.05);
+  border-left: 3px solid #ffb433;
+}
+
 .voice-page-section.active-page-section.blue {
   background-color: rgba(128, 203, 196, 0.05);
   border-left: 3px solid #80cbc4;
 }
+
 .voice-page-section.active-page-section.green {
   background-color: rgba(186, 186, 186, 0.05);
   border-left: 3px solid #bababa;
+}
+
+.page-section-header {
+  margin-bottom: 15px;
 }
 
 .page-section-header h3 {
@@ -387,7 +418,6 @@ body {
   padding: 5px 12px;
   background-color: #f5f5f5;
   border-radius: 20px;
-  margin-bottom: 15px;
 }
 
 .page-section-divider {
@@ -402,25 +432,29 @@ body {
   line-height: 1.7;
   text-align: justify;
 }
+
 .segment-text {
   position: relative;
   display: inline;
 }
 
 .segment-text.important {
-  cursor: help;
   position: relative;
+  cursor: help;
 }
+
 .segment-text.important.red {
-  background: rgba(255, 180, 51, 0.15);
+  background-color: rgba(255, 180, 51, 0.15);
   border-bottom: 2px solid #ffb433;
 }
+
 .segment-text.important.blue {
-  background: rgba(128, 203, 196, 0.15);
+  background-color: rgba(128, 203, 196, 0.15);
   border-bottom: 2px solid #80cbc4;
 }
+
 .segment-text.important.green {
-  background: rgba(186, 186, 186, 0.15);
+  background-color: rgba(186, 186, 186, 0.15);
   border-bottom: 2px solid #bababa;
 }
 
@@ -428,45 +462,39 @@ body {
   font-weight: 500;
   cursor: pointer;
 }
+
 .segment-text.important.linkable.red {
-  background: rgba(255, 180, 51, 0.25);
+  background-color: rgba(255, 180, 51, 0.25);
   border-bottom: 2px dashed #ffb433;
 }
+
 .segment-text.important.linkable.blue {
-  background: rgba(128, 203, 196, 0.25);
+  background-color: rgba(128, 203, 196, 0.25);
   border-bottom: 2px dashed #80cbc4;
 }
+
 .segment-text.important.linkable.green {
-  background: rgba(186, 186, 186, 0.25);
+  background-color: rgba(186, 186, 186, 0.25);
   border-bottom: 2px dashed #bababa;
 }
 
 .reason-tooltip {
   position: fixed;
-  background: #333;
-  color: #fff;
+  background-color: #333;
+  color: white;
   padding: 10px 14px;
   border-radius: 6px;
   font-size: 14px;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s, visibility 0.3s;
+  width: max-content;
   max-width: 250px;
+  text-align: left;
   z-index: 1000;
   pointer-events: none;
-}
-.segment-text.important:hover .reason-tooltip {
-  opacity: 1;
-  visibility: visible;
-}
-.reason-tooltip::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  right: -8px;
-  transform: translateY(-50%);
-  border: 8px solid transparent;
-  border-left-color: #333;
+  white-space: normal;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .link-notice {
@@ -479,30 +507,79 @@ body {
   font-weight: 500;
 }
 
-.no-content,
-.no-page-content {
+.reason-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -8px;
+  transform: translateY(-50%);
+  border-width: 8px 0 8px 8px;
+  border-style: solid;
+  border-color: transparent transparent transparent #333;
+}
+
+.segment-text.important:hover .reason-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.no-content {
   color: #666;
   font-style: italic;
   text-align: center;
   margin-top: 40px;
-  font-size: 14px;
 }
 
-/* ────────── 반응형 ────────── */
+.no-page-content {
+  color: #999;
+  font-style: italic;
+  font-size: 14px;
+  padding: 10px 0;
+}
+
+/* 로딩 스타일 */
+.react-pdf__Document {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 페이지 전환 애니메이션 */
+.pdf-page {
+  transition: transform 0.15s ease-out, opacity 0.15s ease;
+  max-height: calc(100vh - 230px);
+  max-width: 100%;
+  margin: 10px auto;
+}
+
+.pdf-page.transition-left {
+  transform: translateX(-10%);
+  opacity: 0.5;
+}
+
+.pdf-page.transition-right {
+  transform: translateX(10%);
+  opacity: 0.5;
+}
+
+/* 반응형 조정 */
 @media (max-width: 1024px) {
   .main-content {
     flex-direction: column;
     height: auto;
   }
+
   .slide-container,
   .summary-container {
     width: 100%;
     height: auto;
   }
+
   .slide-container {
     min-height: 600px;
     margin-bottom: 20px;
   }
+
   .summary-container {
     min-height: 500px;
   }
@@ -514,6 +591,7 @@ body {
     align-items: flex-start;
     gap: 15px;
   }
+
   .action-buttons {
     width: 100%;
     justify-content: space-between;
