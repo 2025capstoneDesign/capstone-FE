@@ -52,7 +52,7 @@ function Home() {
             image={convert_icon}
             title="강의록 변환"
             description="강의와 음성 파일을 등록하여 필기를 생성해보세요."
-            onClick={() => navigate("/convert2")}
+            onClick={() => navigate("/convert")}
           />
           <FeatureCard
             image={history_icon}

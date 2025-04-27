@@ -220,7 +220,20 @@ function Convert2() {
               onChange={handleFileUpload}
               accept=".doc,.docx,.pdf,.ppt,.pptx,.mp3,.wav"
             />
-            <div className="upload-box"></div>
+            <div className="upload-box">
+              <p
+                style={{
+                  fontSize: "18px",
+                  color: "#666",
+                  marginBottom: "10px",
+                }}
+              >
+                강의록 파일을 이곳에 드래그하거나 클릭하여 업로드하세요
+              </p>
+              <p style={{ fontSize: "14px", color: "#999" }}>
+                지원 형식: PDF, DOCX, PPT, MP3, WAV
+              </p>
+            </div>
           </div>
         </div>
 
@@ -230,42 +243,72 @@ function Convert2() {
           </div>
 
           <div className="file-list">
-            {files.map((file) => (
-              <div key={file.name} className="file-item">
-                <img
-                  src={getFileIcon(file.name)}
-                  alt="파일 아이콘"
-                  className="file-icon"
-                />
-                <div className="file-info">
-                  <div className="file-name">{file.name}</div>
-                  <div className="file-size">{formatFileSize(file.size)}</div>
-                </div>
-                <div className="file-actions">
-                  <button
-                    className="delete-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(file);
-                    }}
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+            {files.length === 0 ? (
+              <div
+                style={{ textAlign: "center", color: "#999", padding: "20px" }}
+              >
+                아직 업로드된 파일이 없습니다
+              </div>
+            ) : (
+              files.map((file) => (
+                <div key={file.name} className="file-item">
+                  <img
+                    src={getFileIcon(file.name)}
+                    alt="파일 아이콘"
+                    className="file-icon"
+                  />
+                  <div className="file-info">
+                    <div className="file-name">{file.name}</div>
+                    <div className="file-size">{formatFileSize(file.size)}</div>
+                    {/* 프로그레스 바 */}
+                    {uploadProgress[file.name] < 100 && (
+                      <div style={{ marginTop: "5px" }}>
+                        <div
+                          style={{
+                            height: "4px",
+                            backgroundColor: "#f0f0f0",
+                            borderRadius: "2px",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <div
+                            style={{
+                              height: "100%",
+                              width: `${uploadProgress[file.name]}%`,
+                              backgroundColor: "#4caf50",
+                              transition: "width 0.2s",
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="file-actions">
+                    <button
+                      className="delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(file);
+                      }}
                     >
-                      <path
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
