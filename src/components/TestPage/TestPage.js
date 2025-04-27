@@ -14,6 +14,11 @@ export default function TestPage() {
   const navigate = useNavigate();
   const { pdfFile } = location.state || { pdfFile: "/sample3.pdf" };
 
+  // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [activeTab, setActiveTab] = useState("ai"); // "ai" or "voice"

@@ -5,6 +5,8 @@ import Convert from "./components/Convert/Convert";
 import TestPage from "./components/TestPage/TestPage";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/convert" element={<Convert />} />
               <Route path="/test" element={<TestPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
             </Routes>
           </div>
         </main>
