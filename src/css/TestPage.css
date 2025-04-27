@@ -1,0 +1,606 @@
+/* /src/styles/TestPage.css */
+
+/* 기본 리셋 및 전체 레이아웃 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* 헤더 스타일 */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.logo-image {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.login-btn {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* 서브 헤더 스타일 */
+.sub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #222;
+  padding-left: 20px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.convert-btn {
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.convert-btn:hover {
+  background-color: #333;
+}
+
+.download-btn {
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.download-btn:hover {
+  background-color: #f5f5f5;
+}
+
+/* 메인 콘텐츠 레이아웃 */
+.main-content {
+  display: flex;
+  flex: 1;
+  padding: 0 25px 25px;
+  gap: 25px;
+  height: calc(100vh - 130px);
+}
+
+/* 왼쪽 PDF 슬라이드 컨테이너 */
+.slide-container {
+  flex: 1.7;
+  position: relative;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  height: 100%;
+}
+
+.slide-header {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: #fffaec;
+  border-bottom: 1px solid #f0f0f0;
+  height: 56px;
+}
+
+.audio-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.audio-icon:hover {
+  transform: scale(1.1);
+}
+
+.pdf-viewer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.pdf-document {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.pdf-page {
+  max-height: calc(100vh - 230px);
+  margin: 10px 0;
+}
+
+/* PDF 페이지 네비게이션 */
+.page-navigation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  display: flex;
+}
+
+.nav-area {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.nav-area:hover {
+  opacity: 1;
+}
+
+.nav-area.left-area {
+  justify-content: flex-start;
+}
+
+.nav-area.right-area {
+  justify-content: flex-end;
+}
+
+.nav-arrow-icon {
+  font-size: 42px;
+  color: rgba(105, 105, 105, 0.9);
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.5s, color 0.5s;
+  user-select: none;
+  opacity: 0.7;
+}
+
+.left-area .nav-arrow-icon {
+  margin-left: 30px;
+}
+
+.right-area .nav-arrow-icon {
+  margin-right: 30px;
+}
+
+.nav-area:hover .nav-arrow-icon {
+  transform: scale(1.2);
+  color: rgba(138, 138, 138, 0.9);
+  opacity: 1;
+}
+
+.page-info {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.4);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 오른쪽 요약 패널 스타일 */
+.summary-container {
+  flex: 0.6;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  height: 100%;
+}
+
+.content-tabs {
+  background-color: #fffaec;
+}
+
+/* 탭 컨테이너 스타일 */
+.tab-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0 15px;
+  background-color: #fffaec;
+  height: 56px;
+}
+
+.tabs {
+  display: flex;
+}
+
+.tab {
+  padding: 15px 20px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  color: #666;
+}
+
+.tab:hover {
+  color: #333;
+}
+
+.tab.active {
+  color: #80cbc4;
+  font-weight: 600;
+}
+
+.tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #80cbc4;
+}
+
+/* 색상 선택 버튼 스타일 */
+.color-selector {
+  display: flex;
+  gap: 10px;
+  transition: opacity 0.3s;
+}
+
+.color-selector.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.color-selector.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.color-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.color-btn:hover {
+  transform: scale(1.1);
+}
+
+.color-btn.selected {
+  border-color: #333;
+  transform: scale(1.2);
+}
+
+.color-btn.red {
+  background-color: #ffb433;
+}
+
+.color-btn.blue {
+  background-color: #80cbc4;
+}
+
+.color-btn.green {
+  background-color: #bababa;
+}
+
+/* 콘텐츠 컨테이너 스타일 */
+.content-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  scroll-behavior: smooth;
+}
+
+/* AI 콘텐츠 스타일 */
+.ai-content {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.ai-content h1,
+.ai-content h2,
+.ai-content h3 {
+  margin-bottom: 12px;
+  margin-top: 20px;
+  color: #333;
+}
+
+.ai-content p {
+  margin-bottom: 16px;
+}
+
+.ai-content ul,
+.ai-content ol {
+  margin-left: 20px;
+  margin-bottom: 16px;
+}
+
+/* 음성 원본 콘텐츠 스타일 */
+.voice-content {
+  padding: 15px 0;
+}
+
+/* 페이지별 음성 섹션 스타일 */
+.voice-page-section {
+  margin-bottom: 25px;
+  transition: background-color 0.3s ease, border-left 0.3s ease;
+  padding: 10px;
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+}
+
+/* 현재 활성화된 페이지 섹션 스타일 - 색상별 */
+.voice-page-section.active-page-section {
+  background-color: rgba(255, 180, 51, 0.05);
+  border-left: 3px solid #ffb433;
+  scroll-margin-top: 20px;
+}
+
+.voice-page-section.active-page-section.red {
+  background-color: rgba(255, 180, 51, 0.05);
+  border-left: 3px solid #ffb433;
+}
+
+.voice-page-section.active-page-section.blue {
+  background-color: rgba(128, 203, 196, 0.05);
+  border-left: 3px solid #80cbc4;
+}
+
+.voice-page-section.active-page-section.green {
+  background-color: rgba(186, 186, 186, 0.05);
+  border-left: 3px solid #bababa;
+}
+
+.page-section-header {
+  margin-bottom: 15px;
+}
+
+.page-section-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #555;
+  display: inline-block;
+  padding: 5px 12px;
+  background-color: #f5f5f5;
+  border-radius: 20px;
+}
+
+.page-section-divider {
+  border: none;
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 25px 0;
+}
+
+.segment-container {
+  font-size: 15px;
+  line-height: 1.7;
+  text-align: justify;
+}
+
+.segment-text {
+  position: relative;
+  display: inline;
+}
+
+.segment-text.important {
+  position: relative;
+  cursor: help;
+}
+
+.segment-text.important.red {
+  background-color: rgba(255, 180, 51, 0.15);
+  border-bottom: 2px solid #ffb433;
+}
+
+.segment-text.important.blue {
+  background-color: rgba(128, 203, 196, 0.15);
+  border-bottom: 2px solid #80cbc4;
+}
+
+.segment-text.important.green {
+  background-color: rgba(186, 186, 186, 0.15);
+  border-bottom: 2px solid #bababa;
+}
+
+.segment-text.important.linkable {
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.segment-text.important.linkable.red {
+  background-color: rgba(255, 180, 51, 0.25);
+  border-bottom: 2px dashed #ffb433;
+}
+
+.segment-text.important.linkable.blue {
+  background-color: rgba(128, 203, 196, 0.25);
+  border-bottom: 2px dashed #80cbc4;
+}
+
+.segment-text.important.linkable.green {
+  background-color: rgba(186, 186, 186, 0.25);
+  border-bottom: 2px dashed #bababa;
+}
+
+.reason-tooltip {
+  position: fixed;
+  background-color: #333;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+  width: max-content;
+  max-width: 250px;
+  text-align: left;
+  z-index: 1000;
+  pointer-events: none;
+  white-space: normal;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.link-notice {
+  display: block;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+.reason-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -8px;
+  transform: translateY(-50%);
+  border-width: 8px 0 8px 8px;
+  border-style: solid;
+  border-color: transparent transparent transparent #333;
+}
+
+.segment-text.important:hover .reason-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.no-content {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.no-page-content {
+  color: #999;
+  font-style: italic;
+  font-size: 14px;
+  padding: 10px 0;
+}
+
+/* 로딩 스타일 */
+.react-pdf__Document {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 페이지 전환 애니메이션 */
+.pdf-page {
+  transition: transform 0.15s ease-out, opacity 0.15s ease;
+  max-height: calc(100vh - 230px);
+  max-width: 100%;
+  margin: 10px auto;
+}
+
+.pdf-page.transition-left {
+  transform: translateX(-10%);
+  opacity: 0.5;
+}
+
+.pdf-page.transition-right {
+  transform: translateX(10%);
+  opacity: 0.5;
+}
+
+/* 반응형 조정 */
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .slide-container,
+  .summary-container {
+    width: 100%;
+    height: auto;
+  }
+
+  .slide-container {
+    min-height: 600px;
+    margin-bottom: 20px;
+  }
+
+  .summary-container {
+    min-height: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sub-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

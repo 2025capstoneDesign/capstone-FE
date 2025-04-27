@@ -1,9 +1,10 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './components/Main/Home';
-import Convert from './components/Convert/Convert';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./components/Main/Home";
+import Convert from "./components/Convert/Convert";
+import TestPage from "./components/TestPage/TestPage";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/convert" element={<Convert />} />
+              <Route path="/test" element={<TestPage />} />
             </Routes>
           </div>
         </main>
@@ -24,4 +26,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;
