@@ -5,12 +5,15 @@ import pdf_icon from "../../assets/images/pdf.png";
 import ppt_icon from "../../assets/images/ppt.png";
 import mp3_icon from "../../assets/images/mp3.png";
 import wav_icon from "../../assets/images/wav.png";
+import axios from "axios";
 import "../../css/Convert2.css";
 
 function Convert2() {
   const navigate = useNavigate();
   const [files, setFiles] = useState([]);
   const [uploadProgress, setUploadProgress] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const fileInputRef = useRef(null);
 
   const formatFileSize = (bytes) => {
@@ -75,12 +78,7 @@ function Convert2() {
 
       setFiles((prevFiles) => [
         ...prevFiles,
-        {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          uploadComplete: false,
-        },
+        file, // 실제 File 객체를 저장
       ]);
 
       setUploadProgress((prev) => ({
@@ -129,8 +127,47 @@ function Convert2() {
     }
   };
 
-  const handleConvert = () => {
-    navigate("/test", { state: { pdfFile: "/sample3.pdf" } });
+  const handleConvert = async () => {
+    if (files.length === 0) {
+      window.alert("파일을 업로드해주세요.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      if (process.env.REACT_APP_API_URL === "mock") {
+        // mock 모드일 경우 sample3.pdf 사용
+        navigate("/test", { state: { pdfFile: "/sample3.pdf" } });
+      } else {
+        // 실제 API 호출 - 첫 번째 파일만 업로드
+        const formData = new FormData();
+        const fileToUpload = files[0];
+        formData.append("file", fileToUpload);
+
+        const response = await axios.post(
+          `${process.env.REACT_APP_API_URL}/api/lecture/upload-lecture-file`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        // 200 응답이면 성공으로 간주
+        if (response.status === 200) {
+          window.alert("파일이 성공적으로 업로드되었습니다.");
+          navigate("/test", { state: { pdfFile: fileToUpload } });
+        }
+      }
+    } catch (error) {
+      console.error("업로드 실패:", error);
+      window.alert("파일 업로드에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -138,11 +175,24 @@ function Convert2() {
       <div className="sub-header">
         <h1 className="page-title">강의록 변환</h1>
         <div className="action-buttons">
-          <button className="convert-btn" onClick={handleConvert}>
-            변환하기
+          <button
+            className="convert-btn"
+            onClick={handleConvert}
+            disabled={isLoading}
+          >
+            {isLoading ? "변환 중..." : "변환하기"}
           </button>
         </div>
       </div>
+
+      {error && (
+        <div
+          className="error-message"
+          style={{ color: "red", margin: "10px 0" }}
+        >
+          {error}
+        </div>
+      )}
 
       <div className="main-content">
         <div className="upload-container">
