@@ -128,19 +128,27 @@ function Convert2() {
   };
 
   const handleConvert = async () => {
-    if (files.length === 0) {
-      window.alert("파일을 업로드해주세요.");
-      return;
-    }
-
     setIsLoading(true);
     setError("");
 
     try {
       if (process.env.REACT_APP_API_URL === "mock") {
-        // mock 모드일 경우 sample3.pdf 사용
-        navigate("/test", { state: { pdfFile: "/sample3.pdf" } });
+        // mock 모드일 경우
+        if (files.length === 0) {
+          // 파일이 없을 경우 sample3.pdf 사용
+          navigate("/test", { state: { pdfFile: "/sample3.pdf" } });
+        } else {
+          // 파일이 있을 경우 업로드된 파일 사용
+          navigate("/test", { state: { pdfFile: files[0] } });
+        }
       } else {
+        // 실제 API 호출 시에는 파일 업로드 필수
+        if (files.length === 0) {
+          window.alert("파일을 업로드해주세요.");
+          setIsLoading(false);
+          return;
+        }
+
         // 실제 API 호출 - 첫 번째 파일만 업로드
         const formData = new FormData();
         const fileToUpload = files[0];
