@@ -58,20 +58,13 @@ const Login = () => {
   return (
     <div className="flex h-screen w-full min-w-[1480px]">
       <div className="w-1/2 bg-[#FBF8EF] flex items-center justify-center h-screen">
-        <img
-          src={loginImage}
-          alt="로그인 이미지"
-          className="w-full h-full object-fit"
-        />
+        <img src={loginImage} alt="로그인 이미지" className="w-full h-full object-fit" />
       </div>
       <div className="w-1/2 bg-white flex flex-col items-center justify-center p-16 h-screen">
         <h2 className="text-4xl font-bold text-gray-800 mb-14">로그인</h2>
         <form onSubmit={handleLogin} className="w-full max-w-xl space-y-8">
           <div className="space-y-4">
-            <label
-              htmlFor="username"
-              className="block text-xl font-medium text-gray-700"
-            >
+            <label htmlFor="username" className="block text-xl font-medium text-gray-700">
               아이디
             </label>
             <input
@@ -84,10 +77,7 @@ const Login = () => {
             />
           </div>
           <div className="space-y-4">
-            <label
-              htmlFor="password"
-              className="block text-xl font-medium text-gray-700"
-            >
+            <label htmlFor="password" className="block text-xl font-medium text-gray-700">
               비밀번호
             </label>
             <input
@@ -108,10 +98,7 @@ const Login = () => {
         </form>
         <p className="text-lg text-gray-600 mt-8">
           아직 회원이 아니신가요?{" "}
-          <Link
-            to="/register"
-            className="text-[#5B7F7C] hover:text-[#455E5C] font-medium"
-          >
+          <Link to="/register" className="text-[#5B7F7C] hover:text-[#455E5C] font-medium">
             회원가입 하러 가기
           </Link>
         </p>
