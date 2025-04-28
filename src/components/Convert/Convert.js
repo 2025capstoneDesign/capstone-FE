@@ -141,7 +141,7 @@ function Convert() {
   };
 
   return (
-    <div className="min-w-[1280px] mx-16 m-auto py-12">
+    <div className="min-w-[1280px] mx-16 m-auto py-12 mt-[70px]">
       <div className="mb-8">
         <h1 className="text-5xl font-bold mx-4">강의록 변환</h1>
       </div>
