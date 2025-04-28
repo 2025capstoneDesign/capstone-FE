@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import loginImage from "../../assets/images/login2.png";
 import "../../css/Auth.css";
 
 const Register = () => {
@@ -71,49 +72,85 @@ const Register = () => {
   };
 
   return (
-    <div className="auth-container">
-      <h2>회원가입</h2>
-      <form onSubmit={handleSubmit} className="auth-form">
-        <div className="form-group">
-          <label htmlFor="email">이메일</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">비밀번호</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="confirmPassword">비밀번호 확인</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button type="submit" className="auth-button">
-          회원가입
-        </button>
-      </form>
-      <p className="auth-link">
-        이미 회원이신가요? <Link to="/login">로그인 하러 가기</Link>
-      </p>
+    <div className="flex h-screen w-full min-w-[1480px]">
+      <div className="w-1/2 bg-[#FBF8EF] flex items-center justify-center h-screen">
+        <img
+          src={loginImage}
+          alt="회원가입 이미지"
+          className="w-full h-full object-fit"
+        />
+      </div>
+      <div className="w-1/2 bg-white flex flex-col items-center justify-center p-16 h-screen">
+        <h2 className="text-4xl font-bold text-gray-800 mb-14">회원가입</h2>
+        <form onSubmit={handleSubmit} className="w-full max-w-xl space-y-8">
+          <div className="space-y-4">
+            <label
+              htmlFor="email"
+              className="block text-xl font-medium text-gray-700"
+            >
+              이메일
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="w-full px-6 py-4 text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#455E5C]"
+            />
+          </div>
+          <div className="space-y-4">
+            <label
+              htmlFor="password"
+              className="block text-xl font-medium text-gray-700"
+            >
+              비밀번호
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="w-full px-6 py-4 text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#455E5C]"
+            />
+          </div>
+          <div className="space-y-4">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-xl font-medium text-gray-700"
+            >
+              비밀번호 확인
+            </label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              className="w-full px-6 py-4 text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#455E5C]"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full py-4 px-8 text-xl bg-[#5B7F7C] text-white rounded-md hover:bg-[#455E5C] focus:outline-none focus:ring-2 focus:ring-[#455E5C] focus:ring-offset-2 transition-colors"
+          >
+            회원가입
+          </button>
+        </form>
+        <p className="text-lg text-gray-600 mt-8">
+          이미 회원이신가요?{" "}
+          <Link
+            to="/login"
+            className="text-[#5B7F7C] hover:text-[#455E5C] font-medium"
+          >
+            로그인 하러 가기
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };
