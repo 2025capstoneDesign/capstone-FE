@@ -22,6 +22,16 @@ body {
   margin-top: 70px;
 }
 
+/* 헤더 스타일
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
 .header-logo {
   display: flex;
   align-items: center;
@@ -42,7 +52,7 @@ body {
   color: #333;
   font-size: 15px;
   cursor: pointer;
-}
+} */
 
 /* 서브 헤더 스타일 */
 .sub-header {
@@ -363,7 +373,8 @@ body {
 
 /* 음성 원본 콘텐츠 스타일 */
 .voice-content {
-  padding: 15px 0;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 /* 페이지별 음성 섹션 스타일 */

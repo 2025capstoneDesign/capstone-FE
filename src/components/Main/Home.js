@@ -1,7 +1,7 @@
 import React from "react";
 import Banner from "./Banner";
 import convert_icon from "../../assets/images/convert_icon.png";
-import history_icon from "../../assets/images/history_icon.png";
+import history_icon from "../../assets/images/history_icon2.png";
 import setting_icon from "../../assets/images/setting_icon.png";
 import { useNavigate } from "react-router-dom";
 
@@ -46,12 +46,8 @@ function Home() {
 
       {/* 기능 소개 섹션 */}
       <div className="mt-28 mb-28 max-w-[1480px] mx-auto">
-        <h2 className="text-[42px] font-semibold text-center">
-          기능을 살펴보세요
-        </h2>
-        <p className="text-gray-400 text-xl text-center mb-12">
-          필기 요정이 제공하는 다양한 기능들을 체험해보세요
-        </p>
+        <h2 className="text-[42px] font-semibold text-center">기능을 살펴보세요</h2>
+        <p className="text-gray-400 text-xl text-center mb-12">필기 요정이 제공하는 다양한 기능들을 체험해보세요</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <FeatureCard
             image={convert_icon}

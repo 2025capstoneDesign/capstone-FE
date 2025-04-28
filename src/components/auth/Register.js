@@ -74,20 +74,13 @@ const Register = () => {
   return (
     <div className="flex h-screen w-full min-w-[1480px]">
       <div className="w-1/2 bg-[#FBF8EF] flex items-center justify-center h-screen">
-        <img
-          src={loginImage}
-          alt="회원가입 이미지"
-          className="w-full h-full object-fit"
-        />
+        <img src={loginImage} alt="회원가입 이미지" className="w-full h-full object-fit" />
       </div>
       <div className="w-1/2 bg-white flex flex-col items-center justify-center p-16 h-screen">
         <h2 className="text-4xl font-bold text-gray-800 mb-14">회원가입</h2>
         <form onSubmit={handleSubmit} className="w-full max-w-xl space-y-8">
           <div className="space-y-4">
-            <label
-              htmlFor="email"
-              className="block text-xl font-medium text-gray-700"
-            >
+            <label htmlFor="email" className="block text-xl font-medium text-gray-700">
               이메일
             </label>
             <input
@@ -101,10 +94,7 @@ const Register = () => {
             />
           </div>
           <div className="space-y-4">
-            <label
-              htmlFor="password"
-              className="block text-xl font-medium text-gray-700"
-            >
+            <label htmlFor="password" className="block text-xl font-medium text-gray-700">
               비밀번호
             </label>
             <input
@@ -118,10 +108,7 @@ const Register = () => {
             />
           </div>
           <div className="space-y-4">
-            <label
-              htmlFor="confirmPassword"
-              className="block text-xl font-medium text-gray-700"
-            >
+            <label htmlFor="confirmPassword" className="block text-xl font-medium text-gray-700">
               비밀번호 확인
             </label>
             <input
@@ -143,10 +130,7 @@ const Register = () => {
         </form>
         <p className="text-lg text-gray-600 mt-8">
           이미 회원이신가요?{" "}
-          <Link
-            to="/login"
-            className="text-[#5B7F7C] hover:text-[#455E5C] font-medium"
-          >
+          <Link to="/login" className="text-[#5B7F7C] hover:text-[#455E5C] font-medium">
             로그인 하러 가기
           </Link>
         </p>
