@@ -1,7 +1,7 @@
 import React from "react";
 import Banner from "./Banner";
 import convert_icon from "../../assets/images/convert_icon.png";
-import history_icon from "../../assets/images/history_icon.png";
+import history_icon from "../../assets/images/history_icon2.png";
 import setting_icon from "../../assets/images/setting_icon.png";
 import { useNavigate } from "react-router-dom";
 

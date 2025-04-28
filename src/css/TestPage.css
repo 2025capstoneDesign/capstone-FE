@@ -373,7 +373,8 @@ body {
 
 /* 음성 원본 콘텐츠 스타일 */
 .voice-content {
-  padding: 15px 0;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 /* 페이지별 음성 섹션 스타일 */
