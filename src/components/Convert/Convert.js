@@ -12,7 +12,6 @@ import "../../css/TestPage.css";
 function Convert() {
   const navigate = useNavigate();
   const [files, setFiles] = useState([]);
-  const [uploadProgress, setUploadProgress] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef(null);
@@ -48,24 +47,6 @@ function Convert() {
     }
   };
 
-  const simulateFileUpload = useCallback((file) => {
-    return new Promise((resolve) => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 5;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-          setTimeout(resolve, 300);
-        }
-        setUploadProgress((prev) => ({
-          ...prev,
-          [file.name]: progress,
-        }));
-      }, 100);
-    });
-  }, []);
-
   const handleFileUpload = async (event) => {
     const uploadedFiles = Array.from(event.target.files);
     if (uploadedFiles.length === 0) return;
@@ -74,40 +55,13 @@ function Convert() {
       fileInputRef.current.value = "";
     }
 
-    for (const file of uploadedFiles) {
-      if (files.some((existingFile) => existingFile.name === file.name)) {
-        continue;
-      }
-
-      setFiles((prevFiles) => [
-        ...prevFiles,
-        file, // 실제 File 객체를 저장
-      ]);
-
-      setUploadProgress((prev) => ({
-        ...prev,
-        [file.name]: 0,
-      }));
-
-      await simulateFileUpload(file);
-
-      setFiles((prevFiles) =>
-        prevFiles.map((f) =>
-          f.name === file.name ? { ...f, uploadComplete: true } : f
-        )
-      );
-    }
+    setFiles((prevFiles) => [...prevFiles, ...uploadedFiles]);
   };
 
   const handleDelete = useCallback((fileToDelete) => {
     setFiles((prevFiles) =>
       prevFiles.filter((file) => file.name !== fileToDelete.name)
     );
-    setUploadProgress((prev) => {
-      const newProgress = { ...prev };
-      delete newProgress[fileToDelete.name];
-      return newProgress;
-    });
   }, []);
 
   const handleDrop = useCallback((event) => {
@@ -184,25 +138,24 @@ function Convert() {
   return (
     <div className="flex flex-col min-h-screen w-full mt-[70px]">
       <div className="flex justify-between items-center px-5">
-        <h2 className="text-[42px] font-semibold text-center mx-12 my-4">강의록 변환</h2>
+        <h2 className="text-[42px] font-semibold text-center mx-12 my-4">
+          강의록 변환
+        </h2>
       </div>
 
-      {error && (
-        <div className="text-red-500 mx-5 my-2">
-          {error}
-        </div>
-      )}
+      {error && <div className="text-red-500 mx-5 my-2">{error}</div>}
 
       <div className="flex flex-1 px-12 gap-6">
         {/* 왼쪽 업로드 영역 */}
         <div className="flex-[3] relative bg-white rounded-xl overflow-hidden h-[950px] shadow-md">
-          <div className="flex items-center p-4 bg-[#fffaec] border-b border-gray-200 h-14">
-          </div>
+          <div className="flex items-center p-4 bg-[#fffaec] border-b border-gray-200 h-14"></div>
 
           <div className="flex h-[calc(100%-3.5rem)]">
             {/* 왼쪽 업로드 영역 */}
             <div className="flex-1 p-10 flex flex-col">
-              <h2 className="text-2xl font-semibold my-12">강의록과 음성을 업로드하여 요약된 필기 내용을 확인해보세요</h2>
+              <h2 className="text-2xl font-semibold my-12">
+                강의록과 음성을 업로드하여 요약된 필기 내용을 확인해보세요
+              </h2>
               <div
                 // className="flex-1"
                 onClick={handleUploadClick}
@@ -222,42 +175,69 @@ function Convert() {
                     <img src={upload_icon} alt="업로드" className="w-56 h-36" />
                   </div>
                   <p className="text-gray-500 text-xl pt-8">
-                  강의록 파일을 이곳에 <span className="text-[#5B7F7C] font-semibold">드래그</span>하거나 <span className="text-[#5B7F7C] font-semibold">클릭</span>하여 업로드하세요
+                    강의록 파일을 이곳에{" "}
+                    <span className="text-[#5B7F7C] font-semibold">드래그</span>
+                    하거나{" "}
+                    <span className="text-[#5B7F7C] font-semibold">클릭</span>
+                    하여 업로드하세요
                   </p>
                 </div>
               </div>
 
               {/* 파일 형식 아이콘들 */}
               <div className="py-6 w-3/4 mx-auto">
-      
                 <div className="grid grid-cols-2 gap-4 ">
                   {/* <div className="flex flex-col items-center gap-2 border-3 border-gray-200 rounded-lg"> */}
-                    <span className="text-lg text-[#455E5C] font-semibold border-b-4 border-[#DEE5E5] px-4 py-1">강의록</span>
+                  <span className="text-lg text-[#455E5C] font-semibold border-b-4 border-[#DEE5E5] px-4 py-1">
+                    강의록
+                  </span>
                   {/* </div> */}
                   {/* <div className="flex flex-col items-center gap-2 border-3 border-gray-200 rounded-lg"> */}
-                    <span className="text-lg text-[#455E5C] font-semibold border-b-4 border-[#DEE5E5] px-4 py-1">음성</span>
+                  <span className="text-lg text-[#455E5C] font-semibold border-b-4 border-[#DEE5E5] px-4 py-1">
+                    음성
+                  </span>
                   {/* </div> */}
 
                   <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-4">
-                    <img src={word_icon} alt="Word" className="w-10 h-10 object-fit" />
+                    <img
+                      src={word_icon}
+                      alt="Word"
+                      className="w-10 h-10 object-fit"
+                    />
                     <span className="text-sm">Word</span>
                   </div>
                   <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-4">
-                    <img src={wav_icon} alt="WAV" className="w-10 h-10 object-fit" />
+                    <img
+                      src={wav_icon}
+                      alt="WAV"
+                      className="w-10 h-10 object-fit"
+                    />
                     <span className="text-sm">WAV</span>
                   </div>
 
                   <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-4">
-                    <img src={ppt_icon} alt="PPT" className="w-10 h-10 object-fit" />
+                    <img
+                      src={ppt_icon}
+                      alt="PPT"
+                      className="w-10 h-10 object-fit"
+                    />
                     <span className="text-sm">PPT</span>
                   </div>
                   <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-4">
-                    <img src={mp3_icon} alt="MP3" className="w-10 h-10 object-fit" />
+                    <img
+                      src={mp3_icon}
+                      alt="MP3"
+                      className="w-10 h-10 object-fit"
+                    />
                     <span className="text-sm">MP3</span>
                   </div>
 
                   <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-4">
-                    <img src={pdf_icon} alt="PDF" className="w-10 h-10 object-fit" />
+                    <img
+                      src={pdf_icon}
+                      alt="PDF"
+                      className="w-10 h-10 object-fit"
+                    />
                     <span className="text-sm">PDF</span>
                   </div>
                 </div>
@@ -283,7 +263,10 @@ function Convert() {
                 </div>
               ) : (
                 files.map((file) => (
-                  <div key={file.name} className="flex items-center p-4 rounded-lg bg-white border border-gray-200 shadow-sm mb-2 transition-colors">
+                  <div
+                    key={file.name}
+                    className="flex items-center p-4 rounded-lg bg-white border border-gray-200 shadow-sm mb-2 transition-colors"
+                  >
                     <img
                       src={getFileIcon(file.name)}
                       alt="파일 아이콘"
@@ -296,16 +279,6 @@ function Convert() {
                       <div className="text-md text-gray-500">
                         {formatFileSize(file.size)}
                       </div>
-                      {uploadProgress[file.name] < 100 && (
-                        <div className="mt-1">
-                          <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-[#5B7F7C] transition-all duration-200"
-                              style={{ width: `${uploadProgress[file.name]}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      )}
                     </div>
                     <button
                       className="text-gray-400 hover:text-gray-800 transition-colors"
@@ -353,19 +326,29 @@ function Convert() {
               </button>
             </div>
 
-            <div className={`color-selector ${activeTab === "voice" ? "visible" : "hidden"}`}>
+            <div
+              className={`color-selector ${
+                activeTab === "voice" ? "visible" : "hidden"
+              }`}
+            >
               <button
-                className={`color-btn red ${highlightColor === "red" ? "selected" : ""}`}
+                className={`color-btn red ${
+                  highlightColor === "red" ? "selected" : ""
+                }`}
                 onClick={() => setHighlightColor("red")}
                 aria-label="빨강색 강조"
               />
               <button
-                className={`color-btn blue ${highlightColor === "blue" ? "selected" : ""}`}
+                className={`color-btn blue ${
+                  highlightColor === "blue" ? "selected" : ""
+                }`}
                 onClick={() => setHighlightColor("blue")}
                 aria-label="파랑색 강조"
               />
               <button
-                className={`color-btn green ${highlightColor === "green" ? "selected" : ""}`}
+                className={`color-btn green ${
+                  highlightColor === "green" ? "selected" : ""
+                }`}
                 onClick={() => setHighlightColor("green")}
                 aria-label="초록색 강조"
               />
@@ -375,18 +358,23 @@ function Convert() {
           <div className="content-container">
             {activeTab === "ai" ? (
               <div className="ai-content p-6">
-                <p className="text-lg text-gray-500">파일을 업로드하고 변환을 시작하면 AI가 작성한 필기를 확인할 수 있습니다.</p>
+                <p className="text-lg text-gray-500">
+                  파일을 업로드하고 변환을 시작하면 AI가 작성한 필기를 확인할 수
+                  있습니다.
+                </p>
               </div>
             ) : (
               <div className="voice-content p-6">
                 <p className="text-lg text-gray-500 mb-12">
-                  파일을 업로드하고 변환을 시작하면 음성 원본을 확인할 수 있습니다.
+                  파일을 업로드하고 변환을 시작하면 음성 원본을 확인할 수
+                  있습니다.
                 </p>
-                <p className="text-lg text-gray-500">                  
-                  <span 
+                <p className="text-lg text-gray-500">
+                  <span
                     className={`segment-text important ${highlightColor}`}
                     onMouseEnter={(e) => {
-                      const tooltip = e.currentTarget.querySelector('.reason-tooltip');
+                      const tooltip =
+                        e.currentTarget.querySelector(".reason-tooltip");
                       if (tooltip) {
                         const rect = e.currentTarget.getBoundingClientRect();
                         tooltip.style.left = `${rect.left - 140}px`;
@@ -394,10 +382,11 @@ function Convert() {
                       }
                     }}
                   >
-                    중요한 내용은 하이라이트로 표시됩니다.
-                    상단의 색상 팔레트에서 색상을 바꿔보세요.
-                    <br/>
-                    글자 위에 마우스를 올리면 해당 내용이 중요한 이유를 확인할 수 있습니다.
+                    중요한 내용은 하이라이트로 표시됩니다. 상단의 색상
+                    팔레트에서 색상을 바꿔보세요.
+                    <br />
+                    글자 위에 마우스를 올리면 해당 내용이 중요한 이유를 확인할
+                    수 있습니다.
                     <span className="reason-tooltip">중요한 이유 확인</span>
                   </span>
                 </p>
