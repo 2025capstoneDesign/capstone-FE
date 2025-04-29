@@ -327,7 +327,7 @@ export default function TestPage() {
                 pageNumber={pageNumber}
                 renderTextLayer={false}
                 renderAnnotationLayer={false}
-                width={window.innerWidth * 0.55}
+                width={window.innerWidth * 0.5}
               />
             </Document>
 
