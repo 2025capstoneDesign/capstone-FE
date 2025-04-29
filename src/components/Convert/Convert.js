@@ -169,7 +169,11 @@ function Convert() {
                 />
                 <div className="w-full lg:w-[70%] h-[22vh] mx-auto border-4 border-[#DEE5E5] rounded-xl flex flex-col justify-center items-center cursor-pointer hover:border-[#5B7F7C] transition-colors bg-[#F9F7F7]">
                   <div className="mb-[0.8rem]">
-                    <img src={upload_icon} alt="업로드" className="w-[12rem] h-[8rem]" />
+                    <img
+                      src={upload_icon}
+                      alt="업로드"
+                      className="w-[7rem] h-[5rem]"
+                    />
                   </div>
                   <p className="text-gray-500 text-[1.2rem] pt-[0.6rem] text-center px-[1rem]">
                     <span className="text-[#5B7F7C] font-semibold">드래그</span>
@@ -191,25 +195,45 @@ function Convert() {
                   </span>
 
                   <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
-                    <img src={word_icon} alt="Word" className="w-[2.5rem] h-[2.trem] object-fit" />
+                    <img
+                      src={word_icon}
+                      alt="Word"
+                      className="w-[2.5rem] h-[2.trem] object-fit"
+                    />
                     <span className="text-sm">Word</span>
                   </div>
                   <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
-                    <img src={wav_icon} alt="WAV" className="w-[2.5rem] h-[2.5rem] object-fit" />
+                    <img
+                      src={wav_icon}
+                      alt="WAV"
+                      className="w-[2.5rem] h-[2.5rem] object-fit"
+                    />
                     <span className="text-sm">WAV</span>
                   </div>
 
                   <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
-                    <img src={ppt_icon} alt="PPT" className="w-[2.5rem] h-[2.5rem] object-fit" />
+                    <img
+                      src={ppt_icon}
+                      alt="PPT"
+                      className="w-[2.5rem] h-[2.5rem] object-fit"
+                    />
                     <span className="text-sm">PPT</span>
                   </div>
                   <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
-                    <img src={mp3_icon} alt="MP3" className="w-[2.5rem] h-[2.5rem] object-fit" />
+                    <img
+                      src={mp3_icon}
+                      alt="MP3"
+                      className="w-[2.5rem] h-[2.5rem] object-fit"
+                    />
                     <span className="text-sm">MP3</span>
                   </div>
 
                   <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
-                    <img src={pdf_icon} alt="PDF" className="w-[2.5rem] h-[2.5rem] object-fit" />
+                    <img
+                      src={pdf_icon}
+                      alt="PDF"
+                      className="w-[2.5rem] h-[2.5rem] object-fit"
+                    />
                     <span className="text-sm">PDF</span>
                   </div>
                 </div>
@@ -345,7 +369,8 @@ function Convert() {
                   <span
                     className={`segment-text important ${highlightColor}`}
                     onMouseEnter={(e) => {
-                      const tooltip = e.currentTarget.querySelector(".reason-tooltip");
+                      const tooltip =
+                        e.currentTarget.querySelector(".reason-tooltip");
                       if (tooltip) {
                         const rect = e.currentTarget.getBoundingClientRect();
                         tooltip.style.left = `${rect.left - 140}px`;
