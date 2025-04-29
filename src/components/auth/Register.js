@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import loginImage from "../../assets/images/login2.png";
+import logo2 from "../../assets/images/logo2.png";
 import "../../css/Auth.css";
 
 const Register = () => {
@@ -72,15 +73,28 @@ const Register = () => {
   };
 
   return (
-    <div className="flex h-screen w-full min-w-[1480px]">
-      <div className="w-1/2 bg-[#FBF8EF] flex items-center justify-center h-screen">
-        <img src={loginImage} alt="회원가입 이미지" className="w-full h-full object-fit" />
+    <div className="flex min-h-screen w-full relative">
+      <div className="hidden lg:block w-[50%] bg-[#FBF8EF] flex items-center justify-center min-h-screen">
+        <img 
+          src={logo2} 
+          alt="회원가입 이미지" 
+          className="w-full h-full object-cover opacity-70"
+        />
       </div>
-      <div className="w-1/2 bg-white flex flex-col items-center justify-center p-16 h-screen">
-        <h2 className="text-4xl font-bold text-gray-800 mb-14">회원가입</h2>
-        <form onSubmit={handleSubmit} className="w-full max-w-xl space-y-8">
-          <div className="space-y-4">
-            <label htmlFor="email" className="block text-xl font-medium text-gray-700">
+      <div className="block lg:hidden absolute inset-0 z-0">
+        <img 
+          src={logo2} 
+          alt="회원가입 배경 이미지" 
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="w-full lg:w-[55%] bg-white/80 flex flex-col items-center justify-center p-[5%] min-h-screen relative z-10">
+        <h2 className="text-[1.8rem] lg:text-[1.8vw] font-bold text-gray-800 mb-[3rem] lg:mb-[3vw]">
+          회원가입
+        </h2>
+        <form onSubmit={handleSubmit} className="w-full max-w-[75%] lg:max-w-[30vw] space-y-[1.8rem] lg:space-y-[1.8vw]">
+          <div className="space-y-[1rem] lg:space-y-[1vw]">
+            <label htmlFor="email" className="block text-[1.1rem] lg:text-[1.1vw] font-medium text-gray-700">
               이메일
             </label>
             <input
@@ -90,11 +104,11 @@ const Register = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-6 py-4 text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#455E5C]"
+              className="w-full px-[1.5rem] lg:px-[1.5vw] py-[1rem] lg:py-[0.8vw] text-[1.1rem] lg:text-[1.1vw] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#455E5C]"
             />
           </div>
-          <div className="space-y-4">
-            <label htmlFor="password" className="block text-xl font-medium text-gray-700">
+          <div className="space-y-[1rem] lg:space-y-[1vw]">
+            <label htmlFor="password" className="block text-[1.1rem] lg:text-[1.1vw] font-medium text-gray-700">
               비밀번호
             </label>
             <input
@@ -104,11 +118,11 @@ const Register = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-6 py-4 text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#455E5C]"
+              className="w-full px-[1.5rem] lg:px-[1.5vw] py-[1rem] lg:py-[0.8vw] text-[1.1rem] lg:text-[1.1vw] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#455E5C]"
             />
           </div>
-          <div className="space-y-4">
-            <label htmlFor="confirmPassword" className="block text-xl font-medium text-gray-700">
+          <div className="space-y-[1rem] lg:space-y-[1vw]">
+            <label htmlFor="confirmPassword" className="block text-[1.1rem] lg:text-[1.1vw] font-medium text-gray-700">
               비밀번호 확인
             </label>
             <input
@@ -118,20 +132,20 @@ const Register = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               required
-              className="w-full px-6 py-4 text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#455E5C]"
+              className="w-full px-[1.5rem] lg:px-[1.5vw] py-[1rem] lg:py-[0.8vw] text-[1.1rem] lg:text-[1.1vw] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#455E5C]"
             />
           </div>
           <button
             type="submit"
-            className="w-full py-4 px-8 text-xl bg-[#5B7F7C] text-white rounded-md hover:bg-[#455E5C] focus:outline-none focus:ring-2 focus:ring-[#455E5C] focus:ring-offset-2 transition-colors"
+            className="w-full py-[1rem] lg:py-[1vw] px-[2rem] lg:px-[2vw] text-[1.2rem] lg:text-[1.2vw] bg-[#5B7F7C] text-white rounded-md hover:bg-[#455E5C] focus:outline-none focus:ring-2 focus:ring-[#455E5C] focus:ring-offset-2 transition-colors"
           >
             회원가입
           </button>
         </form>
-        <p className="text-lg text-gray-600 mt-8">
+        <p className="mt-[2rem] lg:mt-[2vw] text-[1rem] lg:text-[1vw] text-gray-600">
           이미 회원이신가요?{" "}
           <Link to="/login" className="text-[#5B7F7C] hover:text-[#455E5C] font-medium">
-            로그인 하러 가기
+            로그인 하러가기
           </Link>
         </p>
       </div>

@@ -108,7 +108,7 @@ body {
 .main-content {
   display: flex;
   flex: 1;
-  padding: 0 25px 25px;
+  padding: 0 0 25px;
   gap: 25px;
   height: calc(100vh - 130px);
 }
@@ -598,4 +598,5 @@ body {
     width: 100%;
     justify-content: space-between;
   }
+
 }

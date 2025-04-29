@@ -1,5 +1,6 @@
-기본 리셋 및 전체 레이아웃
-* {
+
+/* 기본 리셋 및 전체 레이아웃 */
+/* * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -17,10 +18,10 @@ body {
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
-}
+} */
 
 /* 서브 헤더 스타일 */
-.sub-header {
+/* .sub-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -52,19 +53,19 @@ body {
 
 .convert-btn:hover {
   background-color: #333;
-}
+} */
 
 /* 메인 콘텐츠 레이아웃 */
-.main-content {
+/* .main-content {
   display: flex;
   flex: 1;
   padding: 0 25px 25px;
   gap: 25px;
   height: calc(100vh - 130px);
-}
+} */
 
 /* 왼쪽 파일 업로드 컨테이너 */
-.upload-container {
+/* .upload-container {
   flex: 3;
   position: relative;
   background-color: #fff;
@@ -115,10 +116,10 @@ body {
 .upload-box.dragover {
   border-color: #80cbc4;
   background-color: rgba(128, 203, 196, 0.05);
-}
+} */
 
 /* 오른쪽 파일 목록 컨테이너 */
-.file-list-container {
+/* .file-list-container {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -206,4 +207,4 @@ body {
 
 .delete-btn:hover {
   color: #ff4d4f;
-}
+} */
