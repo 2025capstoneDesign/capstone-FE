@@ -10,45 +10,39 @@ function Home() {
 
   const FeatureCard = ({ image, title, description, onClick }) => (
     <div
-      className="w-auto h-[280px] relative group cursor-pointer"
+      className="w-full min-h-[16rem] relative group cursor-pointer"
       onClick={onClick}
     >
-      <div className="rounded-3xl border-2 border-[#DBE2EF] group-hover:border-gradient-hover group-hover:border-3 h-full transition-all duration-300">
-        <div className="p-8">
-          <div className="flex flex-col items-center gap-4 mb-4">
-            <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center shrink-0">
+      <div className="rounded-3xl border-2 border-[#DBE2EF] group-hover:border-gradient-hover group-hover:border-3 h-full transition-all duration-300 sm:p-[1rem]">
+        <div className="p-[1.5rem] md:p-[1rem]">
+          <div className="flex flex-col items-center gap-[1rem] mb-[1rem]">
+            <div className="w-[3.5rem] h-[3.5rem] md:w-[3.5rem] md:h-[3.5rem] rounded-full flex items-center justify-center shrink-0">
               <img
                 src={image}
                 alt={title}
                 className="w-full h-full object-contain"
               />
             </div>
-            <h3 className="text-3xl font-semibold text-center">{title}</h3>
+            <h3 className="text-[1.3rem] md:text-[1.5rem] font-semibold text-center">{title}</h3>
           </div>
-          <p className="text-2xl mt-8 text-gray-500">{description}</p>
+          <p className="text-[1.2rem] mt-[1.2rem] text-gray-500 text-center">{description}</p>
         </div>
       </div>
     </div>
   );
 
   return (
-    <section className="min-w-[1280px] mt-[70px]">
-      {/* <div className="mx-4 mb-16">
-        <h1 className="text-6xl font-bold my-8">필기요정 소개</h1>
-        <p className="text-gray-500 text-xl">
-          필기요정은 당신의 학습을 돕기 위해서 존재합니다.<br/>
-          강의를 들으면서 놓쳤던 부분들도 다시 확인하고 기록해보세요.
-        </p>
-      </div> */}
-
+    <section className="w-full mt-[4.5rem] px-[1rem] ">
       {/* 메인 배너 */}
       <Banner />
-
+      
       {/* 기능 소개 섹션 */}
-      <div className="mt-28 mb-28 max-w-[1480px] mx-auto">
-        <h2 className="text-[42px] font-semibold text-center">기능을 살펴보세요</h2>
-        <p className="text-gray-400 text-xl text-center mb-12">필기 요정이 제공하는 다양한 기능들을 체험해보세요</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="mt-[4rem] mb-[4rem] w-full max-w-[90rem] mx-auto">
+        <h2 className="text-[2rem] md:text-[2.5rem] font-semibold text-center">기능을 살펴보세요</h2>
+        <p className="text-gray-400 text-[1.1rem] md:text-[1.3rem] text-center mb-[2rem] md:mb-[3rem] px-[1rem]">
+          필기 요정이 제공하는 다양한 기능들을 체험해보세요
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1.5rem] md:gap-[2rem] px-[1rem] md:px-[2rem]">
           <FeatureCard
             image={convert_icon}
             title="강의록 변환"

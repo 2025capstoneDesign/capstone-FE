@@ -136,28 +136,25 @@ function Convert() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen w-full mt-[70px]">
-      <div className="flex justify-between items-center px-5">
-        <h2 className="text-[42px] font-semibold text-center mx-12 my-4">
-          강의록 변환
-        </h2>
+    <div className="app-wrapper">
+      <div className="sub-header">
+        <h2 className="page-title">강의록 변환</h2>
       </div>
 
-      {error && <div className="text-red-500 mx-5 my-2">{error}</div>}
+      {error && <div className="text-red-500 mx-[5%] my-[0.5rem]">{error}</div>}
 
-      <div className="flex flex-1 px-12 gap-6">
+      <div className="main-content mx-[25px]">
         {/* 왼쪽 업로드 영역 */}
-        <div className="flex-[3] relative bg-white rounded-xl overflow-hidden h-[950px] shadow-md">
-          <div className="flex items-center p-4 bg-[#fffaec] border-b border-gray-200 h-14"></div>
+        <div className="slide-container">
+          <div className="slide-header"></div>
 
-          <div className="flex h-[calc(100%-3.5rem)]">
+          <div className="flex flex-col lg:flex-row h-[calc(100%-3.5rem)]">
             {/* 왼쪽 업로드 영역 */}
-            <div className="flex-1 p-10 flex flex-col">
-              <h2 className="text-2xl font-semibold my-12">
+            <div className="flex-1 p-[5%] flex flex-col">
+              <h2 className="text-[1.4rem] font-semibold my-[3vh] text-center">
                 강의록과 음성을 업로드하여 요약된 필기 내용을 확인해보세요
               </h2>
               <div
-                // className="flex-1"
                 onClick={handleUploadClick}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -170,73 +167,72 @@ function Convert() {
                   onChange={handleFileUpload}
                   accept=".doc,.docx,.pdf,.ppt,.pptx,.mp3,.wav"
                 />
-                <div className="w-3/4 h-[360px] mx-auto border-4 border-[#DEE5E5] rounded-xl flex flex-col justify-center items-center cursor-pointer hover:border-[#5B7F7C] transition-colors bg-[#F9F7F7]">
-                  <div className="mb-4">
-                    <img src={upload_icon} alt="업로드" className="w-56 h-36" />
+                <div className="w-full lg:w-[70%] h-[22vh] mx-auto border-4 border-[#DEE5E5] rounded-xl flex flex-col justify-center items-center cursor-pointer hover:border-[#5B7F7C] transition-colors bg-[#F9F7F7]">
+                  <div className="mb-[0.8rem]">
+                    <img
+                      src={upload_icon}
+                      alt="업로드"
+                      className="w-[7rem] h-[5rem]"
+                    />
                   </div>
-                  <p className="text-gray-500 text-xl pt-8">
-                    강의록 파일을 이곳에{" "}
+                  <p className="text-gray-500 text-[1.2rem] pt-[0.6rem] text-center px-[1rem]">
                     <span className="text-[#5B7F7C] font-semibold">드래그</span>
                     하거나{" "}
                     <span className="text-[#5B7F7C] font-semibold">클릭</span>
-                    하여 업로드하세요
+                    하여 파일을 업로드 하세요
                   </p>
                 </div>
               </div>
 
               {/* 파일 형식 아이콘들 */}
-              <div className="py-6 w-3/4 mx-auto">
-                <div className="grid grid-cols-2 gap-4 ">
-                  {/* <div className="flex flex-col items-center gap-2 border-3 border-gray-200 rounded-lg"> */}
-                  <span className="text-lg text-[#455E5C] font-semibold border-b-4 border-[#DEE5E5] px-4 py-1">
+              <div className="py-[1.5rem] w-full lg:w-[75%] mx-auto">
+                <div className="grid grid-cols-2 gap-4">
+                  <span className="text-[1.1rem] text-[#455E5C] font-semibold border-b-4 border-[#DEE5E5] px-[1rem] py-[0.25rem]">
                     강의록
                   </span>
-                  {/* </div> */}
-                  {/* <div className="flex flex-col items-center gap-2 border-3 border-gray-200 rounded-lg"> */}
-                  <span className="text-lg text-[#455E5C] font-semibold border-b-4 border-[#DEE5E5] px-4 py-1">
+                  <span className="text-[1.1rem] text-[#455E5C] font-semibold border-b-4 border-[#DEE5E5] px-[1rem] py-[0.25rem]">
                     음성
                   </span>
-                  {/* </div> */}
 
-                  <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-4">
+                  <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
                     <img
                       src={word_icon}
                       alt="Word"
-                      className="w-10 h-10 object-fit"
+                      className="w-[2.5rem] h-[2.trem] object-fit"
                     />
                     <span className="text-sm">Word</span>
                   </div>
-                  <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-4">
+                  <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
                     <img
                       src={wav_icon}
                       alt="WAV"
-                      className="w-10 h-10 object-fit"
+                      className="w-[2.5rem] h-[2.5rem] object-fit"
                     />
                     <span className="text-sm">WAV</span>
                   </div>
 
-                  <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-4">
+                  <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
                     <img
                       src={ppt_icon}
                       alt="PPT"
-                      className="w-10 h-10 object-fit"
+                      className="w-[2.5rem] h-[2.5rem] object-fit"
                     />
                     <span className="text-sm">PPT</span>
                   </div>
-                  <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-4">
+                  <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
                     <img
                       src={mp3_icon}
                       alt="MP3"
-                      className="w-10 h-10 object-fit"
+                      className="w-[2.5rem] h-[2.5rem] object-fit"
                     />
                     <span className="text-sm">MP3</span>
                   </div>
 
-                  <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-4">
+                  <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
                     <img
                       src={pdf_icon}
                       alt="PDF"
-                      className="w-10 h-10 object-fit"
+                      className="w-[2.5rem] h-[2.5rem] object-fit"
                     />
                     <span className="text-sm">PDF</span>
                   </div>
@@ -246,7 +242,7 @@ function Convert() {
               {/* 변환하기 버튼 */}
               <div className="flex justify-end mt-auto">
                 <button
-                  className="bg-[#5B7F7C] text-white px-8 py-3 rounded-full text-xl hover:bg-[#455E5C] transition-colors disabled:opacity-50"
+                  className="convert-btn"
                   onClick={handleConvert}
                   disabled={isLoading}
                 >
@@ -256,27 +252,27 @@ function Convert() {
             </div>
 
             {/* 오른쪽 업로드된 파일 목록 */}
-            <div className="w-[550px] p-5 border-l border-gray-200">
+            <div className="w-full lg:w-[33%] p-[1rem] border-t lg:border-t-0 lg:border-l border-gray-200">
               {files.length === 0 ? (
-                <div className="text-center text-xl text-gray-500 my-12">
+                <div className="text-center text-[1.2rem] text-gray-500 my-[3rem]">
                   아직 업로드된 파일이 없습니다
                 </div>
               ) : (
                 files.map((file) => (
                   <div
                     key={file.name}
-                    className="flex items-center p-4 rounded-lg bg-white border border-gray-200 shadow-sm mb-2 transition-colors"
+                    className="flex items-center p-[1rem] rounded-lg bg-white border border-gray-200 shadow-sm mb-[0.5rem] transition-colors"
                   >
                     <img
                       src={getFileIcon(file.name)}
                       alt="파일 아이콘"
-                      className="w-8 h-8 mr-4"
+                      className="w-[2rem] h-[2rem] mr-[1rem]"
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="text-lg font-medium text-gray-800 truncate">
+                      <div className="text-[1rem] font-medium text-gray-800 truncate">
                         {file.name}
                       </div>
-                      <div className="text-md text-gray-500">
+                      <div className="text-[0.9rem] text-gray-500">
                         {formatFileSize(file.size)}
                       </div>
                     </div>
@@ -309,20 +305,20 @@ function Convert() {
         </div>
 
         {/* 오른쪽 요약 섹션 */}
-        <div className="w-[550px] bg-white rounded-xl shadow-md flex flex-col h-[950px]">
+        <div className="summary-container">
           <div className="tab-container content-tabs">
             <div className="tabs">
               <button
                 className={`tab ${activeTab === "ai" ? "active" : ""}`}
                 onClick={() => setActiveTab("ai")}
               >
-                <p className="text-lg">AI 필기</p>
+                <p className="text-[1.1rem]">AI 필기</p>
               </button>
               <button
                 className={`tab ${activeTab === "voice" ? "active" : ""}`}
                 onClick={() => setActiveTab("voice")}
               >
-                <p className="text-lg">음성 원본</p>
+                <p className="text-[1.1rem]">음성 원본</p>
               </button>
             </div>
 
@@ -357,19 +353,19 @@ function Convert() {
 
           <div className="content-container">
             {activeTab === "ai" ? (
-              <div className="ai-content p-6">
-                <p className="text-lg text-gray-500">
+              <div className="ai-content">
+                <p className="text-[1.1rem] text-gray-500">
                   파일을 업로드하고 변환을 시작하면 AI가 작성한 필기를 확인할 수
                   있습니다.
                 </p>
               </div>
             ) : (
-              <div className="voice-content p-6">
-                <p className="text-lg text-gray-500 mb-12">
+              <div className="voice-content">
+                <p className="text-[1.1rem] text-gray-500 mb-[3rem]">
                   파일을 업로드하고 변환을 시작하면 음성 원본을 확인할 수
                   있습니다.
                 </p>
-                <p className="text-lg text-gray-500">
+                <p className="text-[1.1rem] text-gray-500">
                   <span
                     className={`segment-text important ${highlightColor}`}
                     onMouseEnter={(e) => {

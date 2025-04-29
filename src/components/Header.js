@@ -5,7 +5,7 @@ import LogoImage from "../assets/images/logo3.png";
 function Header() {
   return (
     <header className="bg-white shadow-sm fixed z-[999] w-full">
-      <nav className="min-w-[1280px] mx-auto px-6 py-3">
+      <nav className="mx-auto px-6 py-3">
         <div className="flex justify-between items-center">
           {/* <div className="flex justify-between items-center"> */}
           <Link
