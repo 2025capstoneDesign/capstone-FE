@@ -16,16 +16,16 @@ function Home() {
       <div className="rounded-3xl border-2 border-[#DBE2EF] group-hover:border-gradient-hover group-hover:border-3 h-full transition-all duration-300 sm:p-[1rem]">
         <div className="p-[1.5rem] md:p-[1rem]">
           <div className="flex flex-col items-center gap-[1rem] mb-[1rem]">
-            <div className="w-[3.5rem] h-[3.5rem] md:w-[4rem] md:h-[4rem] rounded-full flex items-center justify-center shrink-0">
+            <div className="w-[3.5rem] h-[3.5rem] md:w-[3.5rem] md:h-[3.5rem] rounded-full flex items-center justify-center shrink-0">
               <img
                 src={image}
                 alt={title}
                 className="w-full h-full object-contain"
               />
             </div>
-            <h3 className="text-[1.5rem] md:text-[2rem] font-semibold text-center">{title}</h3>
+            <h3 className="text-[1.3rem] md:text-[1.5rem] font-semibold text-center">{title}</h3>
           </div>
-          <p className="text-[1.1rem] md:text-[1.3rem] mt-[1.5rem] text-gray-500 text-center">{description}</p>
+          <p className="text-[1.2rem] mt-[1.2rem] text-gray-500 text-center">{description}</p>
         </div>
       </div>
     </div>
@@ -37,7 +37,7 @@ function Home() {
       <Banner />
       
       {/* 기능 소개 섹션 */}
-      <div className="mt-[4rem] mb-[4rem] w-full max-w-[92rem] mx-auto">
+      <div className="mt-[4rem] mb-[4rem] w-full max-w-[90rem] mx-auto">
         <h2 className="text-[2rem] md:text-[2.5rem] font-semibold text-center">기능을 살펴보세요</h2>
         <p className="text-gray-400 text-[1.1rem] md:text-[1.3rem] text-center mb-[2rem] md:mb-[3rem] px-[1rem]">
           필기 요정이 제공하는 다양한 기능들을 체험해보세요

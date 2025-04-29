@@ -29,13 +29,13 @@ const Banner = () => {
       {/* 컨텐츠 */}
       <div className="relative z-10 h-full flex flex-col justify-center">
         <div className="w-full px-[8%]">
-          <h1 className="text-[1.5rem] md:text-[2rem] xl-[2.5rem] font-[350] text-white tracking-wide">
+          <h1 className="text-[1.5rem] leading-[0.2rem] md:text-[2rem] xl-[2.5rem] font-[350] text-white tracking-wide">
             필기요정과 함께!
           </h1>
-          <h1 className="py-2 md:py-4 text-[2.5rem] md:text-[2.5rem] lg:text-[3.2rem] text-white font-[580] tracking-wide">
+          <h1 className="py-2 md:py-4 text-[2.5rem] md:text-[3.2rem] lg:text-[3.2rem] text-white font-[580] tracking-wide">
             자동 필기 생성 서비스
           </h1>
-          <p className="mt-[1rem] md:mt-[2rem] lg:mt-[2.5rem] xl-[3rem] text-white font-[350] text-[1rem] md:text-[1.2rem] lg:text-[1.3rem] tracking-wide leading-relaxed">
+          <p className="mt-[1rem] md:mt-[1.8rem] lg:mt-[2rem] xl-[2.5rem] text-white font-[350] text-[1rem] md:text-[1.2rem] lg:text-[1.3rem] tracking-wide leading-relaxed">
             강의록과 녹음본으로 새로운 <span className='text-orange-300 font-[450]'>나만의 강의록</span>을 생성할 수 있습니다.<br/>
             AI가 도와주는 <span className='text-orange-300 font-[450]'>스마트한 필기 정리</span>를 경험해보세요.
           </p>

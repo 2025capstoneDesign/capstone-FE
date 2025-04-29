@@ -151,7 +151,7 @@ function Convert() {
           <div className="flex flex-col lg:flex-row h-[calc(100%-3.5rem)]">
             {/* 왼쪽 업로드 영역 */}
             <div className="flex-1 p-[5%] flex flex-col">
-              <h2 className="text-[1.5rem] font-semibold my-[3vh] text-center">
+              <h2 className="text-[1.4rem] font-semibold my-[3vh] text-center">
                 강의록과 음성을 업로드하여 요약된 필기 내용을 확인해보세요
               </h2>
               <div
@@ -167,11 +167,11 @@ function Convert() {
                   onChange={handleFileUpload}
                   accept=".doc,.docx,.pdf,.ppt,.pptx,.mp3,.wav"
                 />
-                <div className="w-full lg:w-[75%] h-[30vh] mx-auto border-4 border-[#DEE5E5] rounded-xl flex flex-col justify-center items-center cursor-pointer hover:border-[#5B7F7C] transition-colors bg-[#F9F7F7]">
-                  <div className="mb-[1rem]">
-                    <img src={upload_icon} alt="업로드" className="w-[14rem] h-[9rem]" />
+                <div className="w-full lg:w-[70%] h-[22vh] mx-auto border-4 border-[#DEE5E5] rounded-xl flex flex-col justify-center items-center cursor-pointer hover:border-[#5B7F7C] transition-colors bg-[#F9F7F7]">
+                  <div className="mb-[0.8rem]">
+                    <img src={upload_icon} alt="업로드" className="w-[12rem] h-[8rem]" />
                   </div>
-                  <p className="text-gray-500 text-[1.2rem] pt-[2rem] text-center px-[1rem]">
+                  <p className="text-gray-500 text-[1.2rem] pt-[0.6rem] text-center px-[1rem]">
                     <span className="text-[#5B7F7C] font-semibold">드래그</span>
                     하거나{" "}
                     <span className="text-[#5B7F7C] font-semibold">클릭</span>
@@ -228,7 +228,7 @@ function Convert() {
             </div>
 
             {/* 오른쪽 업로드된 파일 목록 */}
-            <div className="w-full lg:w-[30%] p-[1rem] border-t lg:border-t-0 lg:border-l border-gray-200">
+            <div className="w-full lg:w-[33%] p-[1rem] border-t lg:border-t-0 lg:border-l border-gray-200">
               {files.length === 0 ? (
                 <div className="text-center text-[1.2rem] text-gray-500 my-[3rem]">
                   아직 업로드된 파일이 없습니다
