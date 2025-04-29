@@ -7,7 +7,7 @@ const Banner = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="relative w-full h-[35vh] md:h-[35vh] lg:h-[45vh] overflow-hidden">
+    <div className="relative w-full h-[35vh] md:h-[45vh] lg:h-[45vh] overflow-hidden">
       {/* 그라데이션 배경 */}
       <div 
         className="absolute inset-0"
@@ -28,11 +28,11 @@ const Banner = () => {
       
       {/* 컨텐츠 */}
       <div className="relative z-10 h-full flex flex-col justify-center">
-        <div className="w-full px-[2%] md:px-[4%] lg:px-[8%]">
+        <div className="w-full px-[8%]">
           <h1 className="text-[1.5rem] md:text-[2rem] xl-[2.5rem] font-[350] text-white tracking-wide">
             필기요정과 함께!
           </h1>
-          <h1 className="py-2 md:py-4 text-[2rem] md:text-[2.5rem] lg:text-[3.2rem] text-white font-[580] tracking-wide">
+          <h1 className="py-2 md:py-4 text-[2.5rem] md:text-[2.5rem] lg:text-[3.2rem] text-white font-[580] tracking-wide">
             자동 필기 생성 서비스
           </h1>
           <p className="mt-[1rem] md:mt-[2rem] lg:mt-[2.5rem] xl-[3rem] text-white font-[350] text-[1rem] md:text-[1.2rem] lg:text-[1.3rem] tracking-wide leading-relaxed">
@@ -48,7 +48,7 @@ const Banner = () => {
         </div>
         
         {/* 메인 이미지 */}
-        <div className="absolute right-[6vw] md:top-10 bottom-[1/2] w-[30%] sm: w-0 md:w-[30%] lg:w-[30%] max-w-[550px]">
+        <div className="absolute right-[6vw] md:top-10 w-0 md:w-[30%] lg:w-[30%] max-w-[550px]">
           <img 
             src={bannerImage} 
             alt="필기 이미지" 

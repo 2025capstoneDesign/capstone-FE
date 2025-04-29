@@ -32,7 +32,7 @@ function Home() {
   );
 
   return (
-    <section className="w-full mt-[4.5rem] px-[1rem] md:px-[2rem] lg:px-[4rem]">
+    <section className="w-full mt-[4.5rem] px-[1rem] ">
       {/* 메인 배너 */}
       <Banner />
       
