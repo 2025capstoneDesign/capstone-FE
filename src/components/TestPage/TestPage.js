@@ -1,10 +1,9 @@
-// /src/pages/TestPage.js
+// /src/components/TestPage/TestPage.js
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Document, Page } from "react-pdf";
-import { summaryData } from "../../data/summaryData";
-import { voiceData } from "../../data/voiceData";
-import "../../css/TestPage.css";
+import { dummyData } from "../../data/dummyData";
+import { parseData } from "./DataParser";
 import ReactMarkdown from "react-markdown";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -12,12 +11,21 @@ import "react-toastify/dist/ReactToastify.css";
 export default function TestPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { pdfFile } = location.state || { pdfFile: "/sample3.pdf" };
+  const { pdfFile, pdfData } = location.state || {
+    pdfFile: "/sample3.pdf",
+    pdfData: null,
+  };
 
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // 전달받은 pdfData가 이미 파싱된 데이터인지 확인하고, 아니면 파싱
+  const { summaryData, voiceData } =
+    typeof pdfData === "object" && pdfData?.summaryData && pdfData?.voiceData
+      ? pdfData // 이미 파싱된 데이터
+      : parseData(pdfData || dummyData); // 파싱 필요
 
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -43,6 +51,14 @@ export default function TestPage() {
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
+  }
+
+  function onDocumentLoadError(error) {
+    console.error("Error loading PDF:", error);
+    toast.error("PDF 로딩 중 오류가 발생했습니다", {
+      position: "top-center",
+      autoClose: 3000,
+    });
   }
 
   // 특정 페이지 섹션으로 스크롤하는 함수 - 부드러운 스크롤 적용
@@ -146,7 +162,8 @@ export default function TestPage() {
 
   // 세그먼트 더블클릭 시 해당 페이지로 이동
   const handleSegmentDoubleClick = (segment) => {
-    if (segment.linkedConcept && segment.pageNumber) {
+    // segment.isImportant가 true이고 linkedConcept와 pageNumber가 존재할 때만 실행
+    if (segment.isImportant && segment.linkedConcept && segment.pageNumber) {
       toast.info(`'${segment.linkedConcept}' 개념으로 이동하였습니다`, {
         position: "top-center",
         autoClose: 1500,
@@ -320,6 +337,7 @@ export default function TestPage() {
             <Document
               file={pdfUrl}
               onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={onDocumentLoadError}
               loading=""
               className="pdf-document"
             >

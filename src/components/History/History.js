@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import pdf_icon from "../../assets/images/pdf.png";
 import "../../css/TestPage.css";
 import ReactMarkdown from "react-markdown";
+import { dummyData } from "../../data/dummyData";
+import { parseData } from "../TestPage/DataParser";
 
 // 더미 데이터
 const historyData = [
@@ -12,6 +14,7 @@ const historyData = [
     date: "2024-03-20",
     size: "2.5MB",
     pdfFile: "/sample3.pdf",
+    data: dummyData,
   },
 ];
 
@@ -22,7 +25,16 @@ export default function History() {
 
   const handleViewPdf = (pdf) => {
     setSelectedPdf(pdf);
-    navigate("/test", { state: { pdfFile: pdf.pdfFile } });
+
+    // PDF 데이터를 미리 파싱하여 전달
+    const parsedData = parseData(pdf.data);
+
+    navigate("/test", {
+      state: {
+        pdfFile: pdf.pdfFile,
+        pdfData: parsedData, // 이미 파싱된 데이터 전달
+      },
+    });
   };
 
   const handleDownload = (pdf) => {
