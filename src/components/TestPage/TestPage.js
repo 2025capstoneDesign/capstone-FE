@@ -8,18 +8,27 @@ import "react-toastify/dist/ReactToastify.css";
 import PdfViewer from "./PdfViewer";
 import SummaryPanel from "./SummaryPanel";
 import { useLoading } from "../../context/LoadingContext";
+import { useHistory } from "../../context/HistoryContext";
 
 export default function TestPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { loading, convertedData, pdfFile: contextPdfFile } = useLoading();
+  const { historyData } = useHistory();
   
-  // Use context data or location state data
-  const { pdfFile, pdfData } = location.state && !loading
+  // Always prioritize location state (from history) if it exists
+  // Otherwise use the context data (from conversion)
+  // If neither exists, use the first item from history (dummy data)
+  const { pdfFile, pdfData } = location.state
     ? location.state
+    : convertedData && contextPdfFile
+    ? {
+        pdfFile: contextPdfFile,
+        pdfData: convertedData,
+      }
     : {
-        pdfFile: contextPdfFile || "/sample3.pdf",
-        pdfData: convertedData || null,
+        pdfFile: historyData[0].pdfFile,
+        pdfData: historyData[0].data,
       };
 
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
@@ -27,12 +36,8 @@ export default function TestPage() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Redirect to convert page if loading
-  useEffect(() => {
-    if (loading) {
-      navigate("/convert");
-    }
-  }, [loading, navigate]);
+  // Don't redirect to convert page at all - we want to be able to view files from history while loading
+  // Remove redirect logic
 
   // 전달받은 pdfData가 이미 파싱된 데이터인지 확인하고, 아니면 파싱
   const { summaryData, voiceData } =
@@ -82,10 +87,7 @@ export default function TestPage() {
     goToPage(1);
   }, [goToPage]);
 
-  // If still loading, don't render the page
-  if (loading) {
-    return null;
-  }
+  // Always render the page, even when loading something else
 
   return (
     <div className="app-wrapper">
@@ -94,6 +96,9 @@ export default function TestPage() {
         <div className="action-buttons">
           <button className="convert-btn" onClick={() => navigate("/convert")}>
             다시 변환하기
+          </button>
+          <button className="history-btn mx-2" onClick={() => navigate("/history")}>
+            변환 기록
           </button>
           <button className="download-btn">다운로드</button>
         </div>

@@ -105,6 +105,8 @@ function LoadingSection() {
       {/* Instruction text */}
       <p className="text-center text-gray-500 mt-8">
         변환이 완료되면 자동으로 결과 화면으로 이동합니다.
+        <br />
+        <span className="font-semibold">변환 기록 버튼을 눌러 이전 파일을 확인할 수 있습니다.</span>
       </p>
     </div>
   );

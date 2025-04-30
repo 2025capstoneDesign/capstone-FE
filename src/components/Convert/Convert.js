@@ -6,6 +6,7 @@ import FileUploadSection from "./FileUploadSection";
 import LoadingSection from "./LoadingSection";
 import SummarySection from "./SummarySection";
 import { useLoading } from "../../context/LoadingContext";
+import { useHistory } from "../../context/HistoryContext";
 import { parseData } from "../TestPage/DataParser";
 
 function Convert() {
@@ -23,10 +24,18 @@ function Convert() {
     pdfFile,
     convertedData,
   } = useLoading();
+  
+  const { addToHistory } = useHistory();
 
   // Check if loading is complete (100%) and navigate to result page
   useEffect(() => {
     if (loading === false && progress === 100 && convertedData) {
+      // Add to history before navigating
+      const title = typeof pdfFile === "string" ? pdfFile.split("/").pop() : pdfFile.name;
+      const size = typeof pdfFile === "string" ? "2.5MB" : pdfFile.size;
+      addToHistory(title, pdfFile, convertedData, size);
+      
+      // Navigate to test page with data
       navigate("/test", {
         state: {
           pdfFile: pdfFile,
@@ -34,7 +43,7 @@ function Convert() {
         },
       });
     }
-  }, [loading, progress, convertedData, navigate, pdfFile]);
+  }, [loading, progress, convertedData, navigate, pdfFile, addToHistory]);
 
   // Simulate a fetch call for the mock API
   const fetchMockData = async () => {
@@ -185,7 +194,17 @@ function Convert() {
         <div className="slide-container">
           <div className="slide-header"></div>
           {loading ? (
-            <LoadingSection />
+            <>
+              <LoadingSection />
+              <div className="flex justify-center mt-4">
+                <button 
+                  className="bg-[#5B7F7C] text-white font-bold py-2 px-4 rounded"
+                  onClick={() => navigate("/history")}
+                >
+                  변환 기록 보기
+                </button>
+              </div>
+            </>
           ) : (
             <FileUploadSection
               files={files}
