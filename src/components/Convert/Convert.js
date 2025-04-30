@@ -15,16 +15,23 @@ function Convert() {
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState("ai");
   const [highlightColor, setHighlightColor] = useState("red");
-  const { loading, startLoading, stopLoading, progress, pdfFile, convertedData } = useLoading();
+  const {
+    loading,
+    startLoading,
+    stopLoading,
+    progress,
+    pdfFile,
+    convertedData,
+  } = useLoading();
 
   // Check if loading is complete (100%) and navigate to result page
   useEffect(() => {
     if (loading === false && progress === 100 && convertedData) {
-      navigate("/test", { 
-        state: { 
-          pdfFile: pdfFile, 
-          pdfData: convertedData 
-        }
+      navigate("/test", {
+        state: {
+          pdfFile: pdfFile,
+          pdfData: convertedData,
+        },
       });
     }
   }, [loading, progress, convertedData, navigate, pdfFile]);
@@ -35,7 +42,7 @@ function Convert() {
       // Simulate a delay for the loading process (20 seconds)
       setTimeout(() => {
         // Get dummy data
-        import("../../data/dummyData").then(module => {
+        import("../../data/dummyData").then((module) => {
           const { dummyData } = module;
           const parsedData = parseData(dummyData);
           resolve(parsedData);
@@ -45,17 +52,17 @@ function Convert() {
   };
 
   // Process real API request
-  const processFiles = async (audioFile, pptFile) => {
+  const processFiles = async (audioFile, docFile) => {
     const formData = new FormData();
-    
+
     if (audioFile) {
       formData.append("audio_file", audioFile);
     }
-    
-    if (pptFile) {
-      formData.append("ppt_file", pptFile);
+
+    if (docFile) {
+      formData.append("doc_file", docFile);
     }
-    
+
     // Always add skip_transcription = true
     formData.append("skip_transcription", "true");
 
@@ -108,20 +115,20 @@ function Convert() {
           // Start loading with sample3.pdf
           const pdfFileObj = "/sample3.pdf";
           startLoading([], pdfFileObj);
-          
+
           // Fetch mock data
           const result = await fetchMockData();
-          
+
           // Stop loading with the result
           stopLoading(result);
         } else {
           // Start loading with the first file
           const pdfFileObj = files[0];
           startLoading(files, pdfFileObj);
-          
+
           // Fetch mock data
           const result = await fetchMockData();
-          
+
           // Stop loading with the result
           stopLoading(result);
         }
@@ -133,23 +140,25 @@ function Convert() {
 
         // Categorize files by type
         let audioFile = null;
-        let pptFile = null;
-        
+        let docFile = null;
+
         for (const file of files) {
-          const extension = file.name.split('.').pop().toLowerCase();
-          if (['mp3', 'wav'].includes(extension)) {
+          const extension = file.name.split(".").pop().toLowerCase();
+          if (["mp3", "wav"].includes(extension)) {
             audioFile = file;
-          } else if (['ppt', 'pptx', 'pdf', 'doc', 'docx'].includes(extension)) {
-            pptFile = file;
+          } else if (
+            ["ppt", "pptx", "pdf", "doc", "docx"].includes(extension)
+          ) {
+            docFile = file;
           }
         }
 
         // Start loading with the files
-        startLoading(files, pptFile || files[0]);
-        
+        startLoading(files, docFile || files[0]);
+
         // Process files with the API
         try {
-          const result = await processFiles(audioFile, pptFile);
+          const result = await processFiles(audioFile, docFile);
           stopLoading(result);
         } catch (error) {
           console.error("변환 실패:", error);

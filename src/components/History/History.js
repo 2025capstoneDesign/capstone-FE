@@ -26,7 +26,8 @@ export default function History() {
   const [sortOrder, setSortOrder] = useState("date"); // "date" or "title"
   const [selectedPdf, setSelectedPdf] = useState(null);
   const [historyData, setHistoryData] = useState(initialHistoryData);
-  const { loading, progress, convertedData, pdfFile, uploadedFiles } = useLoading();
+  const { loading, progress, convertedData, pdfFile, uploadedFiles } =
+    useLoading();
 
   // Update history data when a new conversion is completed
   useEffect(() => {
@@ -34,15 +35,17 @@ export default function History() {
       // Create a new history item
       const newItem = {
         id: Date.now(), // Use timestamp as a unique ID
-        title: typeof pdfFile === 'string' ? pdfFile.split('/').pop() : pdfFile.name,
-        date: new Date().toISOString().split('T')[0], // Current date in YYYY-MM-DD format
-        size: typeof pdfFile === 'string' ? '2.5MB' : formatFileSize(pdfFile.size),
+        title:
+          typeof pdfFile === "string" ? pdfFile.split("/").pop() : pdfFile.name,
+        date: new Date().toISOString().split("T")[0], // Current date in YYYY-MM-DD format
+        size:
+          typeof pdfFile === "string" ? "2.5MB" : formatFileSize(pdfFile.size),
         pdfFile: pdfFile,
-        data: convertedData
+        data: convertedData,
       };
 
       // Add to history
-      setHistoryData(prev => [newItem, ...prev]);
+      setHistoryData((prev) => [newItem, ...prev]);
     }
   }, [convertedData, pdfFile, progress, loading]);
 
@@ -58,7 +61,8 @@ export default function History() {
     setSelectedPdf(pdf);
 
     // PDF 데이터를 미리 파싱하여 전달
-    const parsedData = typeof pdf.data === 'object' ? pdf.data : parseData(pdf.data);
+    const parsedData =
+      typeof pdf.data === "object" ? pdf.data : parseData(pdf.data);
 
     navigate("/test", {
       state: {
