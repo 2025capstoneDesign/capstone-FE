@@ -1,18 +1,86 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../css/TestPage.css";
 import FileUploadSection from "./FileUploadSection";
+import LoadingSection from "./LoadingSection";
 import SummarySection from "./SummarySection";
+import { useLoading } from "../../context/LoadingContext";
+import { parseData } from "../TestPage/DataParser";
 
 function Convert() {
   const navigate = useNavigate();
   const [files, setFiles] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState("ai");
   const [highlightColor, setHighlightColor] = useState("red");
+  const { loading, startLoading, stopLoading, progress, pdfFile, convertedData } = useLoading();
+
+  // Check if loading is complete (100%) and navigate to result page
+  useEffect(() => {
+    if (loading === false && progress === 100 && convertedData) {
+      navigate("/test", { 
+        state: { 
+          pdfFile: pdfFile, 
+          pdfData: convertedData 
+        }
+      });
+    }
+  }, [loading, progress, convertedData, navigate, pdfFile]);
+
+  // Simulate a fetch call for the mock API
+  const fetchMockData = async () => {
+    return new Promise((resolve) => {
+      // Simulate a delay for the loading process (20 seconds)
+      setTimeout(() => {
+        // Get dummy data
+        import("../../data/dummyData").then(module => {
+          const { dummyData } = module;
+          const parsedData = parseData(dummyData);
+          resolve(parsedData);
+        });
+      }, 20000);
+    });
+  };
+
+  // Process real API request
+  const processFiles = async (audioFile, pptFile) => {
+    const formData = new FormData();
+    
+    if (audioFile) {
+      formData.append("audio_file", audioFile);
+    }
+    
+    if (pptFile) {
+      formData.append("ppt_file", pptFile);
+    }
+    
+    // Always add skip_transcription = true
+    formData.append("skip_transcription", "true");
+
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/ai/process-lecture`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        // Parse the response data and get only the Concise Summary Notes
+        const data = response.data;
+        const parsedData = parseData(data);
+        return parsedData;
+      }
+    } catch (error) {
+      console.error("API 요청 실패:", error);
+      throw error;
+    }
+  };
 
   const handleFileUpload = async (event) => {
     const uploadedFiles = Array.from(event.target.files);
@@ -32,47 +100,67 @@ function Convert() {
   }, []);
 
   const handleConvert = async () => {
-    setIsLoading(true);
     setError("");
 
     try {
       if (process.env.REACT_APP_API_URL === "mock") {
         if (files.length === 0) {
-          navigate("/test", { state: { pdfFile: "/sample3.pdf" } });
+          // Start loading with sample3.pdf
+          const pdfFileObj = "/sample3.pdf";
+          startLoading([], pdfFileObj);
+          
+          // Fetch mock data
+          const result = await fetchMockData();
+          
+          // Stop loading with the result
+          stopLoading(result);
         } else {
-          navigate("/test", { state: { pdfFile: files[0] } });
+          // Start loading with the first file
+          const pdfFileObj = files[0];
+          startLoading(files, pdfFileObj);
+          
+          // Fetch mock data
+          const result = await fetchMockData();
+          
+          // Stop loading with the result
+          stopLoading(result);
         }
       } else {
         if (files.length === 0) {
           window.alert("파일을 업로드해주세요.");
-          setIsLoading(false);
           return;
         }
 
-        const formData = new FormData();
-        const fileToUpload = files[0];
-        formData.append("file", fileToUpload);
-
-        const response = await axios.post(
-          `${process.env.REACT_APP_API_URL}/api/lecture/upload-lecture-file`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
+        // Categorize files by type
+        let audioFile = null;
+        let pptFile = null;
+        
+        for (const file of files) {
+          const extension = file.name.split('.').pop().toLowerCase();
+          if (['mp3', 'wav'].includes(extension)) {
+            audioFile = file;
+          } else if (['ppt', 'pptx', 'pdf', 'doc', 'docx'].includes(extension)) {
+            pptFile = file;
           }
-        );
+        }
 
-        if (response.status === 200) {
-          window.alert("파일이 성공적으로 업로드되었습니다.");
-          navigate("/test", { state: { pdfFile: fileToUpload } });
+        // Start loading with the files
+        startLoading(files, pptFile || files[0]);
+        
+        // Process files with the API
+        try {
+          const result = await processFiles(audioFile, pptFile);
+          stopLoading(result);
+        } catch (error) {
+          console.error("변환 실패:", error);
+          window.alert("파일 변환에 실패했습니다. 다시 시도해주세요.");
+          stopLoading(null);
         }
       }
     } catch (error) {
-      console.error("업로드 실패:", error);
-      window.alert("파일 업로드에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setIsLoading(false);
+      console.error("변환 실패:", error);
+      window.alert("파일 변환에 실패했습니다. 다시 시도해주세요.");
+      stopLoading(null);
     }
   };
 
@@ -87,14 +175,18 @@ function Convert() {
       <div className="main-content mx-[25px]">
         <div className="slide-container">
           <div className="slide-header"></div>
-          <FileUploadSection
-            files={files}
-            fileInputRef={fileInputRef}
-            handleFileUpload={handleFileUpload}
-            handleDelete={handleDelete}
-            handleConvert={handleConvert}
-            isLoading={isLoading}
-          />
+          {loading ? (
+            <LoadingSection />
+          ) : (
+            <FileUploadSection
+              files={files}
+              fileInputRef={fileInputRef}
+              handleFileUpload={handleFileUpload}
+              handleDelete={handleDelete}
+              handleConvert={handleConvert}
+              isLoading={loading}
+            />
+          )}
         </div>
 
         <SummarySection

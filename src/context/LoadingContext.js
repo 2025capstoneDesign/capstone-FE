@@ -1,0 +1,93 @@
+import React, { createContext, useState, useContext, useEffect } from 'react';
+
+const LoadingContext = createContext();
+
+export function LoadingProvider({ children }) {
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentStage, setCurrentStage] = useState(0); // 0: 강의 듣는 중, 1: 요약 정리 중, 2: 필기 생성 중
+  const [convertedData, setConvertedData] = useState(null);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [pdfFile, setPdfFile] = useState(null);
+
+  // Reset progress when loading starts
+  useEffect(() => {
+    if (loading) {
+      setProgress(0);
+      setCurrentStage(0);
+    }
+  }, [loading]);
+
+  // Simulate progress when in loading state
+  useEffect(() => {
+    if (!loading) return;
+
+    let timer;
+    let intervalTime = 200; // Update every 200ms
+
+    const simulateProgress = () => {
+      setProgress((prev) => {
+        // Calculate next progress value
+        let next = prev;
+        
+        // First stage: 0-30%
+        if (prev < 30) {
+          next = Math.min(30, prev + 0.5);
+          if (next >= 30) setCurrentStage(1);
+        } 
+        // Second stage: 30-60%
+        else if (prev < 60) {
+          next = Math.min(60, prev + 0.5);
+          if (next >= 60) setCurrentStage(2);
+        } 
+        // Third stage: 60-90%
+        else if (prev < 90) {
+          next = Math.min(90, prev + 0.5);
+        }
+        // Stop at 90% and wait for fetch to complete
+        
+        return next;
+      });
+    };
+
+    timer = setInterval(simulateProgress, intervalTime);
+
+    return () => clearInterval(timer);
+  }, [loading]);
+
+  const startLoading = (files, pdf) => {
+    setLoading(true);
+    setUploadedFiles(files);
+    setPdfFile(pdf);
+  };
+
+  const stopLoading = (data = null) => {
+    setProgress(100);
+    setLoading(false);
+    if (data) {
+      setConvertedData(data);
+    }
+  };
+
+  return (
+    <LoadingContext.Provider
+      value={{
+        loading,
+        progress,
+        currentStage,
+        convertedData,
+        uploadedFiles,
+        pdfFile,
+        startLoading,
+        stopLoading,
+        setProgress
+      }}
+    >
+      {children}
+    </LoadingContext.Provider>
+  );
+}
+
+export function useLoading() {
+  return useContext(LoadingContext);
+}

@@ -7,19 +7,32 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PdfViewer from "./PdfViewer";
 import SummaryPanel from "./SummaryPanel";
+import { useLoading } from "../../context/LoadingContext";
 
 export default function TestPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { pdfFile, pdfData } = location.state || {
-    pdfFile: "/sample3.pdf",
-    pdfData: null,
-  };
+  const { loading, convertedData, pdfFile: contextPdfFile } = useLoading();
+  
+  // Use context data or location state data
+  const { pdfFile, pdfData } = location.state && !loading
+    ? location.state
+    : {
+        pdfFile: contextPdfFile || "/sample3.pdf",
+        pdfData: convertedData || null,
+      };
 
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Redirect to convert page if loading
+  useEffect(() => {
+    if (loading) {
+      navigate("/convert");
+    }
+  }, [loading, navigate]);
 
   // 전달받은 pdfData가 이미 파싱된 데이터인지 확인하고, 아니면 파싱
   const { summaryData, voiceData } =
@@ -68,6 +81,11 @@ export default function TestPage() {
   const goNextPage = useCallback(() => {
     goToPage(1);
   }, [goToPage]);
+
+  // If still loading, don't render the page
+  if (loading) {
+    return null;
+  }
 
   return (
     <div className="app-wrapper">
