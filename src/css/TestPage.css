@@ -605,3 +605,83 @@ body {
     justify-content: space-between;
   }
 }
+
+/* History 페이지 스타일 */
+.sort-options {
+  display: flex;
+  gap: 10px;
+}
+
+.sort-btn {
+  padding: 8px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sort-btn.active {
+  background-color: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.view-btn {
+  padding: 8px 16px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.view-btn:hover {
+  background-color: #333;
+}
+
+.manual-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  padding: 15px 20px;
+}
+
+.manual-content {
+  padding: 20px;
+  line-height: 1.6;
+}
+
+.manual-content h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.manual-content h2 {
+  font-size: 1.4rem;
+  margin: 1.5rem 0 1rem;
+  color: #333;
+}
+
+.manual-content h3 {
+  font-size: 1.2rem;
+  margin: 1rem 0 0.5rem;
+  color: #333;
+}
+
+.manual-content p {
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+.manual-content ul {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.manual-content li {
+  margin-bottom: 0.5rem;
+  color: #555;
+}

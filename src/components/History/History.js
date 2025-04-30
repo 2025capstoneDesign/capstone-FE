@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import pdf_icon from "../../assets/images/pdf.png";
 import "../../css/TestPage.css";
@@ -13,26 +13,9 @@ const historyData = [
     size: "2.5MB",
     pdfFile: "/sample3.pdf",
   },
-  {
-    id: 2,
-    title: "lecture1.pdf",
-    date: "2024-03-19",
-    size: "3.1MB",
-    pdfFile: "/lecture1.pdf",
-  },
-  {
-    id: 3,
-    title: "presentation.pdf",
-    date: "2024-03-18",
-    size: "1.8MB",
-    pdfFile: "/presentation.pdf",
-  },
 ];
 
 export default function History() {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
   const navigate = useNavigate();
   const [sortOrder, setSortOrder] = useState("date"); // "date" or "title"
   const [selectedPdf, setSelectedPdf] = useState(null);
@@ -60,8 +43,8 @@ export default function History() {
       <div className="sub-header">
         <h1 className="page-title">변환 기록</h1>
         <div className="action-buttons">
-          <button className="convert-btn" onClick={() => navigate("/convert")}>
-            새로 변환하기
+          <button className="convert-btn" onClick={() => navigate("/")}>
+            홈으로
           </button>
         </div>
       </div>
