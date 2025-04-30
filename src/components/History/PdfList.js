@@ -12,16 +12,16 @@ export default function PdfList({
   handleDownload,
   loading,
   progress,
-  uploadedFiles
+  uploadedFiles,
 }) {
   // Helper function to get file icon
   const getFileIcon = (fileName) => {
     if (!fileName) return pdf_icon;
-    const extension = (typeof fileName === 'string' ? fileName : fileName.name)
-      .split('.')
+    const extension = (typeof fileName === "string" ? fileName : fileName.name)
+      .split(".")
       .pop()
       .toLowerCase();
-      
+
     switch (extension) {
       case "pdf":
         return pdf_icon;
@@ -79,34 +79,49 @@ export default function PdfList({
         {/* Loading file in progress */}
         {loading && uploadedFiles && uploadedFiles.length > 0 && (
           <div className="flex flex-col p-4 rounded-lg bg-white border border-gray-200 shadow-sm mb-3 transition-all">
-            {uploadedFiles.map((file, index) => (
-              <div key={`loading-${index}`} className="flex items-center mb-2">
-                <img 
-                  src={getFileIcon(file)} 
-                  alt="파일 아이콘" 
-                  className="w-10 h-10 mr-4" 
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="text-lg font-medium text-gray-800">
-                    {file.name}
+            {uploadedFiles
+              .filter((file) => {
+                const extension = (typeof file === "string" ? file : file.name)
+                  .split(".")
+                  .pop()
+                  .toLowerCase();
+                return ["pdf", "ppt", "pptx", "doc", "docx"].includes(
+                  extension
+                );
+              })
+              .slice(0, 1)
+              .map((file, index) => (
+                <div
+                  key={`loading-${index}`}
+                  className="flex items-center mb-2"
+                >
+                  <img
+                    src={getFileIcon(file)}
+                    alt="파일 아이콘"
+                    className="w-10 h-10 mr-4"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-lg font-medium text-gray-800">
+                      {file.name}
+                    </div>
+                    <div className="text-sm text-gray-500 mb-2">
+                      {getProgressStage(progress)} | 크기:{" "}
+                      {formatFileSize(file.size)}
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div
+                        className="bg-[#5B7F7C] h-2.5 rounded-full transition-all duration-300"
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-500 mb-2">
-                    {getProgressStage(progress)} | 크기: {formatFileSize(file.size)}
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div 
-                      className="bg-[#5B7F7C] h-2.5 rounded-full transition-all duration-300"
-                      style={{ width: `${progress}%` }}
-                    ></div>
+                  <div className="flex gap-2">
+                    <button className="view-btn opacity-50 cursor-not-allowed">
+                      변환 중
+                    </button>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button className="view-btn opacity-50 cursor-not-allowed">
-                    변환 중
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         )}
 
@@ -116,10 +131,10 @@ export default function PdfList({
             key={pdf.id}
             className="flex items-center p-4 rounded-lg bg-white border border-gray-200 shadow-sm mb-3 transition-all hover:shadow-md"
           >
-            <img 
-              src={getFileIcon(pdf.pdfFile)} 
-              alt="파일 아이콘" 
-              className="w-10 h-10 mr-4" 
+            <img
+              src={getFileIcon(pdf.pdfFile)}
+              alt="파일 아이콘"
+              className="w-10 h-10 mr-4"
             />
             <div className="flex-1 min-w-0">
               <div className="text-lg font-medium text-gray-800">

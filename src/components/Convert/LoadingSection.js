@@ -5,11 +5,7 @@ function LoadingSection() {
   const { progress, currentStage } = useLoading();
 
   // Stage labels
-  const stageLabels = [
-    "강의 듣는 중...",
-    "요약 정리 중...",
-    "필기 생성 중..."
-  ];
+  const stageLabels = ["강의 듣는 중...", "요약 정리 중...", "필기 생성 중..."];
 
   // Calculate which segments are active
   const isStage1Active = progress > 0;
@@ -25,63 +21,81 @@ function LoadingSection() {
       {/* Progress container */}
       <div className="w-full px-4 py-10">
         {/* Progress bar container */}
-        <div className="relative w-full h-4 bg-gray-200 rounded-full mb-8">
+        <div className="relative w-full h-2 bg-gray-200 rounded-full mb-8">
           {/* Actual progress bar */}
-          <div 
-            className="absolute top-0 left-0 h-4 bg-[#5B7F7C] rounded-full transition-all duration-300"
+          <div
+            className="absolute top-0 left-0 h-2 bg-[#5B7F7C] rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           ></div>
-          
+
           {/* Progress percentage */}
           <div className="absolute top-5 right-0 text-[#5B7F7C] font-semibold">
             {Math.round(progress)}%
           </div>
-          
+
           {/* Stage dividers */}
-          <div className="absolute top-0 left-[30%] w-0.5 h-4 bg-gray-400 rounded"></div>
-          <div className="absolute top-0 left-[60%] w-0.5 h-4 bg-gray-400 rounded"></div>
+          <div className="absolute top-0 left-[30%] w-0.5 h-2 bg-gray-400 rounded"></div>
+          <div className="absolute top-0 left-[60%] w-0.5 h-2 bg-gray-400 rounded"></div>
         </div>
 
         {/* Stages */}
         <div className="flex justify-between mt-12">
           {/* Stage 1 */}
           <div className="flex flex-col items-center w-1/3 px-2">
-            <div className={`mb-4 text-center font-semibold ${currentStage === 0 ? 'text-[#5B7F7C]' : 'text-gray-500'}`}>
+            <div
+              className={`mb-4 text-center font-semibold ${
+                currentStage === 0 ? "text-[#5B7F7C]" : "text-gray-500"
+              }`}
+            >
               {stageLabels[0]}
             </div>
             <div className="w-full flex justify-center">
-              <img 
-                src="/loading_listen.gif" 
-                alt="강의 듣는 중" 
-                className={`w-24 h-24 ${isStage1Active ? 'opacity-100' : 'opacity-50'}`}
+              <img
+                src="/loading_listen.gif"
+                alt="강의 듣는 중"
+                className={`w-24 h-24 ${
+                  isStage1Active ? "opacity-100" : "opacity-50"
+                }`}
               />
             </div>
           </div>
 
           {/* Stage 2 */}
           <div className="flex flex-col items-center w-1/3 px-2">
-            <div className={`mb-4 text-center font-semibold ${currentStage === 1 ? 'text-[#5B7F7C]' : 'text-gray-500'}`}>
+            <div
+              className={`mb-4 text-center font-semibold ${
+                currentStage === 1 ? "text-[#5B7F7C]" : "text-gray-500"
+              }`}
+            >
               {stageLabels[1]}
             </div>
             <div className="w-full flex justify-center">
-              <img 
-                src="/loading_listen.gif" 
-                alt="요약 정리 중" 
-                className={`w-24 h-24 ${isStage2Active ? 'opacity-100' : 'opacity-50'}`}
+              <img
+                src="/loading_listen.gif"
+                alt="요약 정리 중"
+                className={`w-24 h-24 ${
+                  isStage2Active ? "opacity-100" : "opacity-50"
+                }`}
               />
             </div>
           </div>
 
           {/* Stage 3 */}
           <div className="flex flex-col items-center w-1/3 px-2">
-            <div className={`mb-4 text-center font-semibold ${currentStage === 2 ? 'text-[#5B7F7C]' : 'text-gray-500'}`}>
+            <div
+              className={`mb-4 text-center font-semibold ${
+                currentStage === 2 ? "text-[#5B7F7C]" : "text-gray-500"
+              }`}
+            >
               {stageLabels[2]}
             </div>
             <div className="w-full flex justify-center">
-              <img 
-                src="/loading_listen.gif" 
-                alt="필기 생성 중" 
-                className={`w-24 h-24 ${isStage3Active ? 'opacity-100' : 'opacity-50'}`}
+              <img
+                src="/loading_listen.gif"
+                alt="필기 생성 중"
+                className={`w-24 h-24 ${
+                  isStage3Active ? "opacity-100" : "opacity-50"
+                }`}
               />
             </div>
           </div>
