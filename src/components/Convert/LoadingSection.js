@@ -46,7 +46,7 @@ function LoadingSection() {
           <div className="flex flex-col items-center w-1/3 px-2">
             <div
               className={`mb-4 text-center font-semibold ${
-                currentStage === 0 ? "text-[#5B7F7C]" : "text-gray-500"
+                currentStage === 0 ? "text-[#5B7F7C]" : "text-gray-300"
               }`}
             >
               {stageLabels[0]}
@@ -66,7 +66,7 @@ function LoadingSection() {
           <div className="flex flex-col items-center w-1/3 px-2">
             <div
               className={`mb-4 text-center font-semibold ${
-                currentStage === 1 ? "text-[#5B7F7C]" : "text-gray-500"
+                currentStage === 1 ? "text-[#5B7F7C]" : "text-gray-300"
               }`}
             >
               {stageLabels[1]}
@@ -86,7 +86,7 @@ function LoadingSection() {
           <div className="flex flex-col items-center w-1/3 px-2">
             <div
               className={`mb-4 text-center font-semibold ${
-                currentStage === 2 ? "text-[#5B7F7C]" : "text-gray-500"
+                currentStage === 2 ? "text-[#5B7F7C]" : "text-gray-300"
               }`}
             >
               {stageLabels[2]}
