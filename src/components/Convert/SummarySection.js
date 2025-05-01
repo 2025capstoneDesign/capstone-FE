@@ -108,7 +108,7 @@ function SummarySection({
               {(() => {
                 const commonContent = (
                   <>
-                    <span className="text-[1.7rem] font-semibold">필기요정 사용 방법</span>
+                    <span className="text-[1.4rem] font-semibold">필기요정 사용 방법</span>
                     <br/>
                     <br/>
                     🔹 왼쪽 업로드 영역에 강의록 파일과 음성 파일을 업로드해주세요.
@@ -117,7 +117,7 @@ function SummarySection({
                     <br/>
                     <br/>
                     <br/>
-                    <span className="text-[1.7rem] font-semibold">다양한 요약 방식 제공</span>
+                    <span className="text-[1.4rem] font-semibold">다양한 요약 방식 제공</span>
                     <br/>
                     <br/>
                     🔹 오른쪽 상단의 드롭버튼으로 요약 방식을 선택할 수 있습니다. 
@@ -132,7 +132,7 @@ function SummarySection({
                     {noteType === "Concise Summary Notes" ? (
                       <>
                         {commonContent}
-                        <span className="text-[1.3rem]">[간결한 요약]</span>
+                        <span className="text-[1.2rem]">[간결한 요약]</span>
                         <br/>
                         🔹 전체 내용을 간단하고 명확하게 요약한 내용을 줄글 형식으로 확인할 수 있습니다.
                         <br/>
@@ -141,7 +141,7 @@ function SummarySection({
                     ) : noteType === "Bullet Point Notes" ? (
                       <>
                         {commonContent}
-                        <span className="text-[1.3rem]">[불릿포인트]</span>
+                        <span className="text-[1.2rem]">[불릿포인트]</span>
                         <br/>
                         🔹 핵심 내용을 포인트 형태의 독립적인 문장 형식으로 확인할 수 있습니다.
                         <br/>
@@ -150,7 +150,7 @@ function SummarySection({
                     ) : (
                       <>
                         {commonContent}
-                        <span className="text-[1.3rem]">[키워드 요약]</span>
+                        <span className="text-[1.2rem]">[키워드 요약]</span>
                         <br/>
                         🔹 개념 중심으로 핵심 용어와 정의를 확인할 수 있습니다.
                         <br/>
@@ -165,7 +165,7 @@ function SummarySection({
         ) : (
           <div className="voice-content">
             <p className="text-[1.1rem] text-gray-700">
-              <span className="text-[1.7rem] font-semibold">필기요정 사용 방법</span>
+              <span className="text-[1.4rem] font-semibold">필기요정 사용 방법</span>
               <br/>
               <br/>
               🔹 왼쪽 업로드 영역에 강의록 파일과 음성 파일을 업로드해주세요.
@@ -175,7 +175,7 @@ function SummarySection({
             <p className="text-[1.1rem] text-gray-700">
             <br/>
             <br/>
-            <span className="text-[1.7rem] font-semibold">하이라이트 기능</span><br/>
+            <span className="text-[1.4rem] font-semibold">하이라이트 기능</span><br/>
               <span
                 className={`segment-text important ${highlightColor}`}
                 onMouseEnter={(e) => {
