@@ -261,34 +261,45 @@ export default function SummaryPanel({
         ) : (
           <div className="note-type-selector visible">
             <div className="dropdown-menu">
-              <button onClick={(e) => {
-                e.stopPropagation(); // 이벤트 버블링 방지
-                setIsOpen(!isOpen);
-              }}>
-                {noteType === "Concise Summary Notes" ? "간결한 요약" : 
-                 noteType === "Bullet Point Notes" ? "불릿 포인트" : "키워드 요약"}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // 이벤트 버블링 방지
+                  setIsOpen(!isOpen);
+                }}
+              >
+                {noteType === "Concise Summary Notes"
+                  ? "서술형 필기"
+                  : noteType === "Bullet Point Notes"
+                  ? "개조식 필기"
+                  : "키워드 필기"}
               </button>
               <ul
                 ref={dropDownRef}
                 className={`menu ${isOpen ? "active" : ""}`}
               >
-                <li onClick={(e) => {
-                  e.stopPropagation();
-                  handleNoteTypeChange("Concise Summary Notes");
-                }}>
-                  간결한 요약
+                <li
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNoteTypeChange("Concise Summary Notes");
+                  }}
+                >
+                  서술형 필기
                 </li>
-                <li onClick={(e) => {
-                  e.stopPropagation();
-                  handleNoteTypeChange("Bullet Point Notes");
-                }}>
-                  불릿 포인트
+                <li
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNoteTypeChange("Bullet Point Notes");
+                  }}
+                >
+                  개조식 필기
                 </li>
-                <li onClick={(e) => {
-                  e.stopPropagation();
-                  handleNoteTypeChange("Keyword Notes");
-                }}>
-                  키워드 요약
+                <li
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNoteTypeChange("Keyword Notes");
+                  }}
+                >
+                  키워드 필기
                 </li>
               </ul>
             </div>
@@ -299,9 +310,14 @@ export default function SummaryPanel({
       <div className="content-container" ref={contentContainerRef}>
         {activeTab === "ai" ? (
           <div className="ai-content">
+            {console.log(
+              "개조식 필기 데이터:",
+              summaryData[pageNumber] && summaryData[pageNumber][noteType]
+            )}
+
             <ReactMarkdown>
-              {summaryData[pageNumber] && summaryData[pageNumber][noteType] 
-                ? summaryData[pageNumber][noteType] 
+              {summaryData[pageNumber] && summaryData[pageNumber][noteType]
+                ? summaryData[pageNumber][noteType]
                 : "해당 페이지의 요약 내용이 없습니다."}
             </ReactMarkdown>
           </div>
