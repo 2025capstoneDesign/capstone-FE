@@ -1,5 +1,5 @@
 import ReactMarkdown from "react-markdown";
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function SummaryPanel({
@@ -202,6 +202,14 @@ export default function SummaryPanel({
     });
   };
 
+  // AI 필기 유형 상태 관리
+  const [noteType, setNoteType] = useState("Concise Summary Notes");
+
+  // AI 필기 드롭다운 표시 관리
+  const handleNoteTypeChange = (event) => {
+    setNoteType(event.target.value);
+  };
+
   return (
     <div className="summary-container">
       <div className="tab-container content-tabs">
@@ -220,40 +228,49 @@ export default function SummaryPanel({
           </button>
         </div>
 
-        <div
-          className={`color-selector ${
-            activeTab === "voice" ? "visible" : "hidden"
-          }`}
-        >
-          <button
-            className={`color-btn red ${
-              highlightColor === "red" ? "selected" : ""
-            }`}
-            onClick={() => setHighlightColor("red")}
-            aria-label="빨강색 강조"
-          />
-          <button
-            className={`color-btn blue ${
-              highlightColor === "blue" ? "selected" : ""
-            }`}
-            onClick={() => setHighlightColor("blue")}
-            aria-label="파랑색 강조"
-          />
-          <button
-            className={`color-btn green ${
-              highlightColor === "green" ? "selected" : ""
-            }`}
-            onClick={() => setHighlightColor("green")}
-            aria-label="초록색 강조"
-          />
-        </div>
+        {/* 탭에 따라 다른 컨트롤 표시 */}
+        {activeTab === "voice" ? (
+          <div className="color-selector visible">
+            <button
+              className={`color-btn red ${
+                highlightColor === "red" ? "selected" : ""
+              }`}
+              onClick={() => setHighlightColor("red")}
+              aria-label="빨강색 강조"
+            />
+            <button
+              className={`color-btn blue ${
+                highlightColor === "blue" ? "selected" : ""
+              }`}
+              onClick={() => setHighlightColor("blue")}
+              aria-label="파랑색 강조"
+            />
+            <button
+              className={`color-btn green ${
+                highlightColor === "green" ? "selected" : ""
+              }`}
+              onClick={() => setHighlightColor("green")}
+              aria-label="초록색 강조"
+            />
+          </div>
+        ) : (
+          <div className="note-type-selector visible">
+            <select value={noteType} onChange={handleNoteTypeChange} className="note-type-dropdown">
+              <option value="Concise Summary Notes">간결한 요약</option>
+              <option value="Bullet Point Notes">불릿 포인트</option>
+              <option value="Keyword Notes">키워드 요약</option>
+            </select>
+          </div>
+        )}
       </div>
 
       <div className="content-container" ref={contentContainerRef}>
         {activeTab === "ai" ? (
           <div className="ai-content">
             <ReactMarkdown>
-              {summaryData[pageNumber] || "해당 페이지의 요약 내용이 없습니다."}
+              {summaryData[pageNumber] && summaryData[pageNumber][noteType] 
+                ? summaryData[pageNumber][noteType] 
+                : "해당 페이지의 요약 내용이 없습니다."}
             </ReactMarkdown>
           </div>
         ) : (

@@ -27,8 +27,13 @@ export const parseData = (data) => {
       ? parseInt(pageNumberFromKey[0])
       : index + 1;
 
-    // summaryData에 "Concise Summary Notes" 추가
-    summaryData[pageNumber] = slideData["Concise Summary Notes"] || "";
+    // summaryData에 모든 요약 유형 추가
+    summaryData[pageNumber] = {
+      "Concise Summary Notes": slideData["Concise Summary Notes"] || "",
+      "Bullet Point Notes": slideData["Bullet Point Notes"] || "",
+      "Keyword Notes": slideData["Keyword Notes"] || "",
+      "Chart/Table Summary": slideData["Chart/Table Summary"] || ""
+    };
 
     // voiceData에 세그먼트 데이터 추가
     if (slideData.Segments && typeof slideData.Segments === "object") {
