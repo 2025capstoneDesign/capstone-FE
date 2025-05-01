@@ -202,6 +202,11 @@ function Convert() {
     <div className="app-wrapper">
       <div className="sub-header">
         <h2 className="page-title">강의록 변환</h2>
+        <div className="action-buttons">
+          <button className="convert-btn" onClick={() => navigate("/")}>
+            홈으로
+          </button>
+        </div>
       </div>
 
       {error && <div className="text-red-500 mx-[5%] my-[0.5rem]">{error}</div>}
