@@ -210,17 +210,7 @@ function Convert() {
         <div className="slide-container">
           <div className="slide-header"></div>
           {loading ? (
-            <>
-              <LoadingSection />
-              <div className="flex justify-center mt-2">
-                <button
-                  className="bg-[#5B7F7C] text-white font-bold py-2 px-4 rounded"
-                  onClick={() => navigate("/history")}
-                >
-                  변환 기록 보기
-                </button>
-              </div>
-            </>
+            <LoadingSection />
           ) : (
             <FileUploadSection
               files={files}

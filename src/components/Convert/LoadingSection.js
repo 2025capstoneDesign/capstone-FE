@@ -2,9 +2,11 @@
 
 import React from "react";
 import { useLoading } from "../../context/LoadingContext";
+import { useNavigate } from "react-router-dom";
 
 function LoadingSection() {
   const { progress, currentStage } = useLoading();
+  const navigate = useNavigate();
 
   // Stage labels
   const stageLabels = ["강의 듣는 중...", "요약 정리 중...", "필기 생성 중..."];
@@ -105,13 +107,22 @@ function LoadingSection() {
       </div>
 
       {/* Instruction text */}
-      <p className="text-center text-gray-500 mt-8">
+      <p className="text-center text-gray-500 mt-4">
         변환이 완료되면 자동으로 결과 화면으로 이동합니다.
         <br />
         <span className="font-semibold">
           변환 기록 버튼을 눌러 이전 파일을 확인할 수 있습니다.
         </span>
       </p>
+
+      <div className="flex justify-center mt-4">
+        <button
+          className="bg-[#5B7F7C] text-white font-bold py-2 px-4 rounded-lg my-5"
+          onClick={() => navigate("/history")}
+        >
+          변환 기록 보기
+        </button>
+      </div>
     </div>
   );
 }
