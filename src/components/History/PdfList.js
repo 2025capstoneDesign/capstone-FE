@@ -110,17 +110,12 @@ export default function PdfList({
                       {getProgressStage(progress)} | 크기:{" "}
                       {formatFileSize(file.size)}
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="max-w-[200px] bg-gray-200 rounded-full h-2.5">
                       <div
                         className="bg-[#5B7F7C] h-2.5 rounded-full transition-all duration-300"
                         style={{ width: `${progress}%` }}
                       ></div>
                     </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="view-btn opacity-50 cursor-not-allowed">
-                      변환 중
-                    </button>
                   </div>
                 </div>
               ))}

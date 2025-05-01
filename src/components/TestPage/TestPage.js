@@ -15,7 +15,7 @@ export default function TestPage() {
   const navigate = useNavigate();
   const { loading, convertedData, pdfFile: contextPdfFile } = useLoading();
   const { historyData } = useHistory();
-  
+
   // Always prioritize location state (from history) if it exists
   // Otherwise use the context data (from conversion)
   // If neither exists, use the first item from history (dummy data)
@@ -96,9 +96,6 @@ export default function TestPage() {
         <div className="action-buttons">
           <button className="convert-btn" onClick={() => navigate("/convert")}>
             다시 변환하기
-          </button>
-          <button className="history-btn mx-2" onClick={() => navigate("/history")}>
-            변환 기록
           </button>
           <button className="download-btn">다운로드</button>
         </div>
