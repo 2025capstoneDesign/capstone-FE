@@ -32,7 +32,7 @@ export const parseData = (data) => {
       "Concise Summary Notes": slideData["Concise Summary Notes"] || "",
       "Bullet Point Notes": slideData["Bullet Point Notes"] || "",
       "Keyword Notes": slideData["Keyword Notes"] || "",
-      "Chart/Table Summary": slideData["Chart/Table Summary"] || ""
+      "Chart/Table Summary": slideData["Chart/Table Summary"] || "",
     };
 
     // voiceData에 세그먼트 데이터 추가
