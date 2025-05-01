@@ -1,6 +1,8 @@
 import ReactMarkdown from "react-markdown";
 import { useRef, useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import useDetectClose from "../../hooks/useDetectClose";
+import "../../css/Dropdown.css";
 
 export default function SummaryPanel({
   activeTab,
@@ -204,10 +206,13 @@ export default function SummaryPanel({
 
   // AI 필기 유형 상태 관리
   const [noteType, setNoteType] = useState("Concise Summary Notes");
+  const dropDownRef = useRef(null);
+  const [isOpen, setIsOpen] = useDetectClose(dropDownRef, false);
 
-  // AI 필기 드롭다운 표시 관리
-  const handleNoteTypeChange = (event) => {
-    setNoteType(event.target.value);
+  // AI 필기 유형 변경 핸들러
+  const handleNoteTypeChange = (type) => {
+    setNoteType(type);
+    setIsOpen(false);
   };
 
   return (
@@ -255,11 +260,38 @@ export default function SummaryPanel({
           </div>
         ) : (
           <div className="note-type-selector visible">
-            <select value={noteType} onChange={handleNoteTypeChange} className="note-type-dropdown">
-              <option value="Concise Summary Notes">간결한 요약</option>
-              <option value="Bullet Point Notes">불릿 포인트</option>
-              <option value="Keyword Notes">키워드 요약</option>
-            </select>
+            <div className="dropdown-menu">
+              <button onClick={(e) => {
+                e.stopPropagation(); // 이벤트 버블링 방지
+                setIsOpen(!isOpen);
+              }}>
+                {noteType === "Concise Summary Notes" ? "간결한 요약" : 
+                 noteType === "Bullet Point Notes" ? "불릿 포인트" : "키워드 요약"}
+              </button>
+              <ul
+                ref={dropDownRef}
+                className={`menu ${isOpen ? "active" : ""}`}
+              >
+                <li onClick={(e) => {
+                  e.stopPropagation();
+                  handleNoteTypeChange("Concise Summary Notes");
+                }}>
+                  간결한 요약
+                </li>
+                <li onClick={(e) => {
+                  e.stopPropagation();
+                  handleNoteTypeChange("Bullet Point Notes");
+                }}>
+                  불릿 포인트
+                </li>
+                <li onClick={(e) => {
+                  e.stopPropagation();
+                  handleNoteTypeChange("Keyword Notes");
+                }}>
+                  키워드 요약
+                </li>
+              </ul>
+            </div>
           </div>
         )}
       </div>
