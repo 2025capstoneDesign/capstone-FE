@@ -28,15 +28,28 @@ function Convert() {
   } = useLoading();
 
   const { addToHistory } = useHistory();
+  const hasAddedToHistory = useRef(false);
 
   // Check if loading is complete (100%) and navigate to result page
   useEffect(() => {
-    if (loading === false && progress === 100 && convertedData) {
+    if (
+      loading === false &&
+      progress === 100 &&
+      convertedData &&
+      !hasAddedToHistory.current
+    ) {
+      hasAddedToHistory.current = true;
       // Add to history before navigating
       const title =
         typeof pdfFile === "string" ? pdfFile.split("/").pop() : pdfFile.name;
       const size = typeof pdfFile === "string" ? "2.5MB" : pdfFile.size;
       addToHistory(title, pdfFile, convertedData, size);
+      console.log("Convert - 변환 완료 후 히스토리에 추가:", {
+        title,
+        pdfFile,
+        convertedData,
+        size,
+      });
 
       // 테스트 페이지로 이동
       navigate("/test", {
