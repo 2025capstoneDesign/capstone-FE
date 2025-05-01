@@ -1,5 +1,3 @@
-/* /src/styles/TestPage.css */
-
 /* 기본 리셋 및 전체 레이아웃 */
 * {
   margin: 0;
@@ -298,21 +296,18 @@ body {
 }
 
 /* 색상 선택 버튼 스타일 */
-.color-selector,
-.note-type-selector {
+.color-selector {
   display: flex;
   gap: 10px;
   transition: opacity 0.3s;
 }
 
-.color-selector.visible,
-.note-type-selector.visible {
+.color-selector.visible {
   opacity: 1;
   visibility: visible;
 }
 
-.color-selector.hidden,
-.note-type-selector.hidden {
+.color-selector.hidden {
   opacity: 0;
   visibility: hidden;
 }
@@ -345,55 +340,6 @@ body {
 
 .color-btn.green {
   background-color: #bababa;
-}
-
-/* 노트 유형 선택 드롭다운 스타일 */
-.note-type-dropdown {
-  padding: 8px 16px;
-  border-radius: 24px;
-  border: none;
-  background-color: white;
-  font-size: 14px;
-  color: #333;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  min-width: 150px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2380cbc4%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px top 50%;
-  background-size: 10px auto;
-  padding-right: 34px;
-  position: relative;
-}
-
-.note-type-dropdown:hover,
-.note-type-dropdown:focus {
-  box-shadow: 0 4px 12px rgba(128, 203, 196, 0.25);
-  outline: none;
-}
-
-/* 드롭다운 옵션 스타일링을 위한 추가 코드 */
-.note-type-dropdown option {
-  background-color: white;
-  color: #333;
-  font-size: 14px;
-  padding: 8px;
-}
-
-.note-type-selector {
-  align-items: center;
-  position: relative;
-  margin-right: 5px;
-}
-
-/* 드롭다운 열릴 때 위치 고정 */
-.note-type-dropdown::-ms-expand {
-  display: none;
 }
 
 /* 콘텐츠 컨테이너 스타일 */
@@ -679,7 +625,7 @@ body {
   border-color: #000;
 }
 
-.view-btn, .history-btn {
+.view-btn {
   padding: 8px 16px;
   background-color: #000;
   color: #fff;
@@ -689,7 +635,7 @@ body {
   transition: background-color 0.2s;
 }
 
-.view-btn:hover, .history-btn:hover {
+.view-btn:hover {
   background-color: #333;
 }
 

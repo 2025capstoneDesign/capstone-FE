@@ -23,9 +23,13 @@ function Home() {
                 className="w-full h-full object-contain"
               />
             </div>
-            <h3 className="text-[1.3rem] md:text-[1.5rem] font-semibold text-center">{title}</h3>
+            <h3 className="text-[1.3rem] md:text-[1.5rem] font-semibold text-center">
+              {title}
+            </h3>
           </div>
-          <p className="text-[1.2rem] mt-[1.2rem] text-gray-500 text-center">{description}</p>
+          <p className="text-[1.2rem] mt-[1.2rem] text-gray-500 text-center">
+            {description}
+          </p>
         </div>
       </div>
     </div>
@@ -35,10 +39,12 @@ function Home() {
     <section className="w-full mt-[4.5rem] px-[1rem] ">
       {/* 메인 배너 */}
       <Banner />
-      
+
       {/* 기능 소개 섹션 */}
       <div className="mt-[4rem] mb-[4rem] w-full max-w-[90rem] mx-auto">
-        <h2 className="text-[2rem] md:text-[2.5rem] font-semibold text-center">기능을 살펴보세요</h2>
+        <h2 className="text-[2rem] md:text-[2.5rem] font-semibold text-center">
+          기능을 살펴보세요
+        </h2>
         <p className="text-gray-400 text-[1.1rem] md:text-[1.3rem] text-center mb-[2rem] md:mb-[3rem] px-[1rem]">
           필기 요정이 제공하는 다양한 기능들을 체험해보세요
         </p>
@@ -53,6 +59,7 @@ function Home() {
             image={history_icon}
             title="히스토리"
             description="이전에 변환했던 강의들을 다시 찾아볼 수 있습니다."
+            onClick={() => navigate("/history")}
           />
           <FeatureCard
             image={setting_icon}
