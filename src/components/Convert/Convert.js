@@ -202,6 +202,11 @@ function Convert() {
     <div className="app-wrapper">
       <div className="sub-header">
         <h2 className="page-title">강의록 변환</h2>
+        <div className="action-buttons">
+          <button className="convert-btn" onClick={() => navigate("/")}>
+            홈으로
+          </button>
+        </div>
       </div>
 
       {error && <div className="text-red-500 mx-[5%] my-[0.5rem]">{error}</div>}
@@ -210,17 +215,7 @@ function Convert() {
         <div className="slide-container">
           <div className="slide-header"></div>
           {loading ? (
-            <>
-              <LoadingSection />
-              <div className="flex justify-center mt-2">
-                <button
-                  className="bg-[#5B7F7C] text-white font-bold py-2 px-4 rounded"
-                  onClick={() => navigate("/history")}
-                >
-                  변환 기록 보기
-                </button>
-              </div>
-            </>
+            <LoadingSection />
           ) : (
             <FileUploadSection
               files={files}
