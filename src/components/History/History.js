@@ -1,8 +1,8 @@
+//
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import pdf_icon from "../../assets/images/pdf.png";
 import "../../css/TestPage.css";
-import ReactMarkdown from "react-markdown";
 import { parseData } from "../TestPage/DataParser";
 import PdfList from "./PdfList";
 import Manual from "./Manual";
@@ -16,13 +16,9 @@ export default function History() {
   const { historyData } = useHistory();
   const { loading, progress, uploadedFiles } = useLoading();
 
-  const formatFileSize = (bytes) => {
-    if (!bytes || bytes === 0) return "0 KB";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-  };
+  useEffect(() => {
+    console.log("History data updated:", historyData);
+  }, [historyData]);
 
   const handleViewPdf = (pdf) => {
     setSelectedPdf(pdf);

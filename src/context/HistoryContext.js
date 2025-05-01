@@ -1,3 +1,5 @@
+//src/context/HistoryContext.js
+
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { dummyData } from "../data/dummyData";
 import { parseData } from "../components/TestPage/DataParser";
@@ -24,6 +26,7 @@ export function HistoryProvider({ children }) {
 
   // Add new items to history
   const addToHistory = (title, pdfFile, data, size = "2.5MB") => {
+    console.log("Adding to history:", { title, pdfFile, data, size });
     const newItem = {
       id: Date.now(),
       title: typeof title === "string" ? title : pdfFile.name,
@@ -33,7 +36,12 @@ export function HistoryProvider({ children }) {
       data: data,
     };
 
-    setHistoryData((prev) => [newItem, ...prev]);
+    setHistoryData((prev) => {
+      console.log("Previous history:", prev);
+      const newHistory = [newItem, ...prev];
+      console.log("New history:", newHistory);
+      return newHistory;
+    });
   };
 
   // Format file size in a readable format

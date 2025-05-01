@@ -1,3 +1,5 @@
+//src/components/Convert/Convert.js
+
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -24,18 +26,19 @@ function Convert() {
     pdfFile,
     convertedData,
   } = useLoading();
-  
+
   const { addToHistory } = useHistory();
 
   // Check if loading is complete (100%) and navigate to result page
   useEffect(() => {
     if (loading === false && progress === 100 && convertedData) {
       // Add to history before navigating
-      const title = typeof pdfFile === "string" ? pdfFile.split("/").pop() : pdfFile.name;
+      const title =
+        typeof pdfFile === "string" ? pdfFile.split("/").pop() : pdfFile.name;
       const size = typeof pdfFile === "string" ? "2.5MB" : pdfFile.size;
       addToHistory(title, pdfFile, convertedData, size);
-      
-      // Navigate to test page with data
+
+      // 테스트 페이지로 이동
       navigate("/test", {
         state: {
           pdfFile: pdfFile,
@@ -197,7 +200,7 @@ function Convert() {
             <>
               <LoadingSection />
               <div className="flex justify-center mt-4">
-                <button 
+                <button
                   className="bg-[#5B7F7C] text-white font-bold py-2 px-4 rounded"
                   onClick={() => navigate("/history")}
                 >

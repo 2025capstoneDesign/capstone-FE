@@ -1,3 +1,5 @@
+//src/components/Convert/LoadingSection.js
+
 import React from "react";
 import { useLoading } from "../../context/LoadingContext";
 
@@ -54,7 +56,7 @@ function LoadingSection() {
                 src="/loading_listen.gif"
                 alt="강의 듣는 중"
                 className={`w-24 h-24 ${
-                  isStage1Active ? "opacity-100" : "opacity-50"
+                  isStage1Active ? "opacity-100" : "opacity-30"
                 }`}
               />
             </div>
@@ -71,10 +73,10 @@ function LoadingSection() {
             </div>
             <div className="w-full flex justify-center">
               <img
-                src="/loading_listen.gif"
+                src="/loading_analyze.png"
                 alt="요약 정리 중"
                 className={`w-24 h-24 ${
-                  isStage2Active ? "opacity-100" : "opacity-50"
+                  isStage2Active ? "opacity-100" : "opacity-30"
                 }`}
               />
             </div>
@@ -91,10 +93,10 @@ function LoadingSection() {
             </div>
             <div className="w-full flex justify-center">
               <img
-                src="/loading_listen.gif"
+                src="/loading_write.png"
                 alt="필기 생성 중"
                 className={`w-24 h-24 ${
-                  isStage3Active ? "opacity-100" : "opacity-50"
+                  isStage3Active ? "opacity-100" : "opacity-30"
                 }`}
               />
             </div>
@@ -106,7 +108,9 @@ function LoadingSection() {
       <p className="text-center text-gray-500 mt-8">
         변환이 완료되면 자동으로 결과 화면으로 이동합니다.
         <br />
-        <span className="font-semibold">변환 기록 버튼을 눌러 이전 파일을 확인할 수 있습니다.</span>
+        <span className="font-semibold">
+          변환 기록 버튼을 눌러 이전 파일을 확인할 수 있습니다.
+        </span>
       </p>
     </div>
   );
