@@ -25,13 +25,13 @@ function SummarySection({
             className={`tab ${activeTab === "ai" ? "active" : ""}`}
             onClick={() => setActiveTab("ai")}
           >
-            <p className="text-[1.1rem]">AI 필기</p>
+            <p className="text-[0.9rem]">AI 필기</p>
           </button>
           <button
             className={`tab ${activeTab === "voice" ? "active" : ""}`}
             onClick={() => setActiveTab("voice")}
           >
-            <p className="text-[1.1rem]">음성 원본</p>
+            <p className="text-[0.9rem]">음성 원본</p>
           </button>
         </div>
 
@@ -66,33 +66,44 @@ function SummarySection({
         ) : (
           <div className="note-type-selector visible">
             <div className="dropdown-menu">
-              <button onClick={(e) => {
-                e.stopPropagation();
-                setIsOpen(!isOpen);
-              }}>
-                {noteType === "Concise Summary Notes" ? "간결한 요약" : 
-                 noteType === "Bullet Point Notes" ? "불릿 포인트" : "키워드 요약"}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsOpen(!isOpen);
+                }}
+              >
+                {noteType === "Concise Summary Notes"
+                  ? "간결한 요약"
+                  : noteType === "Bullet Point Notes"
+                  ? "불릿 포인트"
+                  : "키워드 요약"}
               </button>
               <ul
                 ref={dropDownRef}
                 className={`menu ${isOpen ? "active" : ""}`}
               >
-                <li onClick={(e) => {
-                  e.stopPropagation();
-                  handleNoteTypeChange("Concise Summary Notes");
-                }}>
+                <li
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNoteTypeChange("Concise Summary Notes");
+                  }}
+                >
                   간결한 요약
                 </li>
-                <li onClick={(e) => {
-                  e.stopPropagation();
-                  handleNoteTypeChange("Bullet Point Notes");
-                }}>
+                <li
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNoteTypeChange("Bullet Point Notes");
+                  }}
+                >
                   불릿 포인트
                 </li>
-                <li onClick={(e) => {
-                  e.stopPropagation();
-                  handleNoteTypeChange("Keyword Notes");
-                }}>
+                <li
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNoteTypeChange("Keyword Notes");
+                  }}
+                >
                   키워드 요약
                 </li>
               </ul>
@@ -108,22 +119,28 @@ function SummarySection({
               {(() => {
                 const commonContent = (
                   <>
-                    <span className="text-[1.4rem] font-semibold">필기요정 사용 방법</span>
-                    <br/>
-                    <br/>
-                    🔹 왼쪽 업로드 영역에 강의록 파일과 음성 파일을 업로드해주세요.
-                    <br/>
-                    🔹 파일을 업로드하고 변환을 시작하면 AI가 작성한 필기를 확인할 수 있습니다.
-                    <br/>
-                    <br/>
-                    <br/>
-                    <span className="text-[1.4rem] font-semibold">다양한 요약 방식 제공</span>
-                    <br/>
-                    <br/>
-                    🔹 오른쪽 상단의 드롭버튼으로 요약 방식을 선택할 수 있습니다. 
-                    다양한 방식으로 제공되는 필기를 확인해보세요.
-                    <br/>
-                    <br/>
+                    <span className="text-[1.4rem] font-semibold">
+                      필기요정 사용 방법
+                    </span>
+                    <br />
+                    <br />
+                    🔹 왼쪽 업로드 영역에 강의록 파일과 음성 파일을
+                    업로드해주세요.
+                    <br />
+                    🔹 파일을 업로드하고 변환을 시작하면 AI가 작성한 필기를
+                    확인할 수 있습니다.
+                    <br />
+                    <br />
+                    <br />
+                    <span className="text-[1.4rem] font-semibold">
+                      다양한 요약 방식 제공
+                    </span>
+                    <br />
+                    <br />
+                    🔹 오른쪽 상단의 드롭버튼으로 요약 방식을 선택할 수
+                    있습니다. 다양한 방식으로 제공되는 필기를 확인해보세요.
+                    <br />
+                    <br />
                   </>
                 );
 
@@ -133,28 +150,33 @@ function SummarySection({
                       <>
                         {commonContent}
                         <span className="text-[1.2rem]">[간결한 요약]</span>
-                        <br/>
-                        🔹 전체 내용을 간단하고 명확하게 요약한 내용을 줄글 형식으로 확인할 수 있습니다.
-                        <br/>
-                        🔹 전반적인 내용의 이해가 필요하다면 '간결한 요약' 방식의 필기를 사용해보세요.
+                        <br />
+                        🔹 전체 내용을 간단하고 명확하게 요약한 내용을 줄글
+                        형식으로 확인할 수 있습니다.
+                        <br />
+                        🔹 전반적인 내용의 이해가 필요하다면 '간결한 요약'
+                        방식의 필기를 사용해보세요.
                       </>
                     ) : noteType === "Bullet Point Notes" ? (
                       <>
                         {commonContent}
                         <span className="text-[1.2rem]">[불릿포인트]</span>
-                        <br/>
-                        🔹 핵심 내용을 포인트 형태의 독립적인 문장 형식으로 확인할 수 있습니다.
-                        <br/>
-                        🔹 핵심 내용을 빠르게 확인하고 싶다면 '불릿 포인트' 방식의 필기를 사용해보세요.
+                        <br />
+                        🔹 핵심 내용을 포인트 형태의 독립적인 문장 형식으로
+                        확인할 수 있습니다.
+                        <br />
+                        🔹 핵심 내용을 빠르게 확인하고 싶다면 '불릿 포인트'
+                        방식의 필기를 사용해보세요.
                       </>
                     ) : (
                       <>
                         {commonContent}
                         <span className="text-[1.2rem]">[키워드 요약]</span>
-                        <br/>
+                        <br />
                         🔹 개념 중심으로 핵심 용어와 정의를 확인할 수 있습니다.
-                        <br/>
-                        🔹 강의에 등장하는 용어와 정의를 정리하고 싶다면 '키워드 요약' 방식의 필기를 사용해보세요.
+                        <br />
+                        🔹 강의에 등장하는 용어와 정의를 정리하고 싶다면 '키워드
+                        요약' 방식의 필기를 사용해보세요.
                       </>
                     )}
                   </>
@@ -165,17 +187,23 @@ function SummarySection({
         ) : (
           <div className="voice-content">
             <p className="text-[1.1rem] text-gray-700">
-              <span className="text-[1.4rem] font-semibold">필기요정 사용 방법</span>
-              <br/>
-              <br/>
+              <span className="text-[1.4rem] font-semibold">
+                필기요정 사용 방법
+              </span>
+              <br />
+              <br />
               🔹 왼쪽 업로드 영역에 강의록 파일과 음성 파일을 업로드해주세요.
-              <br/>
-              🔹파일을 업로드하고 변환을 시작하면 음성 원본을 확인할 수 있습니다.
+              <br />
+              🔹파일을 업로드하고 변환을 시작하면 음성 원본을 확인할 수
+              있습니다.
             </p>
             <p className="text-[1.1rem] text-gray-700">
-            <br/>
-            <br/>
-            <span className="text-[1.4rem] font-semibold">하이라이트 기능</span><br/>
+              <br />
+              <br />
+              <span className="text-[1.4rem] font-semibold">
+                하이라이트 기능
+              </span>
+              <br />
               <span
                 className={`segment-text important ${highlightColor}`}
                 onMouseEnter={(e) => {
@@ -188,9 +216,9 @@ function SummarySection({
                   }
                 }}
               >
-                <br/>
-                🔹중요한 내용은 하이라이트로 표시됩니다. 오른쪽 상단의 색상 팔레트에서
-                색상을 바꿔보세요.
+                <br />
+                🔹중요한 내용은 하이라이트로 표시됩니다. 오른쪽 상단의 색상
+                팔레트에서 색상을 바꿔보세요.
                 <br />
                 🔹문장 위에 마우스를 올리면 해당 내용이 중요한 이유를 확인할 수
                 있습니다.
