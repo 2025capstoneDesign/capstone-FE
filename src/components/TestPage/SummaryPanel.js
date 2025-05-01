@@ -268,7 +268,7 @@ export default function SummaryPanel({
                 }}
               >
                 {noteType === "Concise Summary Notes"
-                  ? "간결한 필기"
+                  ? "서술형 필기"
                   : noteType === "Bullet Point Notes"
                   ? "개조식 필기"
                   : "키워드 필기"}
@@ -283,7 +283,7 @@ export default function SummaryPanel({
                     handleNoteTypeChange("Concise Summary Notes");
                   }}
                 >
-                  간결한 필기
+                  서술형 필기
                 </li>
                 <li
                   onClick={(e) => {
