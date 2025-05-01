@@ -160,7 +160,7 @@ function FileUploadSection({
         {/* 변환하기 버튼 */}
         <div className="flex justify-end mt-auto">
           <button
-            className="convert-btn"
+            className="bg-[#5B7F7C] text-white font-semibold py-2 px-4 rounded-lg my-5"
             onClick={handleConvert}
             disabled={isLoading}
           >

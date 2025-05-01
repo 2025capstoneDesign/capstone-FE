@@ -117,7 +117,7 @@ function LoadingSection() {
 
       <div className="flex justify-center mt-4">
         <button
-          className="bg-[#5B7F7C] text-white font-bold py-2 px-4 rounded-lg my-5"
+          className="bg-[#5B7F7C] text-white font-semibold py-2 px-4 rounded-lg my-5"
           onClick={() => navigate("/history")}
         >
           변환 기록 보기
