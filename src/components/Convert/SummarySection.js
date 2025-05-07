@@ -88,7 +88,7 @@ function SummarySection({
                     handleNoteTypeChange("Concise Summary Notes");
                   }}
                 >
-                  간결한 요약
+                  서술형 필기
                 </li>
                 <li
                   onClick={(e) => {
@@ -96,7 +96,7 @@ function SummarySection({
                     handleNoteTypeChange("Bullet Point Notes");
                   }}
                 >
-                  불릿 포인트
+                  개조식 필기
                 </li>
                 <li
                   onClick={(e) => {
@@ -104,7 +104,7 @@ function SummarySection({
                     handleNoteTypeChange("Keyword Notes");
                   }}
                 >
-                  키워드 요약
+                  키워드 필기
                 </li>
               </ul>
             </div>

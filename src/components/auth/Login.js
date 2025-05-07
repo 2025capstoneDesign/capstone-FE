@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
-import qs from "qs";
+import { login } from "../../api/auth";
 import loginImage from "../../assets/images/login2.png";
-import logo2 from "../../assets/images/logo2.png";
 
-const Login = () => {
+const Login = ({ setIsLoggedIn }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -21,29 +19,17 @@ const Login = () => {
       if (process.env.REACT_APP_API_URL === "mock") {
         console.log("Mock API: 로그인 성공");
         localStorage.setItem("token", "mock_access_token");
+        setIsLoggedIn(true);
         navigate("/");
         return;
       }
 
-      const formData = qs.stringify({
-        username,
-        password,
-      });
-
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/login`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
-
+      const response = await login({ username, password });
       console.log("로그인 응답:", response.data);
 
       if (response.data.access_token) {
         localStorage.setItem("token", response.data.access_token);
+        setIsLoggedIn(true);
         navigate("/");
       } else {
         alert("로그인 응답에 토큰이 없습니다.");
