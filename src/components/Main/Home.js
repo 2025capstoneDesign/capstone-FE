@@ -27,7 +27,7 @@ function Home({ isLoggedIn }) {
               {title}
             </h3>
           </div>
-          <p className="text-[1.2rem] mt-[1.2rem] text-gray-500 text-center">
+          <p className="text-[1.1rem] mt-[1.2rem] text-gray-500 text-center">
             {description}
           </p>
         </div>
