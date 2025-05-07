@@ -3,8 +3,16 @@ import bannerImage from '../../assets/images/banner_image2.png';
 import overlayImage from '../../assets/images/overlay3.png';
 import { useNavigate } from 'react-router-dom';
 
-const Banner = () => {
+const Banner = ({ isLoggedIn }) => {
   const navigate = useNavigate();
+
+  const handleButtonClick = () => {
+    if (isLoggedIn) {
+      navigate('/convert');
+    } else {
+      navigate('/login');
+    }
+  };
 
   return (
     <div className="relative w-full h-[35vh] md:h-[45vh] lg:h-[45vh] overflow-hidden">
@@ -40,7 +48,7 @@ const Banner = () => {
             AI가 도와주는 <span className='text-orange-300 font-[450]'>스마트한 필기 정리</span>를 경험해보세요.
           </p>
           <button 
-            onClick={() => navigate('/convert')}
+            onClick={handleButtonClick}
             className="mt-[1.5rem] md:mt-[2rem] border border-white text-white px-[1.5rem] py-[0.75rem] rounded-full font-[350] text-[1rem] md:text-[1.2rem] hover:bg-white/10 transition-all"
           >
             변환하러 가기

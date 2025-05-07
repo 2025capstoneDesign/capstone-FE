@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { register } from "../../api/auth";
 import loginImage from "../../assets/images/login2.png";
 import logo2 from "../../assets/images/logo2.png";
 import "../../css/Auth.css";
 
-const Register = () => {
+const Register = ({ setIsLoggedIn }) => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -41,28 +41,22 @@ const Register = () => {
       if (process.env.REACT_APP_API_URL === "mock") {
         console.log("Mock API: 회원가입 성공");
         localStorage.setItem("token", "mock_access_token");
+        setIsLoggedIn(true);
         alert("회원가입이 완료되었습니다.");
         navigate("/");
         return;
       }
 
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/register`,
-        {
-          email: formData.email,
-          password: formData.password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await register({
+        email: formData.email,
+        password: formData.password,
+      });
 
       console.log("회원가입 응답:", response.data);
 
       if (response.status === 200 || response.status === 201) {
         localStorage.setItem("token", response.data.access_token);
+        setIsLoggedIn(true);
         alert("회원가입이 완료되었습니다.");
         navigate("/");
       }

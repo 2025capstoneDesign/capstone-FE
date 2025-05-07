@@ -5,7 +5,7 @@ import history_icon from "../../assets/images/history_icon2.png";
 import setting_icon from "../../assets/images/setting_icon.png";
 import { useNavigate } from "react-router-dom";
 
-function Home() {
+function Home({ isLoggedIn }) {
   const navigate = useNavigate();
 
   const FeatureCard = ({ image, title, description, onClick }) => (
@@ -35,10 +35,18 @@ function Home() {
     </div>
   );
 
+  const handleConvertClick = () => {
+    if (isLoggedIn) {
+      navigate("/convert");
+    } else {
+      navigate("/login");
+    }
+  };
+
   return (
     <section className="w-full mt-[4.5rem]">
       {/* 메인 배너 */}
-      <Banner />
+      <Banner isLoggedIn={isLoggedIn} />
 
       {/* 기능 소개 섹션 */}
       <div className="mt-[4rem] mb-[4rem] w-full max-w-[90rem] mx-auto">
@@ -53,7 +61,7 @@ function Home() {
             image={convert_icon}
             title="강의록 변환"
             description="강의와 음성 파일을 등록하여 필기를 생성해보세요."
-            onClick={() => navigate("/convert")}
+            onClick={handleConvertClick}
           />
           <FeatureCard
             image={history_icon}
