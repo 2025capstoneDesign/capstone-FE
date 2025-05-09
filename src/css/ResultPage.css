@@ -118,6 +118,9 @@ body {
   padding: 0 25px 25px 25px;
 }
 
+.history-page .main-content {
+  padding: 0 25px 25px 25px;
+}
 
 /* 왼쪽 PDF 슬라이드 컨테이너 */
 .slide-container {
@@ -622,23 +625,24 @@ body {
 }
 
 .sort-btn {
-  padding: 8px 16px;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
-  background-color: #fff;
+  padding: 8px 14px;
+  /* border: 1px solid #e0e0e0; */
+  /* border-radius: 20px; */
+  /* background-color: #fff; */
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .sort-btn.active {
-  background-color: #000;
-  color: #fff;
-  border-color: #000;
+  /* background-color: #000; */
+  color: #455E5C;
+  border-bottom: 3px solid #5B7F7C;
+  /* border-color: #000; */
 }
 
 .view-btn {
   padding: 8px 16px;
-  background-color: #000;
+  background-color: #5B7F7C;
   color: #fff;
   border: none;
   border-radius: 20px;
@@ -647,7 +651,7 @@ body {
 }
 
 .view-btn:hover {
-  background-color: #333;
+  background-color: #455E5C;
 }
 
 .manual-title {

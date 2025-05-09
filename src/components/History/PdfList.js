@@ -59,7 +59,7 @@ export default function PdfList({
   };
 
   return (
-    <div className="slide-container ml-[25px]">
+    <div className="slide-container">
       <div className="slide-header">
         <div className="sort-options">
           <button
