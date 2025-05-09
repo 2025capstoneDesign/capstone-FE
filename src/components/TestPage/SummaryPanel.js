@@ -19,6 +19,14 @@ export default function SummaryPanel({
   const contentContainerRef = useRef(null);
   const prevTabRef = useRef(activeTab);
   const prevPageRef = useRef(pageNumber);
+  const [noteType, setNoteType] = useState(() => {
+    // localStorage에서 저장된 noteType 불러오기
+    const savedNoteType = localStorage.getItem("defaultNoteType");
+    if (savedNoteType === "서술형 필기") return "Concise Summary Notes";
+    if (savedNoteType === "개조식 필기") return "Bullet Point Notes";
+    if (savedNoteType === "키워드 필기") return "Keyword Notes";
+    return "Concise Summary Notes"; // 기본값
+  });
 
   // 특정 페이지 섹션으로 스크롤하는 함수 - 부드러운 스크롤 적용
   const scrollToPageSection = useCallback(
@@ -205,7 +213,6 @@ export default function SummaryPanel({
   };
 
   // AI 필기 유형 상태 관리
-  const [noteType, setNoteType] = useState("Concise Summary Notes");
   const dropDownRef = useRef(null);
   const [isOpen, setIsOpen] = useDetectClose(dropDownRef, false);
 

@@ -112,13 +112,21 @@ function FileUploadSection({
               음성
             </span>
 
-            <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
+            {/* <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
               <img
                 src={word_icon}
                 alt="Word"
                 className="w-[2.5rem] h-[2.trem] object-fit"
               />
               <span className="text-sm">Word</span>
+            </div> */}
+            <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
+              <img
+                src={pdf_icon}
+                alt="PDF"
+                className="w-[2.5rem] h-[2.5rem] object-fit"
+              />
+              <span className="text-sm">PDF</span>
             </div>
             <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
               <img
@@ -146,14 +154,6 @@ function FileUploadSection({
               <span className="text-sm">MP3</span>
             </div>
 
-            <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
-              <img
-                src={pdf_icon}
-                alt="PDF"
-                className="w-[2.5rem] h-[2.5rem] object-fit"
-              />
-              <span className="text-sm">PDF</span>
-            </div>
           </div>
         </div>
 

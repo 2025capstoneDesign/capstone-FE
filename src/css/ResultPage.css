@@ -107,12 +107,17 @@ body {
 .main-content {
   display: flex;
   flex: 1;
-  padding: 0 0 25px;
+  padding: 0 25px 25px 0;
   gap: 25px;
   min-height: 0;
-  max-height: calc(100vh - 130px);
-  overflow: hidden;
+  /* max-height: calc(100vh - 130px); */
 }
+
+/* 변환 페이지 전용 메인 콘텐츠 스타일 */
+.convert-page .main-content {
+  padding: 0 25px 25px 25px;
+}
+
 
 /* 왼쪽 PDF 슬라이드 컨테이너 */
 .slide-container {
@@ -133,6 +138,7 @@ body {
   align-items: center;
   padding: 15px 20px;
   background-color: #fffaec;
+  border-radius:12px 12px 0 0;
   border-bottom: 1px solid #f0f0f0;
   height: 56px;
 }
@@ -258,6 +264,7 @@ body {
   padding: 0 15px;
   background-color: #fffaec;
   height: 56px;
+  border-radius: 12px 12px 0 0;
 }
 
 .tabs {
@@ -355,6 +362,7 @@ body {
 .ai-content {
   font-size: 15px;
   line-height: 1.6;
+  max-height: 500px;
 }
 
 .ai-content h1,
@@ -379,6 +387,7 @@ body {
 .voice-content {
   font-size: 15px;
   line-height: 1.6;
+  max-height: 500px;
 }
 
 /* 페이지별 음성 섹션 스타일 */
@@ -573,6 +582,8 @@ body {
   .main-content {
     flex-direction: column;
     height: auto;
+    padding: 0 25px 25px 25px;
+    gap: 25px;
   }
 
   .slide-container,
@@ -583,7 +594,7 @@ body {
 
   .slide-container {
     min-height: 600px;
-    margin-bottom: 20px;
+    margin-bottom: 0;
   }
 
   .summary-container {

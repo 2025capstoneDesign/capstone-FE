@@ -4,12 +4,13 @@ import Home from "./components/Main/Home";
 import Convert from "./components/Convert/Convert";
 import TestPage from "./components/TestPage/TestPage";
 import History from "./components/History/History";
+import Setting from "./components/Setting/Setting";
 import Header from "./components/Header";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import { LoadingProvider } from "./context/LoadingContext";
 import { HistoryProvider } from "./context/HistoryContext";
-import Banner from "./components/Main/Banner";
+
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
@@ -35,6 +36,7 @@ function App() {
                   <Route path="/convert" element={<Convert />} />
                   <Route path="/test" element={<TestPage />} />
                   <Route path="/history" element={<History />} />
+                  <Route path="/setting" element={<Setting />} />
                   <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
                   <Route path="/register" element={<Register setIsLoggedIn={setIsLoggedIn} />} />
                 </Routes>

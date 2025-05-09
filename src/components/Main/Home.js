@@ -73,6 +73,7 @@ function Home({ isLoggedIn }) {
             image={setting_icon}
             title="사용자 설정"
             description="내가 원하는 조건으로 요약본을 생성할 수 있습니다."
+            onClick={() => navigate("/setting")}
           />
         </div>
       </div>
