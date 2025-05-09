@@ -126,7 +126,7 @@ export default function PdfList({
         {sortedHistory.map((pdf) => (
           <div
             key={pdf.id}
-            className="flex items-center p-4 rounded-lg bg-white border border-gray-200 shadow-sm mb-3 transition-all hover:shadow-md"
+            className="flex items-center p-4 rounded-lg bg-white border border-gray-200 shadow-sm mb-3 transition-all"
           >
             <img
               src={getFileIcon(pdf.pdfFile)}
