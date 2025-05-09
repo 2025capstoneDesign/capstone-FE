@@ -107,11 +107,19 @@ body {
 .main-content {
   display: flex;
   flex: 1;
-  padding: 0 0 25px;
+  padding: 0 25px 25px 0;
   gap: 25px;
   min-height: 0;
-  max-height: calc(100vh - 130px);
-  overflow: hidden;
+  /* max-height: calc(100vh - 130px); */
+}
+
+/* 변환 페이지 전용 메인 콘텐츠 스타일 */
+.convert-page .main-content {
+  padding: 0 25px 25px 25px;
+}
+
+.history-page .main-content {
+  padding: 0 25px 25px 25px;
 }
 
 /* 왼쪽 PDF 슬라이드 컨테이너 */
@@ -133,6 +141,7 @@ body {
   align-items: center;
   padding: 15px 20px;
   background-color: #fffaec;
+  border-radius:12px 12px 0 0;
   border-bottom: 1px solid #f0f0f0;
   height: 56px;
 }
@@ -258,6 +267,7 @@ body {
   padding: 0 15px;
   background-color: #fffaec;
   height: 56px;
+  border-radius: 12px 12px 0 0;
 }
 
 .tabs {
@@ -355,6 +365,7 @@ body {
 .ai-content {
   font-size: 15px;
   line-height: 1.6;
+  max-height: 500px;
 }
 
 .ai-content h1,
@@ -379,6 +390,7 @@ body {
 .voice-content {
   font-size: 15px;
   line-height: 1.6;
+  max-height: 500px;
 }
 
 /* 페이지별 음성 섹션 스타일 */
@@ -573,6 +585,8 @@ body {
   .main-content {
     flex-direction: column;
     height: auto;
+    padding: 0 25px 25px 25px;
+    gap: 25px;
   }
 
   .slide-container,
@@ -583,7 +597,7 @@ body {
 
   .slide-container {
     min-height: 600px;
-    margin-bottom: 20px;
+    margin-bottom: 0;
   }
 
   .summary-container {
@@ -611,23 +625,24 @@ body {
 }
 
 .sort-btn {
-  padding: 8px 16px;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
-  background-color: #fff;
+  padding: 8px 14px;
+  /* border: 1px solid #e0e0e0; */
+  /* border-radius: 20px; */
+  /* background-color: #fff; */
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .sort-btn.active {
-  background-color: #000;
-  color: #fff;
-  border-color: #000;
+  /* background-color: #000; */
+  color: #455E5C;
+  border-bottom: 3px solid #5B7F7C;
+  /* border-color: #000; */
 }
 
 .view-btn {
   padding: 8px 16px;
-  background-color: #000;
+  background-color: #5B7F7C;
   color: #fff;
   border: none;
   border-radius: 20px;
@@ -636,7 +651,7 @@ body {
 }
 
 .view-btn:hover {
-  background-color: #333;
+  background-color: #455E5C;
 }
 
 .manual-title {

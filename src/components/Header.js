@@ -13,7 +13,7 @@ function Header({ isLoggedIn, setIsLoggedIn }) {
 
   return (
     <header className="bg-white shadow-sm fixed z-[999] w-full">
-      <nav className="mx-auto px-6 py-[1rem]">
+      <nav className="mx-auto px-6 py-[0.8rem]">
         <div className="flex justify-between items-center">
           {/* <div className="flex justify-between items-center"> */}
           <Link
@@ -31,14 +31,14 @@ function Header({ isLoggedIn, setIsLoggedIn }) {
           {isLoggedIn ? (
             <button
               onClick={handleLogout}
-              className="text-gray-600 text-xl hover:text-gray-900 px-6 py-2"
+              className="text-gray-600 text-lg hover:text-gray-900 px-6 py-2"
             >
               로그아웃
             </button>
           ) : (
             <Link
               to="/login"
-              className="text-gray-600 text-xl hover:text-gray-900 px-6 py-2"
+              className="text-gray-600 text-lg hover:text-gray-900 px-6 py-2"
             >
               로그인
             </Link>

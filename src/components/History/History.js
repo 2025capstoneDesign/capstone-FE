@@ -52,7 +52,7 @@ export default function History() {
   });
 
   return (
-    <div className="app-wrapper">
+    <div className="app-wrapper history-page">
       <div className="sub-header">
         <h1 className="page-title">변환 기록</h1>
         <div className="action-buttons">

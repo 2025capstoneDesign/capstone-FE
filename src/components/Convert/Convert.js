@@ -199,7 +199,7 @@ function Convert() {
   };
 
   return (
-    <div className="app-wrapper">
+    <div className="app-wrapper convert-page">
       <div className="sub-header">
         <h2 className="page-title">강의록 변환</h2>
         <div className="action-buttons">
@@ -211,7 +211,7 @@ function Convert() {
 
       {error && <div className="text-red-500 mx-[5%] my-[0.5rem]">{error}</div>}
 
-      <div className="main-content mx-[25px]">
+      <div className="main-content">
         <div className="slide-container">
           <div className="slide-header"></div>
           {loading ? (

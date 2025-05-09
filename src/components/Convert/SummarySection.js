@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import useDetectClose from "../../hooks/useDetectClose";
 import "../../css/Dropdown.css";
+import "../../css/ResultPage.css";
 
 function SummarySection({
   activeTab,
