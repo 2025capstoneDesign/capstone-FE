@@ -43,6 +43,8 @@ function Convert() {
       const title =
         typeof pdfFile === "string" ? pdfFile.split("/").pop() : pdfFile.name;
       const size = typeof pdfFile === "string" ? "2.5MB" : pdfFile.size;
+
+      // At this point, pdfFile should already be a Blob URL from LoadingContext
       addToHistory(title, pdfFile, convertedData, size);
       console.log("Convert - 변환 완료 후 히스토리에 추가:", {
         title,
@@ -54,7 +56,7 @@ function Convert() {
       // 테스트 페이지로 이동
       navigate("/test", {
         state: {
-          pdfFile: pdfFile,
+          pdfFile: pdfFile, // This should be a Blob URL or static path
           pdfData: convertedData,
         },
       });

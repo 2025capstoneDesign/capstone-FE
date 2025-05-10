@@ -1,5 +1,6 @@
 import { Document, Page } from "react-pdf";
 import { toast } from "react-toastify";
+import { useEffect, useState } from "react";
 
 export default function PdfViewer({
   pdfUrl,
@@ -10,6 +11,40 @@ export default function PdfViewer({
   goPrevPage,
   goNextPage,
 }) {
+  // The Document component will handle both file paths and blob URLs correctly,
+  // so we don't need to do any special conversion here.
+  // Just pass pdfUrl directly to the file prop.
+
+  // Track loading state to show a loading indicator if needed
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Reset loading state when the PDF URL changes
+  useEffect(() => {
+    setIsLoading(true);
+  }, [pdfUrl]);
+
+  // Handle successful loading
+  const handleLoadSuccess = (pdf) => {
+    setIsLoading(false);
+    if (onDocumentLoadSuccess) {
+      onDocumentLoadSuccess(pdf);
+    }
+  };
+
+  // Handle loading error
+  const handleLoadError = (error) => {
+    setIsLoading(false);
+    console.error("Error loading PDF:", error);
+    if (onDocumentLoadError) {
+      onDocumentLoadError(error);
+    } else {
+      toast.error("PDF 로딩 중 오류가 발생했습니다", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    }
+  };
+
   return (
     <div className="slide-container">
       <div className="slide-header">
@@ -68,9 +103,9 @@ export default function PdfViewer({
       <div className="pdf-viewer">
         <Document
           file={pdfUrl}
-          onLoadSuccess={onDocumentLoadSuccess}
-          onLoadError={onDocumentLoadError}
-          loading=""
+          onLoadSuccess={handleLoadSuccess}
+          onLoadError={handleLoadError}
+          loading={isLoading ? "PDF 로딩 중..." : ""}
           className="pdf-document"
         >
           <Page

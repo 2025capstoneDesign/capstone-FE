@@ -13,8 +13,9 @@ import { useHistory } from "../../context/HistoryContext";
 export default function TestPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { loading, convertedData, pdfFile: contextPdfFile } = useLoading();
-  const { historyData } = useHistory();
+  const { loading, convertedData, pdfFile: contextPdfFile, cleanupBlobUrls: cleanupLoadingBlobUrls } = useLoading();
+  const { historyData, revokeBlobUrl } = useHistory();
+  const createdBlobUrlsRef = useRef([]);
 
   // Always prioritize location state (from history) if it exists
   // Otherwise use the context data (from conversion)
@@ -36,8 +37,22 @@ export default function TestPage() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Don't redirect to convert page at all - we want to be able to view files from history while loading
-  // Remove redirect logic
+  // Cleanup function for any locally created blob URLs
+  const cleanupLocalBlobUrls = useCallback(() => {
+    createdBlobUrlsRef.current.forEach(url => {
+      if (url && url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
+    });
+    createdBlobUrlsRef.current = [];
+  }, []);
+
+  // Cleanup all blob URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      cleanupLocalBlobUrls();
+    };
+  }, [cleanupLocalBlobUrls]);
 
   // 전달받은 pdfData가 이미 파싱된 데이터인지 확인하고, 아니면 파싱
   const { summaryData, voiceData } =
@@ -53,9 +68,9 @@ export default function TestPage() {
   // 각 페이지 섹션에 대한 ref를 저장할 객체
   const pageSectionRefs = useRef({});
 
-  // File 객체인 경우 URL 생성, 문자열인 경우 그대로 사용
-  const pdfUrl =
-    pdfFile instanceof File ? URL.createObjectURL(pdfFile) : pdfFile;
+  // We don't need to create a new blob URL here, we should already have it
+  // If pdfFile is already a blob URL or a string path, use it directly
+  const pdfUrl = pdfFile;
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
@@ -87,14 +102,24 @@ export default function TestPage() {
     goToPage(1);
   }, [goToPage]);
 
-  // Always render the page, even when loading something else
+  // Handle navigation away from this component
+  const handlePageLeave = useCallback(() => {
+    // Don't revoke blob URLs from history items - those need to persist
+    // Only clean up locally created ones if any
+    cleanupLocalBlobUrls();
+  }, [cleanupLocalBlobUrls]);
+
+  const handleConvertClick = useCallback(() => {
+    handlePageLeave();
+    navigate("/convert");
+  }, [handlePageLeave, navigate]);
 
   return (
     <div className="app-wrapper">
       <div className="sub-header">
         <h1 className="page-title">PDF 변환 결과</h1>
         <div className="action-buttons">
-          <button className="convert-btn" onClick={() => navigate("/convert")}>
+          <button className="convert-btn" onClick={handleConvertClick}>
             다시 변환하기
           </button>
           <button className="download-btn">다운로드</button>
