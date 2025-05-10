@@ -1,6 +1,6 @@
 //src/context/HistoryContext.js
 
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext } from "react";
 import { dummyData } from "../data/dummyData";
 import { parseData } from "../components/TestPage/DataParser";
 
@@ -14,7 +14,7 @@ export function HistoryProvider({ children }) {
       title: "sample3.pdf",
       date: "2024-03-20",
       size: "2.5MB",
-      pdfFile: "/sample3.pdf", // Static path is fine as is
+      pdfFile: "/sample3.pdf",
       data: dummyData,
     },
   ];
@@ -23,50 +23,16 @@ export function HistoryProvider({ children }) {
   initialHistoryData[0].data = parsedDummyData;
 
   const [historyData, setHistoryData] = useState(initialHistoryData);
-  const [blobUrlMap, setBlobUrlMap] = useState({}); // Map blobUrl -> original File
-
-  // Cleanup function for all blob URLs
-  const cleanupBlobUrls = () => {
-    Object.keys(blobUrlMap).forEach(url => {
-      if (url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
-    });
-    setBlobUrlMap({});
-  };
-
-  // Cleanup all blob URLs when component unmounts
-  useEffect(() => {
-    return () => {
-      cleanupBlobUrls();
-    };
-  }, []);
 
   // Add new items to history
-  const addToHistory = (title, pdfFileOrUrl, data, size = "2.5MB") => {
-    console.log("Adding to history:", { title, pdfFileOrUrl, data, size });
-
-    let pdfBlobUrl = pdfFileOrUrl;
-    let fileTitle = title;
-
-    // If pdfFileOrUrl is a File object, create a blob URL
-    if (pdfFileOrUrl instanceof File) {
-      pdfBlobUrl = URL.createObjectURL(pdfFileOrUrl);
-      fileTitle = pdfFileOrUrl.name;
-
-      // Store mapping between blob URL and original file
-      setBlobUrlMap(prev => ({
-        ...prev,
-        [pdfBlobUrl]: pdfFileOrUrl
-      }));
-    }
-
+  const addToHistory = (title, pdfFile, data, size = "2.5MB") => {
+    console.log("Adding to history:", { title, pdfFile, data, size });
     const newItem = {
       id: Date.now(),
-      title: typeof fileTitle === "string" ? fileTitle : "Unnamed File",
+      title: typeof title === "string" ? title : pdfFile.name,
       date: new Date().toISOString().split("T")[0],
       size: typeof size === "string" ? size : formatFileSize(size),
-      pdfFile: pdfBlobUrl, // Store the blob URL or path string
+      pdfFile: pdfFile,
       data: data,
     };
 
@@ -76,23 +42,6 @@ export function HistoryProvider({ children }) {
       console.log("New history:", newHistory);
       return newHistory;
     });
-  };
-
-  // Get the original File object from a blob URL if it exists
-  const getOriginalFile = (blobUrl) => {
-    return blobUrlMap[blobUrl] || null;
-  };
-
-  // Clean up a specific blob URL
-  const revokeBlobUrl = (blobUrl) => {
-    if (blobUrl && blobUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(blobUrl);
-      setBlobUrlMap(prev => {
-        const newMap = { ...prev };
-        delete newMap[blobUrl];
-        return newMap;
-      });
-    }
   };
 
   // Format file size in a readable format
@@ -110,10 +59,6 @@ export function HistoryProvider({ children }) {
         historyData,
         setHistoryData,
         addToHistory,
-        blobUrlMap,
-        getOriginalFile,
-        revokeBlobUrl,
-        cleanupBlobUrls
       }}
     >
       {children}
