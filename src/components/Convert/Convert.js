@@ -27,14 +27,9 @@ function Convert() {
   //Blob URL 생성 함수
   const { createBlobUrl } = useBlobUrlManager();
 
-  //히스토리에 추가되었는지 확인 (중복 방지)
-  const hasAddedToHistory = useRef(false);
-
   // 로딩이 완료되었는지 확인하고 결과 페이지로 이동
   useEffect(() => {
-    if (loading === false && convertedData && !hasAddedToHistory.current) {
-      hasAddedToHistory.current = true;
-
+    if (loading === false && convertedData) {
       let pdfBlobUrl = pdfFile;
       let fileTitle;
       let fileSize;
@@ -70,7 +65,8 @@ function Convert() {
         },
       });
     }
-  }, [loading, convertedData, navigate, pdfFile, addToHistory, createBlobUrl]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, convertedData, navigate, pdfFile]);
 
   // 더미 데이터 fetch 함수
   const fetchMockData = async () => {
@@ -211,12 +207,6 @@ function Convert() {
       stopLoading(null);
     }
   };
-
-  useEffect(() => {
-    return () => {
-      hasAddedToHistory.current = false;
-    };
-  }, []);
 
   return (
     <div className="app-wrapper">
