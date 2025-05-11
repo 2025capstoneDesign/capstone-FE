@@ -3,6 +3,7 @@
 import React, { createContext, useState, useContext } from "react";
 import { dummyData } from "../data/dummyData";
 import { parseData } from "../components/TestPage/DataParser";
+import useBlobUrlManager from "../hooks/useBlobUrlManager";
 
 const HistoryContext = createContext();
 
@@ -14,7 +15,7 @@ export function HistoryProvider({ children }) {
       title: "sample3.pdf",
       date: "2024-03-20",
       size: "2.5MB",
-      pdfFile: "/sample3.pdf",
+      pdfFile: "/sample3.pdf", // Static path is fine as is
       data: dummyData,
     },
   ];
@@ -23,16 +24,35 @@ export function HistoryProvider({ children }) {
   initialHistoryData[0].data = parsedDummyData;
 
   const [historyData, setHistoryData] = useState(initialHistoryData);
+  
+  // Use the centralized BlobUrlManager hook
+  const { 
+    createBlobUrl, 
+    revokeBlobUrl, 
+    revokeAllBlobUrls, 
+    getOriginalFile, 
+    blobUrlMap 
+  } = useBlobUrlManager();
 
   // Add new items to history
-  const addToHistory = (title, pdfFile, data, size = "2.5MB") => {
-    console.log("Adding to history:", { title, pdfFile, data, size });
+  const addToHistory = (title, pdfFileOrUrl, data, size = "2.5MB") => {
+    console.log("Adding to history:", { title, pdfFileOrUrl, data, size });
+    
+    let pdfBlobUrl = pdfFileOrUrl;
+    let fileTitle = title;
+    
+    // If pdfFileOrUrl is a File object, create a blob URL using our hook
+    if (pdfFileOrUrl instanceof File) {
+      pdfBlobUrl = createBlobUrl(pdfFileOrUrl);
+      fileTitle = pdfFileOrUrl.name;
+    }
+
     const newItem = {
       id: Date.now(),
-      title: typeof title === "string" ? title : pdfFile.name,
+      title: typeof fileTitle === "string" ? fileTitle : "Unnamed File",
       date: new Date().toISOString().split("T")[0],
       size: typeof size === "string" ? size : formatFileSize(size),
-      pdfFile: pdfFile,
+      pdfFile: pdfBlobUrl, // Store the blob URL or path string
       data: data,
     };
 
@@ -59,6 +79,10 @@ export function HistoryProvider({ children }) {
         historyData,
         setHistoryData,
         addToHistory,
+        getOriginalFile, // Expose these functions from the hook
+        revokeBlobUrl,
+        revokeAllBlobUrls,
+        blobUrlMap
       }}
     >
       {children}

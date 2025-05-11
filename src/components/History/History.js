@@ -8,6 +8,7 @@ import PdfList from "./PdfList";
 import Manual from "./Manual";
 import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
+import useBlobUrlManager from "../../hooks/useBlobUrlManager";
 
 export default function History() {
   const navigate = useNavigate();
@@ -15,6 +16,16 @@ export default function History() {
   const [selectedPdf, setSelectedPdf] = useState(null);
   const { historyData, getOriginalFile } = useHistory();
   const { loading, progress, uploadedFiles } = useLoading();
+  
+  // Use our BlobUrlManager hook for any local blob URL needs
+  const { createBlobUrl, revokeBlobUrl, revokeAllBlobUrls } = useBlobUrlManager();
+  
+  // Clean up any local blob URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      revokeAllBlobUrls();
+    };
+  }, [revokeAllBlobUrls]);
 
   useEffect(() => {
     console.log("History data updated:", historyData);
@@ -31,7 +42,7 @@ export default function History() {
 
     // pdf.pdfFile should already be a Blob URL or static path
     // No need to create a new Blob URL
-
+    
     // Even if we are loading something else, we can still view files from history
     navigate("/test", {
       state: {
@@ -44,21 +55,21 @@ export default function History() {
   const handleDownload = useCallback((pdf) => {
     // Create a temporary anchor element
     const link = document.createElement('a');
-
+    
     // If it's a blob URL, we can download it directly
     if (pdf.pdfFile && typeof pdf.pdfFile === 'string') {
       // Set the href to the PDF URL (either blob: URL or static path)
       link.href = pdf.pdfFile;
-
+      
       // Set download attribute to the PDF title
       link.download = pdf.title || 'document.pdf';
-
+      
       // Append to body, click, and remove
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
-
+    
     console.log("Downloading:", pdf.title);
   }, []);
 

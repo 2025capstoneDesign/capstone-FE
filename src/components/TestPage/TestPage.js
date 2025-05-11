@@ -9,13 +9,16 @@ import PdfViewer from "./PdfViewer";
 import SummaryPanel from "./SummaryPanel";
 import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
+import useBlobUrlManager from "../../hooks/useBlobUrlManager";
 
 export default function TestPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { loading, convertedData, pdfFile: contextPdfFile, cleanupBlobUrls: cleanupLoadingBlobUrls } = useLoading();
-  const { historyData, revokeBlobUrl } = useHistory();
-  const createdBlobUrlsRef = useRef([]);
+  const { loading, convertedData, pdfFile: contextPdfFile, revokePdfBlob } = useLoading();
+  const { historyData } = useHistory();
+
+  // Use our central BlobUrlManager for this component
+  const { createBlobUrl, revokeBlobUrl, revokeAllBlobUrls } = useBlobUrlManager();
 
   // Always prioritize location state (from history) if it exists
   // Otherwise use the context data (from conversion)
@@ -37,22 +40,14 @@ export default function TestPage() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Cleanup function for any locally created blob URLs
-  const cleanupLocalBlobUrls = useCallback(() => {
-    createdBlobUrlsRef.current.forEach(url => {
-      if (url && url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
-    });
-    createdBlobUrlsRef.current = [];
-  }, []);
-
-  // Cleanup all blob URLs when component unmounts
+  // Cleanup all blob URLs managed by this component when it unmounts
   useEffect(() => {
     return () => {
-      cleanupLocalBlobUrls();
+      // We don't want to revoke URL's managed by the contexts
+      // The revokeAllBlobUrls will only revoke URLs created in this component
+      revokeAllBlobUrls();
     };
-  }, [cleanupLocalBlobUrls]);
+  }, [revokeAllBlobUrls]);
 
   // 전달받은 pdfData가 이미 파싱된 데이터인지 확인하고, 아니면 파싱
   const { summaryData, voiceData } =
@@ -68,8 +63,7 @@ export default function TestPage() {
   // 각 페이지 섹션에 대한 ref를 저장할 객체
   const pageSectionRefs = useRef({});
 
-  // We don't need to create a new blob URL here, we should already have it
-  // If pdfFile is already a blob URL or a string path, use it directly
+  // Use pdfFile directly (already a Blob URL or path)
   const pdfUrl = pdfFile;
 
   function onDocumentLoadSuccess({ numPages }) {
@@ -102,17 +96,22 @@ export default function TestPage() {
     goToPage(1);
   }, [goToPage]);
 
-  // Handle navigation away from this component
-  const handlePageLeave = useCallback(() => {
-    // Don't revoke blob URLs from history items - those need to persist
-    // Only clean up locally created ones if any
-    cleanupLocalBlobUrls();
-  }, [cleanupLocalBlobUrls]);
-
+  // Handle navigation away from this component - don't revoke context-managed blob URLs
   const handleConvertClick = useCallback(() => {
-    handlePageLeave();
     navigate("/convert");
-  }, [handlePageLeave, navigate]);
+  }, [navigate]);
+
+  // Add download functionality using the blob URL
+  const handleDownload = useCallback(() => {
+    if (pdfUrl && typeof pdfUrl === 'string') {
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = 'document.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }, [pdfUrl]);
 
   return (
     <div className="app-wrapper">
@@ -122,7 +121,9 @@ export default function TestPage() {
           <button className="convert-btn" onClick={handleConvertClick}>
             다시 변환하기
           </button>
-          <button className="download-btn">다운로드</button>
+          <button className="download-btn" onClick={handleDownload}>
+            다운로드
+          </button>
         </div>
       </div>
       <div className="main-content">

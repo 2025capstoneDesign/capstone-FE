@@ -1,6 +1,7 @@
 //src/context/LoadingContext.js
 
 import React, { createContext, useState, useContext, useEffect } from "react";
+import useBlobUrlManager from "../hooks/useBlobUrlManager";
 
 const LoadingContext = createContext();
 
@@ -11,8 +12,15 @@ export function LoadingProvider({ children }) {
   const [convertedData, setConvertedData] = useState(null);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [pdfFile, setPdfFile] = useState(null);
-  const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
-  const [originalFiles, setOriginalFiles] = useState({});
+  
+  // Use the centralized BlobUrlManager hook
+  const { 
+    createBlobUrl, 
+    revokeBlobUrl, 
+    revokeAllBlobUrls, 
+    getOriginalFile, 
+    blobUrlMap 
+  } = useBlobUrlManager();
 
   // Reset progress when loading starts
   useEffect(() => {
@@ -21,20 +29,6 @@ export function LoadingProvider({ children }) {
       setCurrentStage(0);
     }
   }, [loading]);
-
-  // Cleanup function for Blob URLs
-  const cleanupBlobUrls = () => {
-    if (pdfBlobUrl && pdfBlobUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(pdfBlobUrl);
-    }
-  };
-
-  // Cleanup Blob URLs when component unmounts
-  useEffect(() => {
-    return () => {
-      cleanupBlobUrls();
-    };
-  }, []);
 
   // Simulate progress when in loading state
   useEffect(() => {
@@ -74,22 +68,20 @@ export function LoadingProvider({ children }) {
   }, [loading]);
 
   const startLoading = (files, pdf) => {
-    // Clean up previous Blob URL if it exists
-    cleanupBlobUrls();
-
+    // If we had previous blob URL for a PDF, revoke it
+    if (pdfFile && typeof pdfFile === 'string' && pdfFile.startsWith('blob:')) {
+      revokeBlobUrl(pdfFile);
+    }
+    
     setLoading(true);
     setUploadedFiles(files);
-
-    // If pdf is a File object, create a Blob URL
+    
+    // If pdf is a File object, create a Blob URL using our hook
     if (pdf instanceof File) {
-      const blobUrl = URL.createObjectURL(pdf);
-      setPdfBlobUrl(blobUrl);
-      // Store the original file in a map for potential later use
-      setOriginalFiles(prev => ({ ...prev, [blobUrl]: pdf }));
+      const blobUrl = createBlobUrl(pdf);
       setPdfFile(blobUrl);
     } else {
       // If it's already a string (like "/sample3.pdf"), keep it as is
-      setPdfBlobUrl(null);
       setPdfFile(pdf);
     }
   };
@@ -111,12 +103,13 @@ export function LoadingProvider({ children }) {
         convertedData,
         uploadedFiles,
         pdfFile,
-        pdfBlobUrl,
-        originalFiles,
         startLoading,
         stopLoading,
         setProgress,
-        cleanupBlobUrls,
+        getOriginalPdfFile: getOriginalFile,
+        revokePdfBlob: revokeBlobUrl,
+        revokeAllBlobs: revokeAllBlobUrls,
+        blobUrlMap
       }}
     >
       {children}
