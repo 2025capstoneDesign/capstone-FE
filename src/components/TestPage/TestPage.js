@@ -14,11 +14,11 @@ import useBlobUrlManager from "../../hooks/useBlobUrlManager";
 export default function TestPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { loading, convertedData, pdfFile: contextPdfFile, revokePdfBlob } = useLoading();
+  const { convertedData, pdfFile: contextPdfFile } = useLoading();
   const { historyData } = useHistory();
 
   // Use our central BlobUrlManager for this component
-  const { createBlobUrl, revokeBlobUrl, revokeAllBlobUrls } = useBlobUrlManager();
+  const { revokeAllBlobUrls } = useBlobUrlManager();
 
   // Always prioritize location state (from history) if it exists
   // Otherwise use the context data (from conversion)
@@ -103,10 +103,10 @@ export default function TestPage() {
 
   // Add download functionality using the blob URL
   const handleDownload = useCallback(() => {
-    if (pdfUrl && typeof pdfUrl === 'string') {
-      const link = document.createElement('a');
+    if (pdfUrl && typeof pdfUrl === "string") {
+      const link = document.createElement("a");
       link.href = pdfUrl;
-      link.download = 'document.pdf';
+      link.download = "document.pdf";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
