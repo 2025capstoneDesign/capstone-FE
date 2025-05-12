@@ -11,19 +11,19 @@ export default function PdfViewer({
   goPrevPage,
   goNextPage,
 }) {
-  // The Document component will handle both file paths and blob URLs correctly,
-  // so we don't need to do any special conversion here.
-  // Just pass pdfUrl directly to the file prop.
+  // Document 컴포넌트는 파일 경로와 blob URL을 모두 올바르게 처리하므로,
+  // 여기서 특별한 변환 작업이 필요X
+  // pdfUrl을 file prop에 직접 전달
 
-  // Track loading state to show a loading indicator if needed
+  // 로딩 상태를 추적하여 필요한 경우 로딩 표시
   const [isLoading, setIsLoading] = useState(false);
 
-  // Reset loading state when the PDF URL changes
+  // PDF URL이 변경될 때 로딩 상태를 초기화
   useEffect(() => {
     setIsLoading(true);
   }, [pdfUrl]);
 
-  // Handle successful loading
+  // 성공적인 로딩 처리
   const handleLoadSuccess = (pdf) => {
     setIsLoading(false);
     if (onDocumentLoadSuccess) {
@@ -31,7 +31,7 @@ export default function PdfViewer({
     }
   };
 
-  // Handle loading error
+  // 로딩 오류 처리
   const handleLoadError = (error) => {
     setIsLoading(false);
     console.error("Error loading PDF:", error);

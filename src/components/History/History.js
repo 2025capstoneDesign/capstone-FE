@@ -16,11 +16,11 @@ export default function History() {
   const [selectedPdf, setSelectedPdf] = useState(null);
   const { historyData, getOriginalFile } = useHistory();
   const { loading, progress, uploadedFiles } = useLoading();
-  
-  // Use our BlobUrlManager hook for any local blob URL needs
-  const { createBlobUrl, revokeBlobUrl, revokeAllBlobUrls } = useBlobUrlManager();
-  
-  // Clean up any local blob URLs when component unmounts
+
+  // 로컬 블랍 URL 관리를 위한 훅
+  const { revokeAllBlobUrls } = useBlobUrlManager();
+
+  // 컴포넌트 언마운트 시 로컬 블랍 URL 정리
   useEffect(() => {
     return () => {
       revokeAllBlobUrls();
@@ -33,61 +33,69 @@ export default function History() {
     // historyData가 변경되면 화면을 새로 렌더링하고 있는지 확인
     if (historyData && Array.isArray(historyData)) {
       // 정상적으로 업데이트됨
-      console.log(`History.js - 총 ${historyData.length}개의 히스토리 항목 로드됨`);
+      console.log(
+        `History.js - 총 ${historyData.length}개의 히스토리 항목 로드됨`
+      );
     } else {
       console.error("History.js - 히스토리 데이터 형식이 잘못됨:", historyData);
     }
   }, [historyData]);
 
-  const handleViewPdf = useCallback((pdf) => {
-    setSelectedPdf(pdf);
+  const handleViewPdf = useCallback(
+    (pdf) => {
+      setSelectedPdf(pdf);
 
-    // PDF 데이터를 미리 파싱하여 전달
-    const parsedData =
-      typeof pdf.data === "object" && pdf.data?.summaryData
-        ? pdf.data
-        : parseData(pdf.data);
+      // PDF 데이터를 미리 파싱하여 전달
+      const parsedData =
+        typeof pdf.data === "object" && pdf.data?.summaryData
+          ? pdf.data
+          : parseData(pdf.data);
 
-    // Validate that pdf.pdfFile is a string (either a Blob URL or static path)
-    // If it's not a string (e.g., somehow a File object got here), log an error
-    if (!(typeof pdf.pdfFile === 'string')) {
-      console.error("History - pdfFile is not a string URL:", pdf.pdfFile);
-      return; // Don't proceed with navigation
-    }
+      // pdf.pdfFile이 문자열인지 확인
+      // 문자열이 아니면 (예: 뭔가 파일 객체가 여기에 왔다면) 오류 로그 출력
+      if (!(typeof pdf.pdfFile === "string")) {
+        console.error("History - pdfFile is not a string URL:", pdf.pdfFile);
+        return; // 계속 진행하지 않음
+      }
 
-    // Even if we are loading something else, we can still view files from history
-    navigate("/test", {
-      state: {
-        pdfFile: pdf.pdfFile, // Using the Blob URL or static path
-        pdfData: parsedData, // 이미 파싱된 데이터 전달
-      },
-    });
-  }, [navigate]);
+      // 다른 것을 로드하고 있더라도 히스토리에서 파일을 볼 수 있음
+      navigate("/test", {
+        state: {
+          pdfFile: pdf.pdfFile, // 블랍 URL 또는 정적 경로 사용
+          pdfData: parsedData, // 이미 파싱된 데이터 전달
+        },
+      });
+    },
+    [navigate]
+  );
 
   const handleDownload = useCallback((pdf) => {
-    // Create a temporary anchor element
-    const link = document.createElement('a');
+    const link = document.createElement("a");
 
-    // If it's a blob URL or static path, we can download it directly
-    if (pdf.pdfFile && typeof pdf.pdfFile === 'string') {
-      // For blob URLs, we can download directly
-      // For static paths like "/sample3.pdf", we need to add the base URL
-      const isStaticPath = pdf.pdfFile.startsWith('/') && !pdf.pdfFile.startsWith('blob:');
+    // 블랍 URL 또는 정적 경로이면 직접 다운로드 가능
+    if (pdf.pdfFile && typeof pdf.pdfFile === "string") {
+      // 블랍 URL이면 직접 다운로드 가능
+      // 정적 경로(예: "/sample3.pdf")는 기본 URL을 추가해야 함
+      const isStaticPath =
+        pdf.pdfFile.startsWith("/") && !pdf.pdfFile.startsWith("blob:");
       link.href = isStaticPath
         ? window.location.origin + pdf.pdfFile
         : pdf.pdfFile;
 
-      // Set download attribute to the PDF title
-      link.download = pdf.title || 'document.pdf';
+      // 다운로드 속성을 PDF 제목으로 설정
+      link.download = pdf.title || "document.pdf";
 
-      // Append to body, click, and remove
+      // 바디에 추가, 클릭, 제거
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
       console.log("Downloading:", pdf.title);
     } else {
-      console.error("History - Cannot download: pdfFile is not a string URL or is missing", pdf);
+      console.error(
+        "History - Cannot download: pdfFile is not a string URL or is missing",
+        pdf
+      );
     }
   }, []);
 
