@@ -5,7 +5,7 @@ import { useLoading } from "../../context/LoadingContext";
 import { useNavigate } from "react-router-dom";
 
 function LoadingSection() {
-  const { progress, currentStage } = useLoading();
+  const { progress, currentStage, statusMessage } = useLoading();
   const navigate = useNavigate();
 
   // Stage labels
@@ -42,8 +42,15 @@ function LoadingSection() {
           <div className="absolute top-0 left-[60%] w-0.5 h-2 bg-gray-400 rounded"></div>
         </div>
 
+        {/* Status message from server */}
+        {statusMessage && (
+          <div className="text-center text-[#5B7F7C] font-medium mb-6">
+            {statusMessage}
+          </div>
+        )}
+
         {/* Stages */}
-        <div className="flex justify-between mt-12">
+        <div className="flex justify-between mt-8">
           {/* Stage 1 */}
           <div className="flex flex-col items-center w-1/3 px-2">
             <div

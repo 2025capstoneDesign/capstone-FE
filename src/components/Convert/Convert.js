@@ -2,14 +2,12 @@
 
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import "../../css/TestPage.css";
 import FileUploadSection from "./FileUploadSection";
 import LoadingSection from "./LoadingSection";
 import SummarySection from "./SummarySection";
 import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
-import { parseData } from "../TestPage/DataParser";
 import useBlobUrlManager from "../../hooks/useBlobUrlManager";
 
 function Convert() {
@@ -19,8 +17,14 @@ function Convert() {
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState("ai");
   const [highlightColor, setHighlightColor] = useState("red");
-  const { loading, startLoading, stopLoading, pdfFile, convertedData } =
-    useLoading();
+  const {
+    loading,
+    startLoading,
+    stopLoading,
+    pdfFile,
+    convertedData,
+    processingError,
+  } = useLoading();
 
   //히스토리 결과 추가 함수
   const { addToHistory } = useHistory();
@@ -65,61 +69,15 @@ function Convert() {
         },
       });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, convertedData, navigate, pdfFile]);
 
-  // 더미 데이터 fetch 함수
-  const fetchMockData = async () => {
-    return new Promise((resolve) => {
-      // 로딩 프로세스 시뮬레이션 (20초 대기)
-      setTimeout(() => {
-        // 더미 데이터 가져오기
-        import("../../data/dummyData").then((module) => {
-          const { dummyData } = module;
-          const parsedData = parseData(dummyData);
-          resolve(parsedData);
-        });
-      }, 20000);
-    });
-  };
-
-  // 실제 API 요청 처리 함수
-  const processFiles = async (audioFile, docFile) => {
-    const formData = new FormData();
-
-    if (audioFile) {
-      formData.append("audio_file", audioFile);
+  // Display error if processing failed
+  useEffect(() => {
+    if (processingError) {
+      setError(processingError);
     }
-
-    if (docFile) {
-      formData.append("doc_file", docFile);
-    }
-
-    // 항상 skip_transcription = true 추가 (STT 문제있음)
-    formData.append("skip_transcription", "true");
-
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/ai/process-lecture`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        // 응답 데이터 파싱 후 요약 데이터만 반환
-        const data = response.data;
-        const parsedData = parseData(data);
-        return parsedData;
-      }
-    } catch (error) {
-      console.error("API 요청 실패:", error);
-      throw error;
-    }
-  };
+  }, [processingError]);
 
   //파일 업로드 함수
   const handleFileUpload = async (event) => {
@@ -146,28 +104,18 @@ function Convert() {
 
     try {
       if (process.env.REACT_APP_API_URL === "mock") {
-        //파일 없을 경우 더미 데이터 로딩
+        // 모크 모드일 때는 sample3.pdf 파일 사용
+        const pdfFileObj = "/sample3.pdf";
+
         if (files.length === 0) {
-          //더미 데이터 로딩
-          const pdfFileObj = "/sample3.pdf";
+          // 파일 없을 경우 샘플 PDF만 사용
           startLoading([], pdfFileObj);
-          const result = await fetchMockData();
-
-          //로딩 종료
-          stopLoading(result);
         } else {
-          //파일 있을 경우 첫번째 파일 로딩
-          const pdfFileObj = files[0];
-          startLoading(files, pdfFileObj);
-
-          //더미 데이터 로딩
-          const result = await fetchMockData();
-
-          //로딩 종료
-          stopLoading(result);
+          // 파일 있을 경우 업로드된 파일 사용
+          startLoading(files, files[0]);
         }
       } else {
-        //실제 API 요청 처리 부분
+        // 실제 API 사용 모드
         if (files.length === 0) {
           window.alert("파일을 업로드해주세요.");
           return;
@@ -188,18 +136,13 @@ function Convert() {
           }
         }
 
-        // 로딩 시작
-        startLoading(files, docFile || files[0]);
-
-        // API 요청 처리
-        try {
-          const result = await processFiles(audioFile, docFile);
-          stopLoading(result);
-        } catch (error) {
-          console.error("변환 실패:", error);
-          window.alert("파일 변환에 실패했습니다. 다시 시도해주세요.");
-          stopLoading(null);
+        if (!docFile) {
+          setError("문서 파일(PDF, PPT, DOC)을 업로드해주세요.");
+          return;
         }
+
+        // 로딩 시작 (LoadingContext에서 API 호출 처리)
+        startLoading(files, docFile);
       }
     } catch (error) {
       console.error("변환 실패:", error);
