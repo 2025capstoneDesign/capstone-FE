@@ -36,32 +36,47 @@ export function HistoryProvider({ children }) {
 
   // Add new items to history
   const addToHistory = (title, pdfFileOrUrl, data, size = "2.5MB") => {
-    console.log("Adding to history:", { title, pdfFileOrUrl, data, size });
-    
-    let pdfBlobUrl = pdfFileOrUrl;
-    let fileTitle = title;
-    
-    // If pdfFileOrUrl is a File object, create a blob URL using our hook
-    if (pdfFileOrUrl instanceof File) {
-      pdfBlobUrl = createBlobUrl(pdfFileOrUrl);
-      fileTitle = pdfFileOrUrl.name;
+    console.log("HistoryContext - addToHistory 호출됨:", { title, pdfFileOrUrl, data, size });
+
+    if (!pdfFileOrUrl || !data) {
+      console.error("HistoryContext - 히스토리 추가 실패: 필수 데이터 누락", { title, pdfFileOrUrl, data, size });
+      return;
     }
 
-    const newItem = {
-      id: Date.now(),
-      title: typeof fileTitle === "string" ? fileTitle : "Unnamed File",
-      date: new Date().toISOString().split("T")[0],
-      size: typeof size === "string" ? size : formatFileSize(size),
-      pdfFile: pdfBlobUrl, // Store the blob URL or path string
-      data: data,
-    };
+    try {
+      let pdfBlobUrl = pdfFileOrUrl;
+      let fileTitle = title;
 
-    setHistoryData((prev) => {
-      console.log("Previous history:", prev);
-      const newHistory = [newItem, ...prev];
-      console.log("New history:", newHistory);
-      return newHistory;
-    });
+      // If pdfFileOrUrl is a File object, create a blob URL using our hook
+      if (pdfFileOrUrl instanceof File) {
+        pdfBlobUrl = createBlobUrl(pdfFileOrUrl);
+        fileTitle = pdfFileOrUrl.name;
+      }
+
+      const newItem = {
+        id: Date.now(), // 고유 ID 생성
+        title: typeof fileTitle === "string" ? fileTitle : "Unnamed File",
+        date: new Date().toISOString().split("T")[0],
+        size: typeof size === "string" ? size : formatFileSize(size),
+        pdfFile: pdfBlobUrl, // Store the blob URL or path string
+        data: data,
+      };
+
+      // 안전하게 상태 업데이트
+      setHistoryData((prev) => {
+        if (!Array.isArray(prev)) {
+          console.warn("HistoryContext - 이전 히스토리가 배열이 아님, 초기화합니다");
+          return [newItem];
+        }
+
+        console.log("HistoryContext - 이전 히스토리:", prev);
+        const newHistory = [newItem, ...prev];
+        console.log("HistoryContext - 새 히스토리:", newHistory);
+        return newHistory;
+      });
+    } catch (error) {
+      console.error("HistoryContext - 히스토리 추가 중 오류 발생:", error);
+    }
   };
 
   // Format file size in a readable format

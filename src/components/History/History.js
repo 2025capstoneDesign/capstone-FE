@@ -28,7 +28,15 @@ export default function History() {
   }, [revokeAllBlobUrls]);
 
   useEffect(() => {
-    console.log("History data updated:", historyData);
+    console.log("History.js - 히스토리 데이터 업데이트됨:", historyData);
+
+    // historyData가 변경되면 화면을 새로 렌더링하고 있는지 확인
+    if (historyData && Array.isArray(historyData)) {
+      // 정상적으로 업데이트됨
+      console.log(`History.js - 총 ${historyData.length}개의 히스토리 항목 로드됨`);
+    } else {
+      console.error("History.js - 히스토리 데이터 형식이 잘못됨:", historyData);
+    }
   }, [historyData]);
 
   const handleViewPdf = useCallback((pdf) => {

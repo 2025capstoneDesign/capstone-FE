@@ -4,12 +4,30 @@
 /**
  * JSON 형식의 데이터를 TestPage에서 사용할 수 있는 형식으로 변환합니다.
  *
- * @param {Object} data - 변환할 데이터 객체 (dummyData.js 형식)
+ * @param {Object} data - 변환할 데이터 객체 (dummyData.js 형식 또는 API 응답 형식)
  * @returns {Object} - 변환된 데이터 객체 {summaryData, voiceData}
  */
 export const parseData = (data) => {
-  if (!data || typeof data !== "object")
+  // 데이터 유효성 검사
+  if (!data || typeof data !== "object") {
+    console.error("DataParser - 유효하지 않은 데이터 형식:", data);
     return { summaryData: {}, voiceData: {} };
+  }
+
+  // API가 result 필드 안에 데이터를 반환하는 경우 처리
+  if (data.result && typeof data.result === "object") {
+    console.log("DataParser - result 필드 데이터 사용");
+    return parseData(data.result); // 재귀적으로 내부 데이터 파싱
+  }
+
+  console.log("DataParser - 데이터 파싱 시작:", Object.keys(data));
+
+  // 올바른 형식인지 확인 (최소한 하나의 슬라이드 키가 있어야 함 - slide1, slide2 등)
+  const hasSlideKeys = Object.keys(data).some(key => /slide\d+/.test(key));
+  if (!hasSlideKeys) {
+    console.error("DataParser - 슬라이드 데이터를 찾을 수 없음:", data);
+    return { summaryData: {}, voiceData: {} };
+  }
 
   // summaryData 생성: 페이지 번호를 키로 하는 객체 생성
   const summaryData = {};
@@ -19,6 +37,11 @@ export const parseData = (data) => {
 
   // 데이터 파싱
   Object.keys(data).forEach((slideKey, index) => {
+    // 슬라이드 키가 아닌 경우 건너뛰기
+    if (!/slide\d+/.test(slideKey)) {
+      return;
+    }
+
     const slideData = data[slideKey] || {};
 
     // slideKey에서 숫자 추출 ("slide5" -> 5), 없으면 인덱스 + 1 사용
@@ -59,6 +82,7 @@ export const parseData = (data) => {
     }
   });
 
+  console.log("DataParser - 파싱 완료, 페이지 수:", Object.keys(summaryData).length);
   return { summaryData, voiceData };
 };
 

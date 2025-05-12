@@ -106,41 +106,65 @@ export function LoadingProvider({ children }) {
 
   const continueProcessing = async (jId = null) => {
     const currentJobId = jId || jobId;
-    
+
     if (!currentJobId) {
       console.error("No job ID available for processing");
       return;
     }
-    
+
     try {
       // Start the polling loop
       let currentProgress = 0;
-      
+
       while (currentProgress < 100 && isProcessing.current) {
         try {
           const statusData = await processService.checkProcessStatus(currentJobId);
           currentProgress = statusData.progress;
-          
+
           setProgress(currentProgress);
           setStatusMessage(statusData.message || "");
-          
+
           if (currentProgress === 100) {
             // Process is complete, fetch result
             const resultData = await processService.getProcessResult(currentJobId);
-            stopLoading(resultData.result);
+            console.log("LoadingContext - API 응답 결과:", resultData);
+
+            // API가 직접 객체를 반환하는 경우 (result 필드 없이)
+            if (resultData && typeof resultData === 'object' && (resultData.slide1 || Object.keys(resultData).length > 0)) {
+              console.log("LoadingContext - 변환 결과 데이터 수신 성공 (직접 객체)");
+              stopLoading(resultData);
+            }
+            // API가 result 필드 안에 데이터를 반환하는 경우
+            else if (resultData && resultData.result) {
+              console.log("LoadingContext - 변환 결과 데이터 수신 성공 (result 필드)");
+              stopLoading(resultData.result);
+            }
+            // 데이터가 없거나 예상치 못한 형식인 경우
+            else {
+              console.error("LoadingContext - 변환 결과 데이터 형식 오류:", resultData);
+              setProcessingError("변환 결과 데이터를 받지 못했습니다. 다시 시도해주세요.");
+              stopLoading();
+            }
             break;
           }
-          
+
           // Wait 1 second before next poll
           await new Promise(resolve => setTimeout(resolve, 1000));
         } catch (error) {
           console.error("Error checking process status:", error);
+          // 3번까지 재시도 후 계속 오류 발생시 처리 중단
+          if (error.response && error.response.status === 404) {
+            console.error("LoadingContext - 작업을 찾을 수 없음:", currentJobId);
+            setProcessingError("변환 작업을 찾을 수 없습니다. 다시 시도해주세요.");
+            stopLoading();
+            break;
+          }
           // Continue polling despite errors - the service handles retries
         }
       }
     } catch (error) {
-      console.error("Error in process flow:", error);
-      setProcessingError("An error occurred during the conversion process. Please try again.");
+      console.error("LoadingContext - 처리 흐름 오류:", error);
+      setProcessingError("변환 과정에서 오류가 발생했습니다. 다시 시도해주세요.");
       stopLoading();
     }
   };

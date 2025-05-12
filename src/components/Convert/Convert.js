@@ -34,43 +34,77 @@ function Convert() {
   // 로딩이 완료되었는지 확인하고 결과 페이지로 이동
   useEffect(() => {
     if (loading === false && convertedData) {
-      let pdfBlobUrl = pdfFile;
-      let fileTitle;
-      let fileSize;
-
-      // pdfFile이 File 객체인 경우 Blob URL로 변환
-      if (pdfFile instanceof File) {
-        pdfBlobUrl = createBlobUrl(pdfFile);
-        fileTitle = pdfFile.name;
-        fileSize = pdfFile.size;
-      } else {
-        // pdfFile이 이미 문자열(Blob URL 또는 정적 경로)인 경우
-        fileTitle =
-          typeof pdfFile === "string"
-            ? pdfFile.split("/").pop()
-            : "Unnamed File";
-        fileSize = typeof pdfFile === "string" ? "2.5MB" : "Unknown";
-      }
-
-      // 히스토리에 결과 추가
-      addToHistory(fileTitle, pdfBlobUrl, convertedData, fileSize);
-      console.log("Convert - 변환 완료 후 히스토리에 추가:", {
-        title: fileTitle,
-        pdfFile: pdfBlobUrl,
-        convertedData,
-        size: fileSize,
-      });
-
       // 테스트 페이지로 이동
+      let pdfBlobUrl = pdfFile;
+
+      // 히스토리에 결과를 직접 추가하지 않고 navigate만 수행
+      // 히스토리 저장 로직은 별도 함수로 분리하여 수행
       navigate("/test", {
         state: {
           pdfFile: pdfBlobUrl,
           pdfData: convertedData,
         },
       });
+
+      // 히스토리 저장 함수 호출
+      saveToHistory(pdfFile, convertedData);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, convertedData, navigate, pdfFile]);
+
+  // 히스토리 저장을 위한 별도 함수
+  const saveToHistory = (pdfFileOrUrl, data) => {
+    if (!pdfFileOrUrl) {
+      console.error("History 저장 실패: PDF 파일 데이터 누락", { pdfFileOrUrl });
+      return;
+    }
+
+    if (!data) {
+      console.error("History 저장 실패: 변환 데이터 누락", { data });
+      return;
+    }
+
+    console.log("Convert - 히스토리 저장 시작, 데이터 형식:", typeof data, data);
+
+    try {
+      let pdfBlobUrl = pdfFileOrUrl;
+      let fileTitle;
+      let fileSize;
+
+      // pdfFile이 File 객체인 경우 Blob URL로 변환
+      if (pdfFileOrUrl instanceof File) {
+        pdfBlobUrl = createBlobUrl(pdfFileOrUrl);
+        fileTitle = pdfFileOrUrl.name;
+        fileSize = pdfFileOrUrl.size;
+      } else {
+        // pdfFile이 이미 문자열(Blob URL 또는 정적 경로)인 경우
+        fileTitle =
+          typeof pdfFileOrUrl === "string"
+            ? pdfFileOrUrl.split("/").pop()
+            : "Unnamed File";
+        fileSize = typeof pdfFileOrUrl === "string" ? "2.5MB" : "Unknown";
+      }
+
+      // 히스토리에 결과 추가 (timeout을 통해 실행 컨텍스트 분리)
+      setTimeout(() => {
+        // 데이터가 유효한지 최종 확인
+        if (data && typeof data === 'object') {
+          addToHistory(fileTitle, pdfBlobUrl, data, fileSize);
+          console.log("Convert - 변환 완료 후 히스토리에 추가 성공:", {
+            title: fileTitle,
+            pdfFile: pdfBlobUrl,
+            dataType: typeof data,
+            hasData: !!data,
+            size: fileSize,
+          });
+        } else {
+          console.error("Convert - 히스토리 추가 실패: 유효하지 않은 데이터", data);
+        }
+      }, 100);
+    } catch (error) {
+      console.error("History 저장 중 오류 발생:", error);
+    }
+  };
 
   // Display error if processing failed
   useEffect(() => {
