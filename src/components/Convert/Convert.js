@@ -17,6 +17,10 @@ function Convert() {
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState("ai");
   const [highlightColor, setHighlightColor] = useState("red");
+  // 방금 변환이 완료되었는지 추적하는 state
+  const [conversionJustCompleted, setConversionJustCompleted] = useState(false);
+  // 이 컴포넌트에서 변환 결과를 처리했는지 추적하는 ref
+  const processedConversion = useRef(false);
   const {
     loading,
     startLoading,
@@ -24,6 +28,8 @@ function Convert() {
     pdfFile,
     convertedData,
     processingError,
+    setConvertedData,
+    resetAllState
   } = useLoading();
 
   //히스토리 결과 추가 함수
@@ -31,9 +37,57 @@ function Convert() {
   //Blob URL 생성 함수
   const { createBlobUrl } = useBlobUrlManager();
 
+  // Convert 컴포넌트가 마운트될 때 상태 처리
+  useEffect(() => {
+    // Debug logs
+    console.log("Convert 컴포넌트 마운트됨");
+    console.log("현재 convertedData 상태:", convertedData);
+    console.log("현재 loading 상태:", loading);
+    console.log("processedConversion:", processedConversion.current);
+
+    // 로딩 중이 아닐 때만 상태 초기화 (변환이 끝난 후에만)
+    if (!loading) {
+      console.log("로딩 중 아님, 상태 초기화 진행");
+
+      // 강제로 convertedData 초기화
+      setConvertedData(null);
+
+      // 매우 중요: 의도적으로 true로 설정하여 navigation을 방지
+      setConversionJustCompleted(true);
+      // 이미 처리되었음을 표시
+      processedConversion.current = true;
+
+      console.log("상태 완전히 초기화 완료, 자동 탐색 방지됨");
+    } else {
+      console.log("로딩 중, 상태 초기화 건너뜀");
+    }
+
+    // 컴포넌트 언마운트 시 정리 함수
+    return () => {
+      console.log("Convert 컴포넌트 언마운트, 상태 정리");
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // 로딩이 완료되었는지 확인하고 결과 페이지로 이동
   useEffect(() => {
-    if (loading === false && convertedData) {
+    console.log("navigation effect 실행됨");
+    console.log("loading:", loading, "convertedData:", convertedData ? "있음" : "없음");
+    console.log("conversionJustCompleted:", conversionJustCompleted);
+    console.log("processedConversion:", processedConversion.current);
+
+    // 모든 조건을 엄격하게 검증:
+    // 1. 로딩이 완료됨
+    // 2. 변환 데이터가 있음
+    // 3. 이미 처리된 상태가 아님 (conversionJustCompleted가 false)
+    // 4. 이 컴포넌트에서 이미 처리하지 않았음 (processedConversion.current가 false)
+    if (loading === false && convertedData && !conversionJustCompleted && !processedConversion.current) {
+      console.log("navigation 조건 충족, 테스트 페이지로 이동");
+
+      // 이미 처리했음을 표시
+      setConversionJustCompleted(true);
+      processedConversion.current = true;
+
       // 테스트 페이지로 이동
       let pdfBlobUrl = pdfFile;
 
@@ -48,9 +102,11 @@ function Convert() {
 
       // 히스토리 저장 함수 호출
       saveToHistory(pdfFile, convertedData);
+    } else {
+      console.log("navigation 조건 미충족, 이동하지 않음");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, convertedData, navigate, pdfFile]);
+  }, [loading, convertedData, navigate, pdfFile, conversionJustCompleted]);
 
   // 히스토리 저장을 위한 별도 함수
   const saveToHistory = (pdfFileOrUrl, data) => {
@@ -157,6 +213,14 @@ function Convert() {
   //변환 버튼 클릭 함수
   const handleConvert = async () => {
     setError("");
+
+    // 변환 상태 추적 변수 리셋
+    setConversionJustCompleted(false);
+    // 변환 처리 상태 초기화
+    processedConversion.current = false;
+    // 이전 변환 결과 초기화 (다음 변환을 준비)
+    setConvertedData(null);
+    console.log("handleConvert: 모든 상태 완전히 리셋됨");
 
     try {
       if (process.env.REACT_APP_API_URL === "mock") {

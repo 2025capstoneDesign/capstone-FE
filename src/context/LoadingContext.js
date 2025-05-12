@@ -68,15 +68,21 @@ export function LoadingProvider({ children }) {
   }, []);
 
   const startLoading = async (files, pdf) => {
+    console.log("LoadingContext - startLoading 호출됨");
+    console.log("이전 convertedData:", convertedData ? "있음" : "없음");
+
     // If we had previous blob URL for a PDF, revoke it
     if (pdfFile && typeof pdfFile === 'string' && pdfFile.startsWith('blob:')) {
       revokeBlobUrl(pdfFile);
     }
-    
+
+    // Reset convertedData to ensure we don't trigger navigation again when returning to Convert page
+    setConvertedData(null);
+    console.log("LoadingContext - convertedData 초기화됨");
     setLoading(true);
     setUploadedFiles(files);
     isProcessing.current = true;
-    
+
     // If pdf is a File object, create a Blob URL using our hook
     if (pdf instanceof File) {
       const blobUrl = createBlobUrl(pdf);
@@ -92,9 +98,9 @@ export function LoadingProvider({ children }) {
         document: files.find(file => file.type.includes("pdf") || file.type.includes("presentation")),
         audio: files.find(file => file.type.includes("audio"))
       });
-      
+
       setJobId(job_id);
-      
+
       // Begin polling for status
       continueProcessing(job_id);
     } catch (error) {
@@ -170,12 +176,18 @@ export function LoadingProvider({ children }) {
   };
 
   const stopLoading = (data = null) => {
+    console.log("LoadingContext - stopLoading 호출됨");
+    console.log("데이터 존재 여부:", data ? "있음" : "없음");
+
     setProgress(100);
     setLoading(false);
     isProcessing.current = false;
-    
+
     if (data) {
+      console.log("LoadingContext - convertedData 설정됨");
       setConvertedData(data);
+    } else {
+      console.log("LoadingContext - convertedData 설정 안됨 (null)");
     }
   };
 
@@ -187,6 +199,21 @@ export function LoadingProvider({ children }) {
     setStatusMessage("");
   };
 
+  // 상태를 완전히 초기화하는 함수 추가
+  const resetAllState = () => {
+    console.log("LoadingContext - 모든 상태 초기화");
+    setLoading(false);
+    setProgress(0);
+    setCurrentStage(0);
+    setStatusMessage("");
+    setConvertedData(null);
+    setUploadedFiles([]);
+    setPdfFile(null);
+    setJobId(null);
+    setProcessingError(null);
+    isProcessing.current = false;
+  };
+
   return (
     <LoadingContext.Provider
       value={{
@@ -195,6 +222,7 @@ export function LoadingProvider({ children }) {
         currentStage,
         statusMessage,
         convertedData,
+        setConvertedData,
         uploadedFiles,
         pdfFile,
         jobId,
@@ -202,6 +230,7 @@ export function LoadingProvider({ children }) {
         startLoading,
         stopLoading,
         cancelProcessing,
+        resetAllState,
         setProgress,
         getOriginalPdfFile: getOriginalFile,
         revokePdfBlob: revokeBlobUrl,
