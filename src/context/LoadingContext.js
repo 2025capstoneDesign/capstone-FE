@@ -1,6 +1,8 @@
 //src/context/LoadingContext.js
 
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect, useRef } from "react";
+import useBlobUrlManager from "../hooks/useBlobUrlManager";
+import processService from "../api/processService";
 
 const LoadingContext = createContext();
 
@@ -8,67 +10,208 @@ export function LoadingProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState(0); // 0: 강의 듣는 중, 1: 요약 정리 중, 2: 필기 생성 중
+  const [statusMessage, setStatusMessage] = useState("");
   const [convertedData, setConvertedData] = useState(null);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [pdfFile, setPdfFile] = useState(null);
+  const [jobId, setJobId] = useState(null);
+  const [processingError, setProcessingError] = useState(null);
+  
+  // Flag to continue processing even when navigating away
+  const isProcessing = useRef(false);
+  
+  // Use the centralized BlobUrlManager hook
+  const { 
+    createBlobUrl, 
+    revokeBlobUrl, 
+    revokeAllBlobUrls, 
+    getOriginalFile, 
+    blobUrlMap 
+  } = useBlobUrlManager();
 
   // Reset progress when loading starts
   useEffect(() => {
     if (loading) {
       setProgress(0);
       setCurrentStage(0);
+      setStatusMessage("");
+      setProcessingError(null);
     }
   }, [loading]);
 
-  // Simulate progress when in loading state
+  // Update the current stage based on progress
   useEffect(() => {
     if (!loading) return;
 
-    let timer;
-    let intervalTime = 790; // Update every 200ms
+    // Update stages based on progress
+    if (progress < 30) {
+      setCurrentStage(0); // Listening stage
+    } else if (progress < 60) {
+      setCurrentStage(1); // Summarizing stage
+    } else {
+      setCurrentStage(2); // Writing stage
+    }
+  }, [loading, progress]);
 
-    const simulateProgress = () => {
-      setProgress((prev) => {
-        // Calculate next progress value
-        let next = prev;
-
-        // First stage: 0-30%
-        if (prev < 30) {
-          next = Math.min(30, prev + 0.5);
-          if (next >= 30) setCurrentStage(1);
-        }
-        // Second stage: 30-60%
-        else if (prev < 60) {
-          next = Math.min(60, prev + 0.5);
-          if (next >= 60) setCurrentStage(2);
-        }
-        // Third stage: 60-90%
-        else if (prev < 95) {
-          next = Math.min(95, prev + 0.5);
-        }
-        // Stop at 90% and wait for fetch to complete
-
-        return next;
-      });
+  // Continue processing when component is mounted if a job is in progress
+  useEffect(() => {
+    if (jobId && isProcessing.current) {
+      continueProcessing();
+    }
+    
+    return () => {
+      // Component is unmounting but processing should continue
+      if (loading) {
+        isProcessing.current = true;
+      }
     };
+  }, []);
 
-    timer = setInterval(simulateProgress, intervalTime);
+  const startLoading = async (files, pdf) => {
+    console.log("LoadingContext - startLoading 호출됨");
+    console.log("이전 convertedData:", convertedData ? "있음" : "없음");
 
-    return () => clearInterval(timer);
-  }, [loading]);
+    // If we had previous blob URL for a PDF, revoke it
+    if (pdfFile && typeof pdfFile === 'string' && pdfFile.startsWith('blob:')) {
+      revokeBlobUrl(pdfFile);
+    }
 
-  const startLoading = (files, pdf) => {
+    // Reset convertedData to ensure we don't trigger navigation again when returning to Convert page
+    setConvertedData(null);
+    console.log("LoadingContext - convertedData 초기화됨");
     setLoading(true);
     setUploadedFiles(files);
-    setPdfFile(pdf);
+    isProcessing.current = true;
+
+    // If pdf is a File object, create a Blob URL using our hook
+    if (pdf instanceof File) {
+      const blobUrl = createBlobUrl(pdf);
+      setPdfFile(blobUrl);
+    } else {
+      // If it's already a string (like "/sample3.pdf"), keep it as is
+      setPdfFile(pdf);
+    }
+
+    try {
+      // Start the process with uploaded files
+      const { job_id } = await processService.startProcess({
+        document: files.find(file => file.type.includes("pdf") || file.type.includes("presentation")),
+        audio: files.find(file => file.type.includes("audio"))
+      });
+
+      setJobId(job_id);
+
+      // Begin polling for status
+      continueProcessing(job_id);
+    } catch (error) {
+      console.error("Error starting process:", error);
+      setProcessingError("Failed to start the conversion process. Please try again.");
+      stopLoading();
+    }
+  };
+
+  const continueProcessing = async (jId = null) => {
+    const currentJobId = jId || jobId;
+
+    if (!currentJobId) {
+      console.error("No job ID available for processing");
+      return;
+    }
+
+    try {
+      // Start the polling loop
+      let currentProgress = 0;
+
+      while (currentProgress < 100 && isProcessing.current) {
+        try {
+          const statusData = await processService.checkProcessStatus(currentJobId);
+          currentProgress = statusData.progress;
+
+          setProgress(currentProgress);
+          setStatusMessage(statusData.message || "");
+
+          if (currentProgress === 100) {
+            // Process is complete, fetch result
+            const resultData = await processService.getProcessResult(currentJobId);
+            console.log("LoadingContext - API 응답 결과:", resultData);
+
+            // API가 직접 객체를 반환하는 경우 (result 필드 없이)
+            if (resultData && typeof resultData === 'object' && (resultData.slide1 || Object.keys(resultData).length > 0)) {
+              console.log("LoadingContext - 변환 결과 데이터 수신 성공 (직접 객체)");
+              stopLoading(resultData);
+            }
+            // API가 result 필드 안에 데이터를 반환하는 경우
+            else if (resultData && resultData.result) {
+              console.log("LoadingContext - 변환 결과 데이터 수신 성공 (result 필드)");
+              stopLoading(resultData.result);
+            }
+            // 데이터가 없거나 예상치 못한 형식인 경우
+            else {
+              console.error("LoadingContext - 변환 결과 데이터 형식 오류:", resultData);
+              setProcessingError("변환 결과 데이터를 받지 못했습니다. 다시 시도해주세요.");
+              stopLoading();
+            }
+            break;
+          }
+
+          // Wait 1 second before next poll
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error) {
+          console.error("Error checking process status:", error);
+          // 3번까지 재시도 후 계속 오류 발생시 처리 중단
+          if (error.response && error.response.status === 404) {
+            console.error("LoadingContext - 작업을 찾을 수 없음:", currentJobId);
+            setProcessingError("변환 작업을 찾을 수 없습니다. 다시 시도해주세요.");
+            stopLoading();
+            break;
+          }
+          // Continue polling despite errors - the service handles retries
+        }
+      }
+    } catch (error) {
+      console.error("LoadingContext - 처리 흐름 오류:", error);
+      setProcessingError("변환 과정에서 오류가 발생했습니다. 다시 시도해주세요.");
+      stopLoading();
+    }
   };
 
   const stopLoading = (data = null) => {
+    console.log("LoadingContext - stopLoading 호출됨");
+    console.log("데이터 존재 여부:", data ? "있음" : "없음");
+
     setProgress(100);
     setLoading(false);
+    isProcessing.current = false;
+
     if (data) {
+      console.log("LoadingContext - convertedData 설정됨");
       setConvertedData(data);
+    } else {
+      console.log("LoadingContext - convertedData 설정 안됨 (null)");
     }
+  };
+
+  const cancelProcessing = () => {
+    isProcessing.current = false;
+    setLoading(false);
+    setJobId(null);
+    setProgress(0);
+    setStatusMessage("");
+  };
+
+  // 상태를 완전히 초기화하는 함수 추가
+  const resetAllState = () => {
+    console.log("LoadingContext - 모든 상태 초기화");
+    setLoading(false);
+    setProgress(0);
+    setCurrentStage(0);
+    setStatusMessage("");
+    setConvertedData(null);
+    setUploadedFiles([]);
+    setPdfFile(null);
+    setJobId(null);
+    setProcessingError(null);
+    isProcessing.current = false;
   };
 
   return (
@@ -77,12 +220,22 @@ export function LoadingProvider({ children }) {
         loading,
         progress,
         currentStage,
+        statusMessage,
         convertedData,
+        setConvertedData,
         uploadedFiles,
         pdfFile,
+        jobId,
+        processingError,
         startLoading,
         stopLoading,
+        cancelProcessing,
+        resetAllState,
         setProgress,
+        getOriginalPdfFile: getOriginalFile,
+        revokePdfBlob: revokeBlobUrl,
+        revokeAllBlobs: revokeAllBlobUrls,
+        blobUrlMap
       }}
     >
       {children}

@@ -2,14 +2,13 @@
 
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import "../../css/TestPage.css";
 import FileUploadSection from "./FileUploadSection";
 import LoadingSection from "./LoadingSection";
 import SummarySection from "./SummarySection";
 import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
-import { parseData } from "../TestPage/DataParser";
+import useBlobUrlManager from "../../hooks/useBlobUrlManager";
 
 function Convert() {
   const navigate = useNavigate();
@@ -18,103 +17,192 @@ function Convert() {
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState("ai");
   const [highlightColor, setHighlightColor] = useState("red");
+  // 방금 변환이 완료되었는지 추적하는 state
+  const [conversionJustCompleted, setConversionJustCompleted] = useState(false);
+  // 이 컴포넌트에서 변환 결과를 처리했는지 추적하는 ref
+  const processedConversion = useRef(false);
   const {
     loading,
     startLoading,
     stopLoading,
-    progress,
     pdfFile,
     convertedData,
+    processingError,
+    setConvertedData,
   } = useLoading();
 
+  //히스토리 결과 추가 함수
   const { addToHistory } = useHistory();
-  const hasAddedToHistory = useRef(false);
+  //Blob URL 생성 함수
+  const { createBlobUrl } = useBlobUrlManager();
 
-  // Check if loading is complete (100%) and navigate to result page
+  // Convert 컴포넌트가 마운트될 때 상태 처리
   useEffect(() => {
+    // Debug logs
+    console.log("Convert 컴포넌트 마운트됨");
+    console.log("현재 convertedData 상태:", convertedData);
+    console.log("현재 loading 상태:", loading);
+    console.log("processedConversion:", processedConversion.current);
+
+    // 로딩 중이 아닐 때만 상태 초기화 (변환이 끝난 후에만)
+    if (!loading) {
+      console.log("로딩 중 아님, 상태 초기화 진행");
+
+      // 강제로 convertedData 초기화
+      setConvertedData(null);
+
+      // 매우 중요: 의도적으로 true로 설정하여 navigation을 방지
+      setConversionJustCompleted(true);
+      // 이미 처리되었음을 표시
+      processedConversion.current = true;
+
+      console.log("상태 완전히 초기화 완료, 자동 탐색 방지됨");
+    } else {
+      console.log("로딩 중, 상태 초기화 건너뜀");
+    }
+
+    // 컴포넌트 언마운트 시 정리 함수
+    return () => {
+      console.log("Convert 컴포넌트 언마운트, 상태 정리");
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 로딩이 완료되었는지 확인하고 결과 페이지로 이동
+  useEffect(() => {
+    console.log("navigation effect 실행됨");
+    console.log(
+      "loading:",
+      loading,
+      "convertedData:",
+      convertedData ? "있음" : "없음"
+    );
+    console.log("conversionJustCompleted:", conversionJustCompleted);
+    console.log("processedConversion:", processedConversion.current);
+
+    // 모든 조건을 엄격하게 검증:
+    // 1. 로딩이 완료됨
+    // 2. 변환 데이터가 있음
+    // 3. 이미 처리된 상태가 아님 (conversionJustCompleted가 false)
+    // 4. 이 컴포넌트에서 이미 처리하지 않았음 (processedConversion.current가 false)
     if (
       loading === false &&
-      progress === 100 &&
       convertedData &&
-      !hasAddedToHistory.current
+      !conversionJustCompleted &&
+      !processedConversion.current
     ) {
-      hasAddedToHistory.current = true;
-      // Add to history before navigating
-      const title =
-        typeof pdfFile === "string" ? pdfFile.split("/").pop() : pdfFile.name;
-      const size = typeof pdfFile === "string" ? "2.5MB" : pdfFile.size;
-      addToHistory(title, pdfFile, convertedData, size);
-      console.log("Convert - 변환 완료 후 히스토리에 추가:", {
-        title,
-        pdfFile,
-        convertedData,
-        size,
-      });
+      console.log("navigation 조건 충족, 테스트 페이지로 이동");
+
+      // 이미 처리했음을 표시
+      setConversionJustCompleted(true);
+      processedConversion.current = true;
 
       // 테스트 페이지로 이동
+      let pdfBlobUrl = pdfFile;
+
+      // 히스토리에 결과를 직접 추가하지 않고 navigate만 수행
+      // 히스토리 저장 로직은 별도 함수로 분리하여 수행
       navigate("/test", {
         state: {
-          pdfFile: pdfFile,
+          pdfFile: pdfBlobUrl,
           pdfData: convertedData,
         },
       });
-    }
-  }, [loading, progress, convertedData, navigate, pdfFile, addToHistory]);
 
-  // Simulate a fetch call for the mock API
-  const fetchMockData = async () => {
-    return new Promise((resolve) => {
-      // Simulate a delay for the loading process (20 seconds)
-      setTimeout(() => {
-        // Get dummy data
-        import("../../data/dummyData").then((module) => {
-          const { dummyData } = module;
-          const parsedData = parseData(dummyData);
-          resolve(parsedData);
-        });
-      }, 20000);
+      // 히스토리 저장 함수 호출
+      saveToHistory(pdfFile, convertedData);
+    } else {
+      console.log("navigation 조건 미충족, 이동하지 않음");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, convertedData, navigate, pdfFile, conversionJustCompleted]);
+
+  // 히스토리 저장을 위한 별도 함수
+  const saveToHistory = (pdfFileOrUrl, data) => {
+    console.log("Convert - saveToHistory 호출됨");
+    console.log("Convert - 입력 데이터:", {
+      pdfFileType: typeof pdfFileOrUrl,
+      dataType: typeof data,
+      isFile: pdfFileOrUrl instanceof File,
     });
-  };
 
-  // Process real API request
-  const processFiles = async (audioFile, docFile) => {
-    const formData = new FormData();
-
-    if (audioFile) {
-      formData.append("audio_file", audioFile);
+    if (!pdfFileOrUrl) {
+      console.error("History 저장 실패: PDF 파일 데이터 누락", {
+        pdfFileOrUrl,
+      });
+      return;
     }
 
-    if (docFile) {
-      formData.append("doc_file", docFile);
+    if (!data) {
+      console.error("History 저장 실패: 변환 데이터 누락", { data });
+      return;
     }
 
-    // Always add skip_transcription = true
-    formData.append("skip_transcription", "true");
+    console.log(
+      "Convert - 히스토리 저장 시작, 데이터 형식:",
+      typeof data,
+      data
+    );
 
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/ai/process-lecture`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      let pdfBlobUrl = pdfFileOrUrl;
+      let fileTitle;
+      let fileSize;
 
-      if (response.status === 200) {
-        // Parse the response data and get only the Concise Summary Notes
-        const data = response.data;
-        const parsedData = parseData(data);
-        return parsedData;
+      // pdfFile이 File 객체인 경우 Blob URL로 변환
+      if (pdfFileOrUrl instanceof File) {
+        console.log("Convert - File 객체 감지, Blob URL 변환 시작");
+        pdfBlobUrl = createBlobUrl(pdfFileOrUrl);
+        fileTitle = pdfFileOrUrl.name;
+        fileSize = pdfFileOrUrl.size;
+        console.log("Convert - Blob URL 변환 완료:", pdfBlobUrl);
+      } else {
+        // pdfFile이 이미 문자열(Blob URL 또는 정적 경로)인 경우
+        console.log("Convert - 문자열 URL/경로 감지");
+        fileTitle =
+          typeof pdfFileOrUrl === "string"
+            ? pdfFileOrUrl.split("/").pop()
+            : "Unnamed File";
+        fileSize = typeof pdfFileOrUrl === "string" ? "2.5MB" : "Unknown";
+        console.log("Convert - 파일 정보 추출:", { fileTitle, fileSize });
       }
+
+      // 히스토리에 결과 추가 (timeout을 통해 실행 컨텍스트 분리)
+      setTimeout(() => {
+        console.log("Convert - 히스토리 추가 타이머 시작");
+        // 데이터가 유효한지 최종 확인
+        if (data && typeof data === "object") {
+          console.log("Convert - 히스토리 추가 시도:", {
+            title: fileTitle,
+            pdfFile: pdfBlobUrl,
+            dataType: typeof data,
+            hasData: !!data,
+            size: fileSize,
+          });
+          addToHistory(fileTitle, pdfBlobUrl, data, fileSize);
+          console.log("Convert - 변환 완료 후 히스토리에 추가 성공");
+        } else {
+          console.error(
+            "Convert - 히스토리 추가 실패: 유효하지 않은 데이터",
+            data
+          );
+        }
+      }, 100);
     } catch (error) {
-      console.error("API 요청 실패:", error);
-      throw error;
+      console.error("History 저장 중 오류 발생:", error);
     }
   };
 
+  // Display error if processing failed
+  useEffect(() => {
+    if (processingError) {
+      setError(processingError);
+    }
+  }, [processingError]);
+
+  //파일 업로드 함수
   const handleFileUpload = async (event) => {
+    // 업로드된 파일 배열 생성
     const uploadedFiles = Array.from(event.target.files);
     if (uploadedFiles.length === 0) return;
 
@@ -131,39 +219,38 @@ function Convert() {
     );
   }, []);
 
+  //변환 버튼 클릭 함수
   const handleConvert = async () => {
     setError("");
 
+    // 변환 상태 추적 변수 리셋
+    setConversionJustCompleted(false);
+    // 변환 처리 상태 초기화
+    processedConversion.current = false;
+    // 이전 변환 결과 초기화 (다음 변환을 준비)
+    setConvertedData(null);
+    console.log("handleConvert: 모든 상태 완전히 리셋됨");
+
     try {
       if (process.env.REACT_APP_API_URL === "mock") {
+        // 모크 모드일 때는 sample3.pdf 파일 사용
+        const pdfFileObj = "/sample3.pdf";
+
         if (files.length === 0) {
-          // Start loading with sample3.pdf
-          const pdfFileObj = "/sample3.pdf";
+          // 파일 없을 경우 샘플 PDF만 사용
           startLoading([], pdfFileObj);
-
-          // Fetch mock data
-          const result = await fetchMockData();
-
-          // Stop loading with the result
-          stopLoading(result);
         } else {
-          // Start loading with the first file
-          const pdfFileObj = files[0];
-          startLoading(files, pdfFileObj);
-
-          // Fetch mock data
-          const result = await fetchMockData();
-
-          // Stop loading with the result
-          stopLoading(result);
+          // 파일 있을 경우 업로드된 파일 사용
+          startLoading(files, files[0]);
         }
       } else {
+        // 실제 API 사용 모드
         if (files.length === 0) {
           window.alert("파일을 업로드해주세요.");
           return;
         }
 
-        // Categorize files by type
+        // 파일 타입 분류
         let audioFile = null;
         let docFile = null;
 
@@ -178,18 +265,13 @@ function Convert() {
           }
         }
 
-        // Start loading with the files
-        startLoading(files, docFile || files[0]);
-
-        // Process files with the API
-        try {
-          const result = await processFiles(audioFile, docFile);
-          stopLoading(result);
-        } catch (error) {
-          console.error("변환 실패:", error);
-          window.alert("파일 변환에 실패했습니다. 다시 시도해주세요.");
-          stopLoading(null);
+        if (!docFile) {
+          setError("문서 파일(PDF, PPT, DOC)을 업로드해주세요.");
+          return;
         }
+
+        // 로딩 시작 (LoadingContext에서 API 호출 처리)
+        startLoading(files, docFile);
       }
     } catch (error) {
       console.error("변환 실패:", error);

@@ -317,11 +317,6 @@ export default function SummaryPanel({
       <div className="content-container" ref={contentContainerRef}>
         {activeTab === "ai" ? (
           <div className="ai-content">
-            {console.log(
-              "개조식 필기 데이터:",
-              summaryData[pageNumber] && summaryData[pageNumber][noteType]
-            )}
-
             <ReactMarkdown>
               {summaryData[pageNumber] && summaryData[pageNumber][noteType]
                 ? summaryData[pageNumber][noteType]
