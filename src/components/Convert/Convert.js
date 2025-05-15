@@ -29,7 +29,6 @@ function Convert() {
     convertedData,
     processingError,
     setConvertedData,
-    resetAllState
   } = useLoading();
 
   //히스토리 결과 추가 함수
@@ -72,7 +71,12 @@ function Convert() {
   // 로딩이 완료되었는지 확인하고 결과 페이지로 이동
   useEffect(() => {
     console.log("navigation effect 실행됨");
-    console.log("loading:", loading, "convertedData:", convertedData ? "있음" : "없음");
+    console.log(
+      "loading:",
+      loading,
+      "convertedData:",
+      convertedData ? "있음" : "없음"
+    );
     console.log("conversionJustCompleted:", conversionJustCompleted);
     console.log("processedConversion:", processedConversion.current);
 
@@ -81,7 +85,12 @@ function Convert() {
     // 2. 변환 데이터가 있음
     // 3. 이미 처리된 상태가 아님 (conversionJustCompleted가 false)
     // 4. 이 컴포넌트에서 이미 처리하지 않았음 (processedConversion.current가 false)
-    if (loading === false && convertedData && !conversionJustCompleted && !processedConversion.current) {
+    if (
+      loading === false &&
+      convertedData &&
+      !conversionJustCompleted &&
+      !processedConversion.current
+    ) {
       console.log("navigation 조건 충족, 테스트 페이지로 이동");
 
       // 이미 처리했음을 표시
