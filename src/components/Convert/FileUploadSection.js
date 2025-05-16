@@ -114,11 +114,11 @@ function FileUploadSection({
 
             <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
               <img
-                src={word_icon}
-                alt="Word"
-                className="w-[2.5rem] h-[2.trem] object-fit"
+                src={pdf_icon}
+                alt="PDF"
+                className="w-[2.5rem] h-[2.5rem] object-fit"
               />
-              <span className="text-sm">Word</span>
+              <span className="text-sm">PDF</span>
             </div>
             <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
               <img
@@ -148,11 +148,11 @@ function FileUploadSection({
 
             <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
               <img
-                src={pdf_icon}
-                alt="PDF"
+                src={word_icon}
+                alt="Word"
                 className="w-[2.5rem] h-[2.5rem] object-fit"
               />
-              <span className="text-sm">PDF</span>
+              <span className="text-sm">Word</span>
             </div>
           </div>
         </div>
