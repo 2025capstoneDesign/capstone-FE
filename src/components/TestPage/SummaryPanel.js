@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import useDetectClose from "../../hooks/useDetectClose";
 import "../../css/Dropdown.css";
 import remarkGfm from "remark-gfm";
+import DropdownMenu from "../common/DropdownMenu";
 
 export default function SummaryPanel({
   activeTab,
@@ -207,13 +208,16 @@ export default function SummaryPanel({
 
   // AI 필기 유형 상태 관리
   const [noteType, setNoteType] = useState("Concise Summary Notes");
-  const dropDownRef = useRef(null);
-  const [isOpen, setIsOpen] = useDetectClose(dropDownRef, false);
 
-  // AI 필기 유형 변경 핸들러
-  const handleNoteTypeChange = (type) => {
-    setNoteType(type);
-    setIsOpen(false);
+  const noteTypeOptions = [
+    { value: "Concise Summary Notes", label: "서술형 필기" },
+    { value: "Bullet Point Notes", label: "개조식 필기" },
+    { value: "Keyword Notes", label: "키워드 필기" },
+  ];
+
+  const getSelectedNoteTypeLabel = () => {
+    const option = noteTypeOptions.find((opt) => opt.value === noteType);
+    return option ? option.label : noteType;
   };
 
   return (
@@ -261,49 +265,11 @@ export default function SummaryPanel({
           </div>
         ) : (
           <div className="note-type-selector visible">
-            <div className="dropdown-menu">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation(); // 이벤트 버블링 방지
-                  setIsOpen(!isOpen);
-                }}
-              >
-                {noteType === "Concise Summary Notes"
-                  ? "서술형 필기"
-                  : noteType === "Bullet Point Notes"
-                  ? "개조식 필기"
-                  : "키워드 필기"}
-              </button>
-              <ul
-                ref={dropDownRef}
-                className={`menu ${isOpen ? "active" : ""}`}
-              >
-                <li
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNoteTypeChange("Concise Summary Notes");
-                  }}
-                >
-                  서술형 필기
-                </li>
-                <li
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNoteTypeChange("Bullet Point Notes");
-                  }}
-                >
-                  개조식 필기
-                </li>
-                <li
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNoteTypeChange("Keyword Notes");
-                  }}
-                >
-                  키워드 필기
-                </li>
-              </ul>
-            </div>
+            <DropdownMenu
+              options={noteTypeOptions}
+              selectedOption={getSelectedNoteTypeLabel()}
+              onOptionChange={setNoteType}
+            />
           </div>
         )}
       </div>
