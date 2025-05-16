@@ -3,6 +3,8 @@ import { useRef, useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import useDetectClose from "../../hooks/useDetectClose";
 import "../../css/Dropdown.css";
+import remarkGfm from "remark-gfm";
+import DropdownMenu from "../common/DropdownMenu";
 
 export default function SummaryPanel({
   activeTab,
@@ -19,14 +21,6 @@ export default function SummaryPanel({
   const contentContainerRef = useRef(null);
   const prevTabRef = useRef(activeTab);
   const prevPageRef = useRef(pageNumber);
-  const [noteType, setNoteType] = useState(() => {
-    // localStorage에서 저장된 noteType 불러오기
-    const savedNoteType = localStorage.getItem("defaultNoteType");
-    if (savedNoteType === "서술형 필기") return "Concise Summary Notes";
-    if (savedNoteType === "개조식 필기") return "Bullet Point Notes";
-    if (savedNoteType === "키워드 필기") return "Keyword Notes";
-    return "Concise Summary Notes"; // 기본값
-  });
 
   // 특정 페이지 섹션으로 스크롤하는 함수 - 부드러운 스크롤 적용
   const scrollToPageSection = useCallback(
@@ -213,13 +207,17 @@ export default function SummaryPanel({
   };
 
   // AI 필기 유형 상태 관리
-  const dropDownRef = useRef(null);
-  const [isOpen, setIsOpen] = useDetectClose(dropDownRef, false);
+  const [noteType, setNoteType] = useState("Concise Summary Notes");
 
-  // AI 필기 유형 변경 핸들러
-  const handleNoteTypeChange = (type) => {
-    setNoteType(type);
-    setIsOpen(false);
+  const noteTypeOptions = [
+    { value: "Concise Summary Notes", label: "서술형 필기" },
+    { value: "Bullet Point Notes", label: "개조식 필기" },
+    { value: "Keyword Notes", label: "키워드 필기" },
+  ];
+
+  const getSelectedNoteTypeLabel = () => {
+    const option = noteTypeOptions.find((opt) => opt.value === noteType);
+    return option ? option.label : noteType;
   };
 
   return (
@@ -267,49 +265,11 @@ export default function SummaryPanel({
           </div>
         ) : (
           <div className="note-type-selector visible">
-            <div className="dropdown-menu">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation(); // 이벤트 버블링 방지
-                  setIsOpen(!isOpen);
-                }}
-              >
-                {noteType === "Concise Summary Notes"
-                  ? "서술형 필기"
-                  : noteType === "Bullet Point Notes"
-                  ? "개조식 필기"
-                  : "키워드 필기"}
-              </button>
-              <ul
-                ref={dropDownRef}
-                className={`menu ${isOpen ? "active" : ""}`}
-              >
-                <li
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNoteTypeChange("Concise Summary Notes");
-                  }}
-                >
-                  서술형 필기
-                </li>
-                <li
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNoteTypeChange("Bullet Point Notes");
-                  }}
-                >
-                  개조식 필기
-                </li>
-                <li
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNoteTypeChange("Keyword Notes");
-                  }}
-                >
-                  키워드 필기
-                </li>
-              </ul>
-            </div>
+            <DropdownMenu
+              options={noteTypeOptions}
+              selectedOption={getSelectedNoteTypeLabel()}
+              onOptionChange={setNoteType}
+            />
           </div>
         )}
       </div>
@@ -317,7 +277,25 @@ export default function SummaryPanel({
       <div className="content-container" ref={contentContainerRef}>
         {activeTab === "ai" ? (
           <div className="ai-content">
-            <ReactMarkdown>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                strong: ({ node, ...props }) => (
+                  <strong
+                    style={{
+                      color:
+                        noteType === "Concise Summary Notes"
+                          ? "red"
+                          : "inherit",
+                    }}
+                    {...props}
+                  />
+                ),
+                p: ({ node, ...props }) => (
+                  <p style={{ whiteSpace: "pre-wrap" }} {...props} />
+                ),
+              }}
+            >
               {summaryData[pageNumber] && summaryData[pageNumber][noteType]
                 ? summaryData[pageNumber][noteType]
                 : "해당 페이지의 요약 내용이 없습니다."}
