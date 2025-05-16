@@ -3,6 +3,7 @@ import { useRef, useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import useDetectClose from "../../hooks/useDetectClose";
 import "../../css/Dropdown.css";
+import remarkGfm from "remark-gfm";
 
 export default function SummaryPanel({
   activeTab,
@@ -310,7 +311,25 @@ export default function SummaryPanel({
       <div className="content-container" ref={contentContainerRef}>
         {activeTab === "ai" ? (
           <div className="ai-content">
-            <ReactMarkdown>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                strong: ({ node, ...props }) => (
+                  <strong
+                    style={{
+                      color:
+                        noteType === "Concise Summary Notes"
+                          ? "red"
+                          : "inherit",
+                    }}
+                    {...props}
+                  />
+                ),
+                p: ({ node, ...props }) => (
+                  <p style={{ whiteSpace: "pre-wrap" }} {...props} />
+                ),
+              }}
+            >
               {summaryData[pageNumber] && summaryData[pageNumber][noteType]
                 ? summaryData[pageNumber][noteType]
                 : "해당 페이지의 요약 내용이 없습니다."}
