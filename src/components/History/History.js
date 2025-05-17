@@ -8,24 +8,23 @@ import PdfList from "./PdfList";
 import Manual from "./Manual";
 import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
-import useBlobUrlManager from "../../hooks/useBlobUrlManager";
+import { useAuth } from "../../context/AuthContext";
+import { showError } from "../../utils/errorHandler";
 
 export default function History() {
   const navigate = useNavigate();
   const [sortOrder, setSortOrder] = useState("date"); // "date" or "title"
   const [selectedPdf, setSelectedPdf] = useState(null);
-  const { historyData, getOriginalFile } = useHistory();
-  const { loading, progress, uploadedFiles } = useLoading();
-
-  // 로컬 블랍 URL 관리를 위한 훅
-  const { revokeAllBlobUrls } = useBlobUrlManager();
-
-  // 컴포넌트 언마운트 시 로컬 블랍 URL 정리
-  useEffect(() => {
-    return () => {
-      revokeAllBlobUrls();
-    };
-  }, [revokeAllBlobUrls]);
+  const { historyData, downloadPdf, loading: historyLoading, error: historyError } = useHistory();
+  const { loading: processingLoading, progress, uploadedFiles } = useLoading();
+  const { isAuthenticated } = useAuth();
+  
+  // Combined loading state
+  const loading = processingLoading || historyLoading;
+  
+  // Loading modal state
+  const [showLoadingModal, setShowLoadingModal] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("파일을 불러오는 중...");
 
   useEffect(() => {
     console.log("History.js - 히스토리 데이터 업데이트됨:", historyData);
@@ -42,73 +41,136 @@ export default function History() {
   }, [historyData]);
 
   const handleViewPdf = useCallback(
-    (pdf) => {
-      setSelectedPdf(pdf);
-
-      // PDF 데이터를 미리 파싱하여 전달
-      const parsedData =
-        typeof pdf.data === "object" && pdf.data?.summaryData
-          ? pdf.data
-          : parseData(pdf.data);
-
-      // pdf.pdfFile이 문자열인지 확인
-      // 문자열이 아니면 (예: 뭔가 파일 객체가 여기에 왔다면) 오류 로그 출력
-      if (!(typeof pdf.pdfFile === "string")) {
-        console.error("History - pdfFile is not a string URL:", pdf.pdfFile);
-        return; // 계속 진행하지 않음
+    async (item) => {
+      try {
+        setSelectedPdf(item);
+        setShowLoadingModal(true);
+        setLoadingMessage("파일을 불러오는 중...");
+        
+        // If file doesn't exist yet, download it
+        let fileData = item.file;
+        if (!fileData && !item.pdfFile) {
+          fileData = await downloadPdf(item);
+          if (!fileData) {
+            showError("파일을 불러오는데 실패했습니다.");
+            setShowLoadingModal(false);
+            return;
+          }
+        }
+        
+        // Create URL for blob if needed
+        let pdfUrl;
+        if (item.pdfFile) {
+          // If item has a static path
+          pdfUrl = item.pdfFile;
+        } else if (typeof fileData === "string") {
+          // Static path like "/sample3.pdf"
+          pdfUrl = fileData;
+        } else {
+          // Blob data
+          pdfUrl = URL.createObjectURL(fileData);
+        }
+        
+        // Make sure we have parsed result data
+        const parsedData = typeof item.result === "object" && item.result?.summaryData
+          ? item.result
+          : parseData(item.result);
+        
+        setShowLoadingModal(false);
+        
+        // Navigate to the test page with the PDF and data
+        navigate("/test", {
+          state: {
+            pdfFile: pdfUrl,
+            pdfData: parsedData,
+          },
+        });
+      } catch (error) {
+        console.error("Error viewing PDF:", error);
+        showError("파일을 보는데 오류가 발생했습니다.");
+        setShowLoadingModal(false);
       }
-
-      // 다른 것을 로드하고 있더라도 히스토리에서 파일을 볼 수 있음
-      navigate("/test", {
-        state: {
-          pdfFile: pdf.pdfFile, // 블랍 URL 또는 정적 경로 사용
-          pdfData: parsedData, // 이미 파싱된 데이터 전달
-        },
-      });
     },
-    [navigate]
+    [navigate, downloadPdf]
   );
 
-  const handleDownload = useCallback((pdf) => {
-    const link = document.createElement("a");
-
-    // 블랍 URL 또는 정적 경로이면 직접 다운로드 가능
-    if (pdf.pdfFile && typeof pdf.pdfFile === "string") {
-      // 블랍 URL이면 직접 다운로드 가능
-      // 정적 경로(예: "/sample3.pdf")는 기본 URL을 추가해야 함
-      const isStaticPath =
-        pdf.pdfFile.startsWith("/") && !pdf.pdfFile.startsWith("blob:");
-      link.href = isStaticPath
-        ? window.location.origin + pdf.pdfFile
-        : pdf.pdfFile;
-
-      // 다운로드 속성을 PDF 제목으로 설정
-      link.download = pdf.title || "document.pdf";
-
-      // 바디에 추가, 클릭, 제거
+  const handleDownload = useCallback(async (item) => {
+    try {
+      setShowLoadingModal(true);
+      setLoadingMessage("파일을 다운로드하는 중...");
+      
+      // If file doesn't exist yet, download it
+      let fileData = item.file;
+      if (!fileData && !item.pdfFile) {
+        fileData = await downloadPdf(item);
+        if (!fileData) {
+          showError("파일을 다운로드하는데 실패했습니다.");
+          setShowLoadingModal(false);
+          return;
+        }
+      }
+      
+      const link = document.createElement("a");
+      
+      if (item.pdfFile) {
+        // If item has a static path
+        const isStaticPath = item.pdfFile.startsWith("/") && !item.pdfFile.startsWith("blob:");
+        link.href = isStaticPath ? window.location.origin + item.pdfFile : item.pdfFile;
+      } else if (typeof fileData === "string") {
+        // Static path like "/sample3.pdf"
+        const isStaticPath = fileData.startsWith("/") && !fileData.startsWith("blob:");
+        link.href = isStaticPath ? window.location.origin + fileData : fileData;
+      } else {
+        // Blob data
+        link.href = URL.createObjectURL(fileData);
+      }
+      
+      // Set download filename
+      link.download = item.filename || "document.pdf";
+      
+      // Append to body, click, and remove
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      console.log("Downloading:", pdf.title);
-    } else {
-      console.error(
-        "History - Cannot download: pdfFile is not a string URL or is missing",
-        pdf
-      );
+      
+      // Clean up blob URL
+      if (link.href.startsWith("blob:")) {
+        URL.revokeObjectURL(link.href);
+      }
+      
+      setShowLoadingModal(false);
+      
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+      showError("파일 다운로드 중 오류가 발생했습니다.");
+      setShowLoadingModal(false);
     }
-  }, []);
+  }, [downloadPdf]);
 
   const sortedHistory = [...historyData].sort((a, b) => {
     if (sortOrder === "date") {
-      return new Date(b.date) - new Date(a.date);
+      return new Date(b.created_at) - new Date(a.created_at);
     } else {
-      return a.title.localeCompare(b.title);
+      return a.filename.localeCompare(b.filename);
     }
   });
 
   return (
     <div className="app-wrapper history-page">
+      {/* Loading Modal */}
+      {showLoadingModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
+            <img 
+              src="/loading_listen.gif" 
+              alt="로딩 중" 
+              className="w-[200px] h-[200px] object-contain mb-4"
+            />
+            <p className="text-gray-700 text-lg font-medium">{loadingMessage}</p>
+          </div>
+        </div>
+      )}
+      
       <div className="sub-header">
         <h1 className="page-title">변환 기록</h1>
         <div className="action-buttons">
@@ -130,6 +192,12 @@ export default function History() {
         />
         <Manual />
       </div>
+      
+      {historyError && (
+        <div className="text-red-500 text-center mt-4">
+          {historyError}
+        </div>
+      )}
     </div>
   );
 }

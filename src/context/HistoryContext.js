@@ -1,127 +1,141 @@
 //src/context/HistoryContext.js
 
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
 import { dummyData } from "../data/dummyData";
 import { parseData } from "../components/TestPage/DataParser";
-import useBlobUrlManager from "../hooks/useBlobUrlManager";
+import axios from "axios";
+import { useAuth } from "./AuthContext";
 
 const HistoryContext = createContext();
 
 export function HistoryProvider({ children }) {
-  // Initialize with dummy data
+  // Initialize with sample data (this will still be available even without API response)
   const initialHistoryData = [
     {
       id: 1,
-      title: "sample3.pdf",
-      date: "2024-03-20",
-      size: "2.5MB",
-      pdfFile: "/sample3.pdf", // Static path is fine as is
-      data: dummyData,
+      filename: "sample3.pdf",
+      created_at: "2024-03-20T00:00:00Z",
+      result: parseData(dummyData), // Already parsed dummy data
+      file: null, // Will be downloaded on demand
+      pdfFile: "/sample3.pdf", // Path to static file
     },
   ];
 
-  const parsedDummyData = parseData(dummyData);
-  initialHistoryData[0].data = parsedDummyData;
-
   const [historyData, setHistoryData] = useState(initialHistoryData);
-
-  // Use the centralized BlobUrlManager hook
-  const {
-    createBlobUrl,
-    revokeBlobUrl,
-    revokeAllBlobUrls,
-    getOriginalFile,
-    blobUrlMap,
-  } = useBlobUrlManager();
-
-  // Add new items to history
-  const addToHistory = (title, pdfFileOrUrl, data, size = "2.5MB") => {
-    console.log("HistoryContext - addToHistory 호출됨:", {
-      title,
-      pdfFileOrUrl,
-      data,
-      size,
-    });
-    console.log("HistoryContext - 데이터 타입:", {
-      titleType: typeof title,
-      pdfFileType: typeof pdfFileOrUrl,
-      dataType: typeof data,
-      sizeType: typeof size,
-    });
-
-    if (!pdfFileOrUrl || !data) {
-      console.error("HistoryContext - 히스토리 추가 실패: 필수 데이터 누락", {
-        title,
-        pdfFileOrUrl,
-        data,
-        size,
-      });
-      return;
-    }
-
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const { accessToken, getAuthHeader, isAuthenticated } = useAuth();
+  
+  // Function to fetch history from API
+  const fetchHistory = useCallback(async () => {
+    if (!isAuthenticated()) return;
+    
+    setLoading(true);
+    setError(null);
+    
     try {
-      let pdfBlobUrl = pdfFileOrUrl;
-      let fileTitle = title;
-
-      // If pdfFileOrUrl is a File object, create a blob URL using our hook
-      if (pdfFileOrUrl instanceof File) {
-        console.log("HistoryContext - File 객체 감지, Blob URL 생성 시작");
-        pdfBlobUrl = createBlobUrl(pdfFileOrUrl);
-        fileTitle = pdfFileOrUrl.name;
-        console.log("HistoryContext - Blob URL 생성 완료:", pdfBlobUrl);
-      }
-
-      const newItem = {
-        id: Date.now(),
-        title: typeof fileTitle === "string" ? fileTitle : "Unnamed File",
-        date: new Date().toISOString().split("T")[0],
-        size: typeof size === "string" ? size : formatFileSize(size),
-        pdfFile: pdfBlobUrl,
-        data: data,
-      };
-
-      console.log("HistoryContext - 새 히스토리 아이템 생성:", newItem);
-
-      // 안전하게 상태 업데이트
-      setHistoryData((prev) => {
-        if (!Array.isArray(prev)) {
-          console.warn(
-            "HistoryContext - 이전 히스토리가 배열이 아님, 초기화합니다"
-          );
-          return [newItem];
-        }
-
-        console.log("HistoryContext - 이전 히스토리:", prev);
-        const newHistory = [newItem, ...prev];
-        console.log("HistoryContext - 새 히스토리:", newHistory);
-        return newHistory;
-      });
-
-      console.log("HistoryContext - 히스토리 추가 완료");
-    } catch (error) {
-      console.error("HistoryContext - 히스토리 추가 중 오류 발생:", error);
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/history/my`,
+        { headers: { ...getAuthHeader() } }
+      );
+      
+      console.log("History API response:", response.data);
+      
+      // Map the response data to our format
+      const mappedHistory = response.data.map(item => ({
+        id: item.id,
+        filename: item.filename,
+        created_at: item.created_at,
+        result: typeof item.notes_json === 'string' ? 
+               JSON.parse(item.notes_json) : 
+               item.notes_json,
+        file: null // Will be downloaded on demand
+      }));
+      
+      // Add the sample PDF to ensure it's always available
+      const combinedHistory = [
+        ...mappedHistory,
+        initialHistoryData[0] // Sample PDF
+      ];
+      
+      setHistoryData(combinedHistory);
+    } catch (err) {
+      console.error("Error fetching history:", err);
+      setError("Failed to fetch history. Please try again.");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [isAuthenticated, getAuthHeader]);
+  
+  // Fetch history when authenticated or token changes
+  useEffect(() => {
+    if (isAuthenticated()) {
+      fetchHistory();
+    }
+  }, [accessToken, fetchHistory]);
 
-  // Format file size in a readable format
-  const formatFileSize = (bytes) => {
-    if (!bytes || bytes === 0) return "0 KB";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-  };
+  // Download a PDF file by filename
+  const downloadPdf = useCallback(async (historyItem) => {
+    if (!historyItem || !historyItem.filename) {
+      console.error("Cannot download PDF: Invalid history item");
+      return null;
+    }
+    
+    // If it's our sample PDF, use the static path
+    if (historyItem.filename === "sample3.pdf") {
+      return historyItem.pdfFile;
+    }
+    
+    // If we already have the file, return it
+    if (historyItem.file) {
+      return historyItem.file;
+    }
+    
+    try {
+      setLoading(true);
+      
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/history/download/${historyItem.filename}`,
+        { 
+          headers: { ...getAuthHeader() },
+          responseType: 'blob'
+        }
+      );
+      
+      // Update history item with the downloaded file
+      setHistoryData(prev => {
+        return prev.map(item => {
+          if (item.id === historyItem.id) {
+            return { ...item, file: response.data };
+          }
+          return item;
+        });
+      });
+      
+      return response.data;
+    } catch (err) {
+      console.error(`Error downloading file ${historyItem.filename}:`, err);
+      setError(`Failed to download ${historyItem.filename}. Please try again.`);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [getAuthHeader]);
+
+  // Add newly converted item to history, or load from API
+  const refreshHistory = useCallback(async () => {
+    await fetchHistory();
+  }, [fetchHistory]);
 
   return (
     <HistoryContext.Provider
       value={{
         historyData,
+        loading,
+        error,
+        downloadPdf,
+        refreshHistory,
         setHistoryData,
-        addToHistory,
-        getOriginalFile, // Expose these functions from the hook
-        revokeBlobUrl,
-        revokeAllBlobUrls,
-        blobUrlMap,
       }}
     >
       {children}

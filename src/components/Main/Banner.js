@@ -2,12 +2,14 @@ import React from 'react';
 import bannerImage from '../../assets/images/banner_image2.png';
 import overlayImage from '../../assets/images/overlay3.png';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
-const Banner = ({ isLoggedIn }) => {
+const Banner = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const handleButtonClick = () => {
-    if (isLoggedIn) {
+    if (isAuthenticated()) {
       navigate('/convert');
     } else {
       navigate('/login');

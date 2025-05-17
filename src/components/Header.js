@@ -1,13 +1,14 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import LogoImage from "../assets/images/logo3.png";
+import { useAuth } from "../context/AuthContext";
 
-function Header({ isLoggedIn, setIsLoggedIn }) {
+function Header() {
   const navigate = useNavigate();
+  const { isAuthenticated, logout, userEmail } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
+    logout();
     navigate("/login");
   };
 
@@ -28,7 +29,7 @@ function Header({ isLoggedIn, setIsLoggedIn }) {
             {/* 필기요정 */}
           </Link>
           {/* </div> */}
-          {isLoggedIn ? (
+          {isAuthenticated() ? (
             <button
               onClick={handleLogout}
               className="text-gray-600 text-lg hover:text-gray-900 px-6 py-2"

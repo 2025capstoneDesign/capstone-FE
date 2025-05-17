@@ -1,7 +1,6 @@
 //src/context/LoadingContext.js
 
 import React, { createContext, useState, useContext, useEffect, useRef } from "react";
-import useBlobUrlManager from "../hooks/useBlobUrlManager";
 import processService from "../api/processService";
 
 const LoadingContext = createContext();
@@ -20,14 +19,7 @@ export function LoadingProvider({ children }) {
   // Flag to continue processing even when navigating away
   const isProcessing = useRef(false);
   
-  // Use the centralized BlobUrlManager hook
-  const { 
-    createBlobUrl, 
-    revokeBlobUrl, 
-    revokeAllBlobUrls, 
-    getOriginalFile, 
-    blobUrlMap 
-  } = useBlobUrlManager();
+  // BlobUrlManager hook removed
 
   // Reset progress when loading starts
   useEffect(() => {
@@ -71,10 +63,7 @@ export function LoadingProvider({ children }) {
     console.log("LoadingContext - startLoading 호출됨");
     console.log("이전 convertedData:", convertedData ? "있음" : "없음");
 
-    // If we had previous blob URL for a PDF, revoke it
-    if (pdfFile && typeof pdfFile === 'string' && pdfFile.startsWith('blob:')) {
-      revokeBlobUrl(pdfFile);
-    }
+    // Blob URL revocation code removed
 
     // Reset convertedData to ensure we don't trigger navigation again when returning to Convert page
     setConvertedData(null);
@@ -83,14 +72,8 @@ export function LoadingProvider({ children }) {
     setUploadedFiles(files);
     isProcessing.current = true;
 
-    // If pdf is a File object, create a Blob URL using our hook
-    if (pdf instanceof File) {
-      const blobUrl = createBlobUrl(pdf);
-      setPdfFile(blobUrl);
-    } else {
-      // If it's already a string (like "/sample3.pdf"), keep it as is
-      setPdfFile(pdf);
-    }
+    // If it's a string (like "/sample3.pdf"), keep it as is
+    setPdfFile(pdf);
 
     try {
       // Start the process with uploaded files
@@ -231,11 +214,7 @@ export function LoadingProvider({ children }) {
         stopLoading,
         cancelProcessing,
         resetAllState,
-        setProgress,
-        getOriginalPdfFile: getOriginalFile,
-        revokePdfBlob: revokeBlobUrl,
-        revokeAllBlobs: revokeAllBlobUrls,
-        blobUrlMap
+        setProgress
       }}
     >
       {children}

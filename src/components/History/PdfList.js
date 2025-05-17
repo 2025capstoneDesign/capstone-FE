@@ -123,31 +123,31 @@ export default function PdfList({
         )}
 
         {/* Converted files */}
-        {sortedHistory.map((pdf) => (
+        {sortedHistory.map((item) => (
           <div
-            key={pdf.id}
+            key={item.id}
             className="flex items-center p-4 rounded-lg bg-white border border-gray-200 shadow-sm mb-3 transition-all"
           >
             <img
-              src={getFileIcon(pdf.pdfFile)}
+              src={getFileIcon(item.filename || item.pdfFile)}
               alt="파일 아이콘"
               className="w-10 h-10 mr-4"
             />
             <div className="flex-1 min-w-0">
               <div className="text-lg font-medium text-gray-800">
-                {pdf.title}
+                {item.filename}
               </div>
               <div className="text-sm text-gray-500">
-                변환일: {pdf.date} | 크기: {pdf.size}
+                변환일: {new Date(item.created_at).toLocaleDateString()}
               </div>
             </div>
             <div className="flex gap-2">
-              <button className="view-btn" onClick={() => handleViewPdf(pdf)}>
+              <button className="view-btn" onClick={() => handleViewPdf(item)}>
                 열람하기
               </button>
               <button
                 className="download-btn"
-                onClick={() => handleDownload(pdf)}
+                onClick={() => handleDownload(item)}
               >
                 다운로드
               </button>
