@@ -5,12 +5,8 @@ import { login as apiLogin, register as apiRegister } from "../api/auth";
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [accessToken, setAccessToken] = useState(
-    localStorage.getItem("accessToken") || null
-  );
-  const [userEmail, setUserEmail] = useState(
-    localStorage.getItem("userEmail") || null
-  );
+  const [accessToken, setAccessToken] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
