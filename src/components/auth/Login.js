@@ -1,47 +1,59 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { login } from "../../api/auth";
 import loginImage from "../../assets/images/login2.png";
+import { useAuth } from "../../context/AuthContext";
+import { useHistory } from "../../context/HistoryContext";
+import { showError, handleApiError } from "../../utils/errorHandler";
 
-const Login = ({ setIsLoggedIn }) => {
+const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { login, loading: authLoading } = useAuth();
+  const { refreshHistory, loading: historyLoading } = useHistory();
+  const [showLoading, setShowLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("로그인 중...");
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setShowLoading(true);
 
     try {
       console.log("로그인 시도:", { username, password });
-      console.log("API URL:", process.env.REACT_APP_API_URL);
-
-      // mock API 처리
-      if (process.env.REACT_APP_API_URL === "mock") {
-        console.log("Mock API: 로그인 성공");
-        localStorage.setItem("token", "mock_access_token");
-        setIsLoggedIn(true);
-        navigate("/");
-        return;
-      }
-
-      const response = await login({ username, password });
-      console.log("로그인 응답:", response.data);
-
-      if (response.data.access_token) {
-        localStorage.setItem("token", response.data.access_token);
-        setIsLoggedIn(true);
+      
+      const result = await login({ username, password });
+      
+      if (result.success) {
+        // Fetch history after successful login
+        setLoadingMessage("기록을 불러오는 중...");
+        await refreshHistory();
         navigate("/");
       } else {
-        alert("로그인 응답에 토큰이 없습니다.");
+        showError(result.message || "로그인에 실패했습니다.");
       }
     } catch (error) {
-      console.error("로그인 에러:", error.response?.data || error.message);
-      alert("로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.");
+      handleApiError(error, "로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.");
+    } finally {
+      setShowLoading(false);
     }
   };
 
   return (
     <div className="flex min-h-screen w-full relative">
+      {/* Loading Modal */}
+      {showLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
+            <img 
+              src="/loading_listen.gif" 
+              alt="로딩 중" 
+              className="w-[200px] h-[200px] object-contain mb-4"
+            />
+            <p className="text-gray-700 text-lg font-medium">{loadingMessage}</p>
+          </div>
+        </div>
+      )}
+
       <div className="hidden lg:block w-[50%] bg-[#FBF8EF] flex items-center justify-center min-h-screen">
         <img 
           src={loginImage} 

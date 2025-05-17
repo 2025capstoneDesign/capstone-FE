@@ -9,16 +9,14 @@ import PdfViewer from "./PdfViewer";
 import SummaryPanel from "./SummaryPanel";
 import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
-import useBlobUrlManager from "../../hooks/useBlobUrlManager";
+import { useAuth } from "../../context/AuthContext";
 
 export default function TestPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { convertedData, pdfFile: contextPdfFile } = useLoading();
   const { historyData } = useHistory();
-
-  // Use our central BlobUrlManager for this component
-  const { revokeAllBlobUrls } = useBlobUrlManager();
+  const { isAuthenticated } = useAuth();
 
   // Always prioritize location state (from history) if it exists
   // Otherwise use the context data (from conversion)
@@ -31,8 +29,8 @@ export default function TestPage() {
         pdfData: convertedData,
       }
     : {
-        pdfFile: historyData[0].pdfFile,
-        pdfData: historyData[0].data,
+        pdfFile: historyData[0].pdfFile || "/sample3.pdf",
+        pdfData: historyData[0].result,
       };
 
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
@@ -40,14 +38,7 @@ export default function TestPage() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Cleanup all blob URLs managed by this component when it unmounts
-  useEffect(() => {
-    return () => {
-      // We don't want to revoke URL's managed by the contexts
-      // The revokeAllBlobUrls will only revoke URLs created in this component
-      revokeAllBlobUrls();
-    };
-  }, [revokeAllBlobUrls]);
+  // Blob URL cleanup code removed
 
   // 전달받은 pdfData가 이미 파싱된 데이터인지 확인하고, 아니면 파싱
   const { summaryData, voiceData } =

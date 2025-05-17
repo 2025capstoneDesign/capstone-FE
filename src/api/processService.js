@@ -1,8 +1,6 @@
 import axios from "axios";
-import { dummyData } from "../data/dummyData";
 
 const API_URL = process.env.REACT_APP_API_URL;
-const MOCK_MODE = API_URL === "mock";
 
 // Helper function to sleep
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -10,12 +8,6 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 export const processService = {
   // Start the conversion process
   startProcess: async (files) => {
-    if (MOCK_MODE) {
-      // Mock implementation
-      await sleep(1000);
-      return { job_id: "mock-job-id" };
-    }
-
     try {
       const formData = new FormData();
 
@@ -29,14 +21,19 @@ export const processService = {
 
       formData.append("skip_transcription", "true");
 
+      // Add authorization header for authenticated requests
+      const headers = { "Content-Type": "multipart/form-data" };
+
+      // Get auth token from localStorage if it exists
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const response = await axios.post(
         `${API_URL}/api/process/start-process`,
         formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        { headers }
       );
 
       return response.data;
@@ -48,21 +45,6 @@ export const processService = {
 
   // Check the status of a process
   checkProcessStatus: async (jobId, retryCount = 0) => {
-    if (MOCK_MODE) {
-      // Mock implementation with progressive updates
-      await sleep(1000);
-
-      // Calculate mock progress based on number of calls
-      const mockProgress = Math.min(100, 10 + retryCount * 10);
-      const totalSlides = 12;
-      const completedSlides = Math.floor((mockProgress / 100) * totalSlides);
-
-      return {
-        progress: mockProgress,
-        message: `${completedSlides}/${totalSlides} 슬라이드 변환 완료`,
-      };
-    }
-
     try {
       const response = await axios.get(
         `${API_URL}/api/process/process-status/${jobId}`
@@ -81,19 +63,14 @@ export const processService = {
 
   // Get the result of a completed process
   getProcessResult: async (jobId) => {
-    if (MOCK_MODE) {
-      // Return dummy data for mock mode
-      await sleep(1000);
-      return {
-        progress: 100,
-        message: "처리 완료",
-        result: dummyData,
-      };
-    }
-
     try {
+      // Get auth token from localStorage if it exists
+      const token = localStorage.getItem("accessToken");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
       const response = await axios.get(
-        `${API_URL}/api/process/process-result/${jobId}`
+        `${API_URL}/api/process/process-result/${jobId}`,
+        { headers }
       );
       return response.data;
     } catch (error) {

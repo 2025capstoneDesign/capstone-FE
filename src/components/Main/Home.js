@@ -4,9 +4,11 @@ import convert_icon from "../../assets/images/convert_icon.png";
 import history_icon from "../../assets/images/history_icon2.png";
 import setting_icon from "../../assets/images/setting_icon.png";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
-function Home({ isLoggedIn }) {
+function Home() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const FeatureCard = ({ image, title, description, onClick }) => (
     <div
@@ -36,7 +38,7 @@ function Home({ isLoggedIn }) {
   );
 
   const handleConvertClick = () => {
-    if (isLoggedIn) {
+    if (isAuthenticated()) {
       navigate("/convert");
     } else {
       navigate("/login");
@@ -46,7 +48,7 @@ function Home({ isLoggedIn }) {
   return (
     <section className="w-full mt-[4.5rem]">
       {/* 메인 배너 */}
-      <Banner isLoggedIn={isLoggedIn} />
+      <Banner />
 
       {/* 기능 소개 섹션 */}
       <div className="mt-[4rem] mb-[4rem] w-full max-w-[90rem] mx-auto">

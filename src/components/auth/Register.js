@@ -1,17 +1,23 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { register } from "../../api/auth";
 import loginImage from "../../assets/images/login2.png";
 import logo2 from "../../assets/images/logo2.png";
 import "../../css/Auth.css";
+import { useAuth } from "../../context/AuthContext";
+import { useHistory } from "../../context/HistoryContext";
+import { showError, handleApiError } from "../../utils/errorHandler";
 
-const Register = ({ setIsLoggedIn }) => {
+const Register = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
   });
   const navigate = useNavigate();
+  const { register, loading: authLoading } = useAuth();
+  const { refreshHistory, loading: historyLoading } = useHistory();
+  const [showLoading, setShowLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("회원가입 중...");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,10 +29,12 @@ const Register = ({ setIsLoggedIn }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setShowLoading(true);
 
     // 비밀번호 확인
     if (formData.password !== formData.confirmPassword) {
-      alert("비밀번호가 일치하지 않습니다.");
+      showError("비밀번호가 일치하지 않습니다.");
+      setShowLoading(false);
       return;
     }
 
@@ -35,39 +43,43 @@ const Register = ({ setIsLoggedIn }) => {
         email: formData.email,
         password: formData.password,
       });
-      console.log("API URL:", process.env.REACT_APP_API_URL);
 
-      // mock API 처리
-      if (process.env.REACT_APP_API_URL === "mock") {
-        console.log("Mock API: 회원가입 성공");
-        localStorage.setItem("token", "mock_access_token");
-        setIsLoggedIn(true);
-        alert("회원가입이 완료되었습니다.");
-        navigate("/");
-        return;
-      }
-
-      const response = await register({
+      const result = await register({
         email: formData.email,
         password: formData.password,
       });
 
-      console.log("회원가입 응답:", response.data);
-
-      if (response.status === 200 || response.status === 201) {
-        localStorage.setItem("token", response.data.access_token);
-        setIsLoggedIn(true);
-        alert("회원가입이 완료되었습니다.");
+      if (result.success) {
+        showError("회원가입이 완료되었습니다.");
+        // Fetch history after successful registration
+        setLoadingMessage("기록을 불러오는 중...");
+        await refreshHistory();
         navigate("/");
+      } else {
+        showError(result.message || "회원가입에 실패했습니다.");
       }
     } catch (error) {
-      console.error("회원가입 에러:", error.response?.data || error.message);
-      alert("회원가입에 실패했습니다. 다시 시도해주세요.");
+      handleApiError(error, "회원가입에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setShowLoading(false);
     }
   };
 
   return (
     <div className="flex min-h-screen w-full relative">
+      {/* Loading Modal */}
+      {showLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
+            <img 
+              src="/loading_listen.gif" 
+              alt="로딩 중" 
+              className="w-[200px] h-[200px] object-contain mb-4"
+            />
+            <p className="text-gray-700 text-lg font-medium">{loadingMessage}</p>
+          </div>
+        </div>
+      )}
       <div className="hidden lg:block w-[50%] bg-[#FBF8EF] flex items-center justify-center min-h-screen">
         <img 
           src={logo2} 
