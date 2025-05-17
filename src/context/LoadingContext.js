@@ -1,6 +1,12 @@
 //src/context/LoadingContext.js
 
-import React, { createContext, useState, useContext, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import processService from "../api/processService";
 
 const LoadingContext = createContext();
@@ -15,13 +21,11 @@ export function LoadingProvider({ children }) {
   const [pdfFile, setPdfFile] = useState(null);
   const [jobId, setJobId] = useState(null);
   const [processingError, setProcessingError] = useState(null);
-  
-  // Flag to continue processing even when navigating away
-  const isProcessing = useRef(false);
-  
-  // BlobUrlManager hook removed
 
-  // Reset progress when loading starts
+  // 강의 변환 중인지 확인하는 플래그
+  const isProcessing = useRef(false);
+
+  // 로딩이 시작될 때 진행 상태 초기화
   useEffect(() => {
     if (loading) {
       setProgress(0);
@@ -31,11 +35,11 @@ export function LoadingProvider({ children }) {
     }
   }, [loading]);
 
-  // Update the current stage based on progress
+  // 진행 상태에 따라 현재 단계 업데이트
   useEffect(() => {
     if (!loading) return;
 
-    // Update stages based on progress
+    // 진행 상태에 따라 현재 단계 업데이트
     if (progress < 30) {
       setCurrentStage(0); // Listening stage
     } else if (progress < 60) {
@@ -45,27 +49,26 @@ export function LoadingProvider({ children }) {
     }
   }, [loading, progress]);
 
-  // Continue processing when component is mounted if a job is in progress
+  // 컴포넌트가 마운트될 때 작업이 진행 중인 경우 계속 처리
   useEffect(() => {
     if (jobId && isProcessing.current) {
       continueProcessing();
     }
-    
+
     return () => {
-      // Component is unmounting but processing should continue
+      // 컴포넌트가 언마운트될 때 로딩 상태가 유지되면 계속 처리
       if (loading) {
         isProcessing.current = true;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startLoading = async (files, pdf) => {
     console.log("LoadingContext - startLoading 호출됨");
     console.log("이전 convertedData:", convertedData ? "있음" : "없음");
 
-    // Blob URL revocation code removed
-
-    // Reset convertedData to ensure we don't trigger navigation again when returning to Convert page
+    // 변환 결과를 초기화하여 Convert 페이지로 돌아갈 때 다시 탐지하지 않도록 함
     setConvertedData(null);
     console.log("LoadingContext - convertedData 초기화됨");
     setLoading(true);
@@ -76,19 +79,24 @@ export function LoadingProvider({ children }) {
     setPdfFile(pdf);
 
     try {
-      // Start the process with uploaded files
+      // 업로드된 파일로 강의 변환 시작
       const { job_id } = await processService.startProcess({
-        document: files.find(file => file.type.includes("pdf") || file.type.includes("presentation")),
-        audio: files.find(file => file.type.includes("audio"))
+        document: files.find(
+          (file) =>
+            file.type.includes("pdf") || file.type.includes("presentation")
+        ),
+        audio: files.find((file) => file.type.includes("audio")),
       });
 
       setJobId(job_id);
 
-      // Begin polling for status
+      // 진행 상태 확인을 위한 폴링 시작
       continueProcessing(job_id);
     } catch (error) {
       console.error("Error starting process:", error);
-      setProcessingError("Failed to start the conversion process. Please try again.");
+      setProcessingError(
+        "Failed to start the conversion process. Please try again."
+      );
       stopLoading();
     }
   };
@@ -102,58 +110,82 @@ export function LoadingProvider({ children }) {
     }
 
     try {
-      // Start the polling loop
+      // 진행 상태 확인을 위한 폴링 시작
       let currentProgress = 0;
 
       while (currentProgress < 100 && isProcessing.current) {
         try {
-          const statusData = await processService.checkProcessStatus(currentJobId);
+          const statusData = await processService.checkProcessStatus(
+            currentJobId
+          );
           currentProgress = statusData.progress;
 
           setProgress(currentProgress);
           setStatusMessage(statusData.message || "");
 
           if (currentProgress === 100) {
-            // Process is complete, fetch result
-            const resultData = await processService.getProcessResult(currentJobId);
+            // 강의 변환 완료, 결과 데이터 가져오기
+            const resultData = await processService.getProcessResult(
+              currentJobId
+            );
             console.log("LoadingContext - API 응답 결과:", resultData);
 
             // API가 직접 객체를 반환하는 경우 (result 필드 없이)
-            if (resultData && typeof resultData === 'object' && (resultData.slide1 || Object.keys(resultData).length > 0)) {
-              console.log("LoadingContext - 변환 결과 데이터 수신 성공 (직접 객체)");
+            if (
+              resultData &&
+              typeof resultData === "object" &&
+              (resultData.slide1 || Object.keys(resultData).length > 0)
+            ) {
+              console.log(
+                "LoadingContext - 변환 결과 데이터 수신 성공 (직접 객체)"
+              );
               stopLoading(resultData);
             }
             // API가 result 필드 안에 데이터를 반환하는 경우
             else if (resultData && resultData.result) {
-              console.log("LoadingContext - 변환 결과 데이터 수신 성공 (result 필드)");
+              console.log(
+                "LoadingContext - 변환 결과 데이터 수신 성공 (result 필드)"
+              );
               stopLoading(resultData.result);
             }
             // 데이터가 없거나 예상치 못한 형식인 경우
             else {
-              console.error("LoadingContext - 변환 결과 데이터 형식 오류:", resultData);
-              setProcessingError("변환 결과 데이터를 받지 못했습니다. 다시 시도해주세요.");
+              console.error(
+                "LoadingContext - 변환 결과 데이터 형식 오류:",
+                resultData
+              );
+              setProcessingError(
+                "변환 결과 데이터를 받지 못했습니다. 다시 시도해주세요."
+              );
               stopLoading();
             }
             break;
           }
 
-          // Wait 1 second before next poll
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // 다음 폴링 전 1초 대기
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         } catch (error) {
           console.error("Error checking process status:", error);
           // 3번까지 재시도 후 계속 오류 발생시 처리 중단
           if (error.response && error.response.status === 404) {
-            console.error("LoadingContext - 작업을 찾을 수 없음:", currentJobId);
-            setProcessingError("변환 작업을 찾을 수 없습니다. 다시 시도해주세요.");
+            console.error(
+              "LoadingContext - 작업을 찾을 수 없음:",
+              currentJobId
+            );
+            setProcessingError(
+              "변환 작업을 찾을 수 없습니다. 다시 시도해주세요."
+            );
             stopLoading();
             break;
           }
-          // Continue polling despite errors - the service handles retries
+          // 오류가 발생하더라도 계속 폴링 시도 - 서비스가 재시도를 처리함
         }
       }
     } catch (error) {
       console.error("LoadingContext - 처리 흐름 오류:", error);
-      setProcessingError("변환 과정에서 오류가 발생했습니다. 다시 시도해주세요.");
+      setProcessingError(
+        "변환 과정에서 오류가 발생했습니다. 다시 시도해주세요."
+      );
       stopLoading();
     }
   };
@@ -214,7 +246,7 @@ export function LoadingProvider({ children }) {
         stopLoading,
         cancelProcessing,
         resetAllState,
-        setProgress
+        setProgress,
       }}
     >
       {children}

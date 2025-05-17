@@ -18,10 +18,12 @@ export const processService = {
       if (files.document) {
         formData.append("ppt_file", files.document);
       }
-      
+
+      formData.append("skip_transcription", "true");
+
       // Add authorization header for authenticated requests
       const headers = { "Content-Type": "multipart/form-data" };
-      
+
       // Get auth token from localStorage if it exists
       const token = localStorage.getItem("accessToken");
       if (token) {
@@ -44,13 +46,8 @@ export const processService = {
   // Check the status of a process
   checkProcessStatus: async (jobId, retryCount = 0) => {
     try {
-      // Get auth token from localStorage if it exists
-      const token = localStorage.getItem("accessToken");
-      const headers = token ? { "Authorization": `Bearer ${token}` } : {};
-      
       const response = await axios.get(
-        `${API_URL}/api/process/process-status/${jobId}`,
-        { headers }
+        `${API_URL}/api/process/process-status/${jobId}`
       );
       return response.data;
     } catch (error) {
@@ -69,8 +66,8 @@ export const processService = {
     try {
       // Get auth token from localStorage if it exists
       const token = localStorage.getItem("accessToken");
-      const headers = token ? { "Authorization": `Bearer ${token}` } : {};
-      
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
       const response = await axios.get(
         `${API_URL}/api/process/process-result/${jobId}`,
         { headers }
