@@ -1,5 +1,6 @@
 //src/components/History/PdfList.js
 
+import { useState, useMemo } from "react";
 import pdf_icon from "../../assets/images/pdf.png";
 import mp3_icon from "../../assets/images/mp3.png";
 import wav_icon from "../../assets/images/wav.png";
@@ -16,6 +17,89 @@ export default function PdfList({
   progress,
   uploadedFiles,
 }) {
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // 한 페이지당 표시할 항목 수
+
+  // 정렬된 데이터 계산
+  const sortedData = useMemo(() => {
+    if (!sortedHistory) return [];
+    
+    return [...sortedHistory].sort((a, b) => {
+      if (sortOrder === "date") {
+        return new Date(b.created_at) - new Date(a.created_at);
+      } else {
+        // 제목순 정렬 (파일명 기준)
+        return (a.filename || "").localeCompare(b.filename || "");
+      }
+    });
+  }, [sortedHistory, sortOrder]);
+
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = sortedData.slice(startIndex, endIndex);
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    setSelectedItems([]); // 페이지 변경 시 선택 항목 초기화
+  };
+
+  // 페이지네이션 버튼 생성
+  const renderPaginationButtons = () => {
+    const buttons = [];
+    const maxVisiblePages = 5; // 한 번에 보여줄 페이지 버튼 수
+
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    // 이전 페이지 버튼
+    buttons.push(
+      <button
+        key="prev"
+        className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        이전
+      </button>
+    );
+
+    // 페이지 번호 버튼
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(
+        <button
+          key={i}
+          className={`pagination-btn ${currentPage === i ? 'active' : ''}`}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    // 다음 페이지 버튼
+    buttons.push(
+      <button
+        key="next"
+        className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+      >
+        다음
+      </button>
+    );
+
+    return buttons;
+  };
+
   // Helper function to get file icon
   const getFileIcon = (fileName) => {
     if (!fileName) return pdf_icon;
@@ -58,22 +142,75 @@ export default function PdfList({
     return "필기 생성 중...";
   };
 
+  const handleCheckboxChange = (itemId) => {
+    setSelectedItems(prev => {
+      if (prev.includes(itemId)) {
+        return prev.filter(id => id !== itemId);
+      } else {
+        return [...prev, itemId];
+      }
+    });
+  };
+
+  const handleEditClick = () => {
+    setIsEditMode(true);
+    setSelectedItems([]);
+  };
+
+  const handleCancelClick = () => {
+    setIsEditMode(false);
+    setSelectedItems([]);
+  };
+
+  const handleDeleteClick = () => {
+    // TODO: 삭제 로직 구현
+    console.log('Selected items to delete:', selectedItems);
+    setIsEditMode(false);
+    setSelectedItems([]);
+  };
+
   return (
     <div className="slide-container">
       <div className="slide-header">
         <div className="sort-options">
           <button
             className={`sort-btn ${sortOrder === "date" ? "active" : ""}`}
-            onClick={() => setSortOrder("date")}
+            onClick={() => {
+              setSortOrder("date");
+              setCurrentPage(1); // 정렬 변경 시 첫 페이지로 이동
+            }}
           >
             날짜순
           </button>
           <button
             className={`sort-btn ${sortOrder === "title" ? "active" : ""}`}
-            onClick={() => setSortOrder("title")}
+            onClick={() => {
+              setSortOrder("title");
+              setCurrentPage(1); // 정렬 변경 시 첫 페이지로 이동
+            }}
           >
             제목순
           </button>
+        </div>
+        <div className="edit-options">
+          {!isEditMode ? (
+            <button className="edit-btn" onClick={handleEditClick}>
+              편집
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <button className="cancel-btn" onClick={handleCancelClick}>
+                취소
+              </button>
+              <button 
+                className="delete-btn" 
+                onClick={handleDeleteClick}
+                disabled={selectedItems.length === 0}
+              >
+                삭제
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -123,11 +260,19 @@ export default function PdfList({
         )}
 
         {/* Converted files */}
-        {sortedHistory.map((item) => (
+        {currentItems.map((item) => (
           <div
             key={item.id}
             className="flex items-center p-4 rounded-lg bg-white border border-gray-200 shadow-sm mb-3 transition-all"
           >
+            {isEditMode && (
+              <input
+                type="checkbox"
+                className="w-5 h-5 mr-4"
+                checked={selectedItems.includes(item.id)}
+                onChange={() => handleCheckboxChange(item.id)}
+              />
+            )}
             <img
               src={getFileIcon(item.filename || item.pdfFile)}
               alt="파일 아이콘"
@@ -141,23 +286,32 @@ export default function PdfList({
                 변환일: {new Date(item.created_at).toLocaleDateString()}
               </div>
             </div>
-            <div className="flex gap-2">
-              <button className="view-btn" onClick={() => handleViewPdf(item)}>
-                열람하기
-              </button>
-              <button
-                className="download-btn"
-                onClick={() => handleDownload(item)}
-              >
-                다운로드
-              </button>
-            </div>
+            {!isEditMode && (
+              <div className="flex gap-2">
+                <button className="view-btn" onClick={() => handleViewPdf(item)}>
+                  열람하기
+                </button>
+                <button
+                  className="download-btn"
+                  onClick={() => handleDownload(item)}
+                >
+                  다운로드
+                </button>
+              </div>
+            )}
           </div>
         ))}
 
         {!loading && sortedHistory.length === 0 && (
           <div className="text-center py-10 text-gray-500">
             아직 변환된 파일이 없습니다.
+          </div>
+        )}
+
+        {/* 페이지네이션 */}
+        {sortedHistory.length > 0 && (
+          <div className="pagination-container">
+            {renderPaginationButtons()}
           </div>
         )}
       </div>

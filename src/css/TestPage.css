@@ -132,6 +132,7 @@ body {
 
 .slide-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
   background-color: #fffaec;
@@ -736,4 +737,98 @@ body {
 .manual-content li {
   margin-bottom: 0.5rem;
   color: #555;
+}
+
+.edit-options {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn, .cancel-btn, .delete-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.edit-btn {
+  background-color: #000;
+  color: #fff;
+  border: none;
+}
+
+.edit-btn:hover {
+  background-color: #333;
+}
+
+.cancel-btn {
+  background-color: #fff;
+  color: #666;
+  border: 1px solid #e0e0e0;
+}
+
+.cancel-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.delete-btn {
+  background-color: #dc2626;
+  color: #fff;
+  border: none;
+}
+
+.delete-btn:hover {
+  background-color: #b91c1c;
+}
+
+.delete-btn:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* 페이지네이션 스타일 */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2rem;
+  padding: 1rem 0;
+}
+
+.pagination-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-btn:hover:not(.disabled) {
+  background-color: #f5f5f5;
+  border-color: #d0d0d0;
+}
+
+.pagination-btn.active {
+  background-color: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.pagination-btn.disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+  border-color: #e0e0e0;
 }

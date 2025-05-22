@@ -1,0 +1,115 @@
+.banner-container {
+    position: relative;
+    height: 480px;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 0;
+    margin: 0 auto;
+  }
+  
+  .gradient-background {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(130deg, #1A4642 0%, #80CBC4 64%, #B4EBE6 79%, #D9E1BB 93%, #FDD691 100%);
+    opacity: 1;
+  }
+  
+  .overlay-container {
+    position: absolute;
+    inset: 0;
+  }
+  
+  .overlay-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.4;
+  }
+  
+  .content-container {
+    position: relative;
+    z-index: 10;
+    padding: 5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    max-width: 1480px;
+    margin: 0 auto;
+  }
+  
+  .banner-title {
+    padding: 0 9rem;
+    font-size: 2.25rem;
+    font-weight: 350;
+    color: white;
+    letter-spacing: 0.025em;
+    text-align: left;
+    line-height: 1.2;
+  }
+  
+  .banner-subtitle {
+    padding: 1rem 9rem;
+    font-size: 3.125rem;
+    line-height: 1;
+    color: white;
+    font-weight: 580;
+    letter-spacing: 0.025em;
+    text-align: left;
+    margin-top: 0.5rem;
+  }
+  
+  .banner-description {
+    margin-top: 4rem;
+    color: white;
+    font-weight: 350;
+    padding: 0 9rem;
+    font-size: 1.25rem;
+    letter-spacing: 0.025em;
+    text-align: left;
+    line-height: 1.5;
+  }
+  
+  .convert-button {
+    margin: 2rem 9rem;
+    border: 1px solid white;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    font-weight: 350;
+    font-size: 1.25rem;
+    transition: all 0.3s ease;
+    text-align: left;
+    background: transparent;
+    cursor: pointer;
+    display: inline-block;
+  }
+  
+  .convert-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .main-image-container {
+    position: absolute;
+    padding: 0 9rem;
+    right: 0;
+    bottom: 0;
+  }
+  
+  .main-image {
+    width: 700px;
+    height: auto;
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
