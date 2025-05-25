@@ -110,7 +110,7 @@ body {
   display: flex;
   flex: 1;
   padding: 0 0 25px;
-  gap: 25px;
+  /* gap: 25px; */
   min-height: 0;
   max-height: calc(100vh - 130px);
   overflow: hidden;
@@ -119,6 +119,7 @@ body {
 /* 왼쪽 PDF 슬라이드 컨테이너 */
 .slide-container {
   flex: 1.7;
+  margin: 0 25px 0 0;
   position: relative;
   background-color: #fff;
   display: flex;
