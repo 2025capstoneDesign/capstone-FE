@@ -1,15 +1,14 @@
-//src/components/Convert/Convert.js
-
+//src/components/Convert/UploadConvert/Convert.js
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../css/TestPage.css";
+import "../../../css/TestPage.css";
 import FileUploadSection from "./FileUploadSection";
 import LoadingSection from "./LoadingSection";
 import SummarySection from "./SummarySection";
-import { useLoading } from "../../context/LoadingContext";
-import { useHistory } from "../../context/HistoryContext";
-import { useAuth } from "../../context/AuthContext";
-import { showError } from "../../utils/errorHandler";
+import { useLoading } from "../../../context/LoadingContext";
+import { useHistory } from "../../../context/HistoryContext";
+import { useAuth } from "../../../context/AuthContext";
+import { showError } from "../../../utils/errorHandler";
 
 function Convert() {
   const navigate = useNavigate();

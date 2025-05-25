@@ -1,14 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import Banner from "./Banner";
 import convert_icon from "../../assets/images/convert_icon.png";
 import history_icon from "../../assets/images/history_icon2.png";
 import setting_icon from "../../assets/images/setting_icon.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import ConvertSelectModal from "../Convert/ConvertMode/ConvertSelectModal";
 
 function Home() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const FeatureCard = ({ image, title, description, onClick }) => (
     <div
@@ -39,7 +41,7 @@ function Home() {
 
   const handleConvertClick = () => {
     if (isAuthenticated()) {
-      navigate("/convert");
+      setIsModalOpen(true);
     } else {
       navigate("/login");
     }
@@ -79,6 +81,11 @@ function Home() {
           />
         </div>
       </div>
+
+      <ConvertSelectModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </section>
   );
 }

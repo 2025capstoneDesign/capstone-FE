@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import useDetectClose from "../../hooks/useDetectClose";
-import "../../css/Dropdown.css";
-import DropdownMenu from "../common/DropdownMenu";
+import useDetectClose from "../../../hooks/useDetectClose";
+import "../../../css/Dropdown.css";
+import DropdownMenu from "../../common/DropdownMenu";
 
 function SummarySection({
   activeTab,

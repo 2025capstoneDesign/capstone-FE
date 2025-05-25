@@ -1,10 +1,11 @@
+
 import React, { useCallback } from "react";
-import word_icon from "../../assets/images/docx.png";
-import pdf_icon from "../../assets/images/pdf.png";
-import ppt_icon from "../../assets/images/ppt.png";
-import mp3_icon from "../../assets/images/mp3.png";
-import wav_icon from "../../assets/images/wav.png";
-import upload_icon from "../../assets/images/upload_image.png";
+import word_icon from "../../../assets/images/docx.png";
+import pdf_icon from "../../../assets/images/pdf.png";
+import ppt_icon from "../../../assets/images/ppt.png";
+import mp3_icon from "../../../assets/images/mp3.png";
+import wav_icon from "../../../assets/images/wav.png";
+import upload_icon from "../../../assets/images/upload_image.png";
 
 function FileUploadSection({
   files,
