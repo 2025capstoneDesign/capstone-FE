@@ -16,7 +16,7 @@ export const processService = {
       }
 
       if (files.document) {
-        formData.append("ppt_file", files.document);
+        formData.append("doc_file", files.document);
       }
 
       formData.append("skip_transcription", "true");
@@ -31,7 +31,7 @@ export const processService = {
       }
 
       const response = await axios.post(
-        `${API_URL}/api/process/start-process`,
+        `${API_URL}/api/process2/start-process-v2`,
         formData,
         { headers }
       );
@@ -47,7 +47,7 @@ export const processService = {
   checkProcessStatus: async (jobId, retryCount = 0) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/process/process-status/${jobId}`
+        `${API_URL}/api/process2/process-status-v2/${jobId}`
       );
       return response.data;
     } catch (error) {
@@ -69,7 +69,7 @@ export const processService = {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       const response = await axios.get(
-        `${API_URL}/api/process/process-result/${jobId}`,
+        `${API_URL}/api/process2/process-result-v2/${jobId}`,
         { headers }
       );
       return response.data;
