@@ -5,10 +5,9 @@ import RealTimeFileUploadSection from "./RealTimeFileUploadSection";
 import RealTimeSummarySection from "./RealTimeSummarySection";
 import { useLoading } from "../../../context/LoadingContext";
 import { useHistory } from "../../../context/HistoryContext";
-import { useAuth } from "../../../context/AuthContext";
 import { showError } from "../../../utils/errorHandler";
 import PdfViewer from "../../TestPage/PdfViewer";
-import { processService } from "../../../api/processService";
+import axios from "axios";
 
 function RealTimeConvert() {
   const navigate = useNavigate();
@@ -19,20 +18,41 @@ function RealTimeConvert() {
   const [highlightColor, setHighlightColor] = useState("red");
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const pageSectionRefs = useRef({});
 
-  const {
-    loading,
-    startLoading,
-    stopLoading,
-    pdfFile,
-    convertedData,
-    processingError,
-    setConvertedData,
-  } = useLoading();
+  const API_URL = process.env.REACT_APP_API_URL;
+
+  const startRealTime = async (pdfFile = null) => {
+    try {
+      const formData = new FormData();
+
+      if (pdfFile) {
+        formData.append("doc_file", pdfFile);
+      }
+
+      const headers = { "Content-Type": "multipart/form-data" };
+
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await axios.post(
+        `${API_URL}/api/realTime/start-realtime`,
+        pdfFile ? formData : {},
+        { headers }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error starting real-time process:", error);
+      throw error;
+    }
+  };
+
+  const { loading, pdfFile, convertedData, processingError, setConvertedData } =
+    useLoading();
 
   const { refreshHistory } = useHistory();
-  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (loading === false && convertedData !== null) {
@@ -46,7 +66,14 @@ function RealTimeConvert() {
       refreshHistory();
       setConvertedData(null);
     }
-  }, [loading, convertedData, navigate, pdfFile]);
+  }, [
+    loading,
+    convertedData,
+    navigate,
+    pdfFile,
+    refreshHistory,
+    setConvertedData,
+  ]);
 
   useEffect(() => {
     if (processingError) {
@@ -95,15 +122,12 @@ function RealTimeConvert() {
         return;
       }
 
-      // Start loading
-      startLoading();
-
       try {
-        // Upload PDF and start real-time conversion
-        const response = await processService.startRealTime(docFile);
-        
+        // pdf 파일 업로드 후 실시간 변환 시작
+        const response = await startRealTime(docFile);
+
         if (response.jobId) {
-          // Navigate to real-time page with jobId and PDF file
+          // 실시간 페이지로 이동
           navigate("/real-time-page", {
             state: {
               pdfFile: URL.createObjectURL(docFile),
@@ -122,13 +146,10 @@ function RealTimeConvert() {
         console.error("API 요청 실패:", apiError);
         showError("실시간 변환 시작에 실패했습니다. 다시 시도해주세요.");
         setError("실시간 변환 시작에 실패했습니다.");
-      } finally {
-        stopLoading();
       }
     } catch (error) {
       console.error("변환 실패:", error);
       showError("파일 변환에 실패했습니다. 다시 시도해주세요.");
-      stopLoading();
     }
   };
 
