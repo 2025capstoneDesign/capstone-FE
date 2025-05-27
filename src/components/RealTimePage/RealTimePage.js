@@ -266,7 +266,14 @@ export default function RealTimePage() {
       const { audioBlob } = await stopRecordingForSegment();
       
       if (audioBlob) {
-        const metaJson = [...slideMetaRef.current];
+        // Filter out incomplete slides (with null end_time)
+        const metaJson = slideMetaRef.current.filter(slide => slide.end_time !== null);
+        
+        // Only process if we have complete slides
+        if (metaJson.length === 0) {
+          console.log('No complete slides to process');
+          return;
+        }
         
         try {
           const response = await processService.processRealTimeSegment(jobId, audioBlob, metaJson);
@@ -350,7 +357,7 @@ export default function RealTimePage() {
       const segmentDuration = (now - segmentStartTimeRef.current) / 1000;
       
       if (segmentDuration >= 10) {
-        // Update final slide end time
+        // Update final slide end time before processing
         const currentSegmentElapsed = now - segmentStartTimeRef.current;
         const endTimeFormatted = formatRecordingTime(currentSegmentElapsed);
         
@@ -477,6 +484,7 @@ export default function RealTimePage() {
           isRealTimeActive={isRealTimeActive}
           isRecording={isRecording}
           startRecording={startRecording}
+          stopRecording={handlePauseRecording}
           showGuidanceModal={showGuidanceModal}
           recordingTime={recordingTime}
           currentSegmentTime={currentSegmentTime}

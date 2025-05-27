@@ -13,6 +13,7 @@ export default function PdfViewer({
   isRealTimeActive = false,
   isRecording = false,
   startRecording = null,
+  stopRecording = null,
   showGuidanceModal = false,
   recordingTime = "00:00.000",
   currentSegmentTime = "00:00.000",
@@ -64,6 +65,8 @@ export default function PdfViewer({
             onClick={() => {
               if (isRealTimeActive && !isRecording && startRecording) {
                 startRecording();
+              } else if (isRealTimeActive && isRecording && stopRecording) {
+                stopRecording();
               } else if (!isRealTimeActive) {
                 toast.info("실시간 변환을 먼저 시작해주세요.", {
                   position: "top-center",
