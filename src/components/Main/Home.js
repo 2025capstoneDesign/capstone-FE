@@ -40,11 +40,7 @@ function Home() {
   );
 
   const handleConvertClick = () => {
-    if (isAuthenticated()) {
-      setIsModalOpen(true);
-    } else {
-      navigate("/login");
-    }
+    setIsModalOpen(true);
   };
 
   return (
@@ -82,9 +78,9 @@ function Home() {
         </div>
       </div>
 
-      <ConvertSelectModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <ConvertSelectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
       />
     </section>
   );

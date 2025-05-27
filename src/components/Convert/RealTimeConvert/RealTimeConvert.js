@@ -7,6 +7,7 @@ import { useLoading } from "../../../context/LoadingContext";
 import { useHistory } from "../../../context/HistoryContext";
 import { useAuth } from "../../../context/AuthContext";
 import { showError } from "../../../utils/errorHandler";
+import PdfViewer from "../../TestPage/PdfViewer";
 
 function RealTimeConvert() {
   const navigate = useNavigate();
@@ -15,6 +16,10 @@ function RealTimeConvert() {
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState("ai");
   const [highlightColor, setHighlightColor] = useState("red");
+  const [numPages, setNumPages] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const pageSectionRefs = useRef({});
+
   const {
     loading,
     startLoading,
@@ -92,12 +97,43 @@ function RealTimeConvert() {
         return;
       }
 
-      startLoading(files, docFile);
+      navigate("/real-time-page", {
+        state: {
+          pdfFile: URL.createObjectURL(docFile),
+          pdfData: {
+            summaryData: {},
+            voiceData: {},
+          },
+        },
+      });
     } catch (error) {
       console.error("변환 실패:", error);
       showError("파일 변환에 실패했습니다. 다시 시도해주세요.");
-      stopLoading(null);
     }
+  };
+
+  function onDocumentLoadSuccess({ numPages }) {
+    setNumPages(numPages);
+  }
+
+  function onDocumentLoadError(error) {
+    console.error("Error loading PDF:", error);
+    showError("PDF 로딩 중 오류가 발생했습니다");
+  }
+
+  const goToPage = (next) => {
+    const newPage = Math.min(Math.max(1, pageNumber + next), numPages || 1);
+    if (newPage !== pageNumber) {
+      setPageNumber(newPage);
+    }
+  };
+
+  const goPrevPage = () => {
+    goToPage(-1);
+  };
+
+  const goNextPage = () => {
+    goToPage(1);
   };
 
   return (
@@ -116,13 +152,27 @@ function RealTimeConvert() {
       <div className="main-content">
         <div className="slide-container">
           <div className="slide-header"></div>
+          {files.length > 0 &&
+            files.find((file) => file.name.toLowerCase().endsWith(".pdf")) && (
+              <PdfViewer
+                pdfUrl={URL.createObjectURL(
+                  files.find((file) => file.name.toLowerCase().endsWith(".pdf"))
+                )}
+                pageNumber={pageNumber}
+                numPages={numPages}
+                onDocumentLoadSuccess={onDocumentLoadSuccess}
+                onDocumentLoadError={onDocumentLoadError}
+                goPrevPage={goPrevPage}
+                goNextPage={goNextPage}
+              />
+            )}
           <RealTimeFileUploadSection
             files={files}
             fileInputRef={fileInputRef}
             handleFileUpload={handleFileUpload}
             handleDelete={handleDelete}
             handleConvert={handleConvert}
-            isLoading={loading}
+            isLoading={false}
           />
         </div>
 
