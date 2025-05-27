@@ -8,7 +8,7 @@ import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
 import { useAuth } from "../../context/AuthContext";
 import { processService } from "../../api/processService";
-import { parseRealTimeResponse, createMetaJson, isValidDuration, calculateDuration } from "../Convert/RealTimeConvert/realTimeDataParser";
+import { parseRealTimeResponse } from "../Convert/RealTimeConvert/realTimeDataParser";
 
 export default function RealTimePage() {
   const location = useLocation();
@@ -51,15 +51,53 @@ export default function RealTimePage() {
   const [showGuidanceModal, setShowGuidanceModal] = useState(isRealTimeMode);
   const [isUploading, setIsUploading] = useState(false);
   const [realTimePdfData, setRealTimePdfData] = useState(pdfData);
+  const [recordingTime, setRecordingTime] = useState("00:00.000");
+  const [currentSegmentTime, setCurrentSegmentTime] = useState("00:00.000");
   
   // Recording refs
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const recordingStartTimeRef = useRef(null);
+  const segmentStartTimeRef = useRef(null);
   const currentSlideRef = useRef(pageNumber);
+  const slideMetaRef = useRef([]);
+  const timerIntervalRef = useRef(null);
 
   // 각 페이지 섹션에 대한 ref를 저장할 객체
   const pageSectionRefs = useRef({});
+
+  // Format time from milliseconds to MM:SS.sss
+  const formatRecordingTime = (ms) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const milliseconds = ms % 1000;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+  };
+
+  // Update recording timer
+  useEffect(() => {
+    if (isRecording && recordingStartTimeRef.current) {
+      timerIntervalRef.current = setInterval(() => {
+        const now = new Date();
+        const totalElapsed = now - recordingStartTimeRef.current;
+        const segmentElapsed = now - segmentStartTimeRef.current;
+        setRecordingTime(formatRecordingTime(totalElapsed));
+        setCurrentSegmentTime(formatRecordingTime(segmentElapsed));
+      }, 10);
+    } else {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    };
+  }, [isRecording]);
 
   // Use pdfFile directly (already a Blob URL or path)
   const pdfUrl = pdfFile;
@@ -81,7 +119,7 @@ export default function RealTimePage() {
     if (newPage !== pageNumber) {
       // Handle slide transition during recording
       if (isRecording && isRealTimeActive) {
-        handleSlideTransition();
+        handleSlideTransition(newPage);
       }
       setPageNumber(newPage);
       currentSlideRef.current = newPage;
@@ -131,7 +169,16 @@ export default function RealTimePage() {
       
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
-      recordingStartTimeRef.current = new Date();
+      const now = new Date();
+      recordingStartTimeRef.current = now;
+      segmentStartTimeRef.current = now;
+      
+      // Initialize slide meta with current slide
+      slideMetaRef.current = [{
+        slide_id: currentSlideRef.current,
+        start_time: "00:00.000",
+        end_time: null
+      }];
       
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -141,6 +188,8 @@ export default function RealTimePage() {
       
       mediaRecorder.start();
       setIsRecording(true);
+      setRecordingTime("00:00.000");
+      setCurrentSegmentTime("00:00.000");
       setShowGuidanceModal(false);
       
       toast.info("녹음이 시작되었습니다.", {
@@ -174,20 +223,50 @@ export default function RealTimePage() {
     });
   };
 
-  const handleSlideTransition = async () => {
-    if (!isRecording || !recordingStartTimeRef.current || isUploading) {
+  const handleSlideTransition = async (newSlideNumber) => {
+    if (!isRecording || !segmentStartTimeRef.current || isUploading) {
       return;
     }
 
+    const now = new Date();
+    const segmentDuration = (now - segmentStartTimeRef.current) / 1000;
+    
+    // Update current slide end time in meta
+    const currentSegmentElapsed = now - segmentStartTimeRef.current;
+    const endTimeFormatted = formatRecordingTime(currentSegmentElapsed);
+    
+    if (slideMetaRef.current.length > 0) {
+      slideMetaRef.current[slideMetaRef.current.length - 1].end_time = endTimeFormatted;
+    }
+    
+    // Add new slide to meta
+    slideMetaRef.current.push({
+      slide_id: newSlideNumber,
+      start_time: formatRecordingTime(currentSegmentElapsed),
+      end_time: null
+    });
+    
+    // Check if total duration since last API call is >= 10 seconds
+    if (segmentDuration >= 10) {
+      await processCurrentSegment();
+      // Reset for new segment after API call
+      restartSegmentRecording();
+    }
+    
+    console.log('Slide transition recorded:', slideMetaRef.current);
+  };
+
+  const processCurrentSegment = async () => {
+    if (!mediaRecorderRef.current || isUploading) return;
+    
     try {
-      const { audioBlob, endTime } = await stopRecording();
-      const startTime = recordingStartTimeRef.current;
+      setIsUploading(true);
       
-      // Check if duration is at least 10 seconds
-      if (isValidDuration(startTime, endTime)) {
-        setIsUploading(true);
-        
-        const metaJson = createMetaJson(currentSlideRef.current, startTime, endTime);
+      // Stop current recording temporarily to get audio data
+      const { audioBlob } = await stopRecordingForSegment();
+      
+      if (audioBlob) {
+        const metaJson = [...slideMetaRef.current];
         
         try {
           const response = await processService.processRealTimeSegment(jobId, audioBlob, metaJson);
@@ -195,7 +274,7 @@ export default function RealTimePage() {
           // Update PDF data with new response
           setRealTimePdfData(prevData => parseRealTimeResponse(response, prevData));
           
-          toast.success(`슬라이드 ${currentSlideRef.current} 처리 완료`, {
+          toast.success(`세그먼트 처리 완료 (${metaJson.length}개 슬라이드)`, {
             position: "top-center",
             autoClose: 2000,
           });
@@ -205,15 +284,60 @@ export default function RealTimePage() {
             position: "top-center",
             autoClose: 3000,
           });
-        } finally {
-          setIsUploading(false);
         }
-      } else {
-        const duration = calculateDuration(startTime, endTime);
-        console.log(`Recording duration too short: ${duration}s, skipping API call`);
       }
     } catch (error) {
-      console.error("Error handling slide transition:", error);
+      console.error("Error processing segment:", error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const stopRecordingForSegment = () => {
+    return new Promise((resolve) => {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.onstop = () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+          resolve({ audioBlob });
+        };
+        
+        mediaRecorderRef.current.stop();
+      } else {
+        resolve({ audioBlob: null });
+      }
+    });
+  };
+
+  const restartSegmentRecording = async () => {
+    if (!isRecording) return;
+    
+    try {
+      // Get new media stream
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+      segmentStartTimeRef.current = new Date();
+      
+      // Reset slide meta for new segment, starting from 00:00.000
+      slideMetaRef.current = [{
+        slide_id: currentSlideRef.current,
+        start_time: "00:00.000",
+        end_time: null
+      }];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      
+      mediaRecorder.start();
+      setCurrentSegmentTime("00:00.000");
+      
+    } catch (error) {
+      console.error("Failed to restart recording:", error);
     }
   };
 
@@ -221,36 +345,42 @@ export default function RealTimePage() {
     if (!isRecording) return;
 
     try {
-      const { audioBlob, endTime } = await stopRecording();
-      const startTime = recordingStartTimeRef.current;
+      // Process final segment if there's enough duration
+      const now = new Date();
+      const segmentDuration = (now - segmentStartTimeRef.current) / 1000;
       
-      // Only process if duration is at least 10 seconds
-      if (isValidDuration(startTime, endTime)) {
-        setIsUploading(true);
+      if (segmentDuration >= 10) {
+        // Update final slide end time
+        const currentSegmentElapsed = now - segmentStartTimeRef.current;
+        const endTimeFormatted = formatRecordingTime(currentSegmentElapsed);
         
-        const metaJson = createMetaJson(currentSlideRef.current, startTime, endTime);
-        
-        try {
-          const response = await processService.processRealTimeSegment(jobId, audioBlob, metaJson);
-          setRealTimePdfData(prevData => parseRealTimeResponse(response, prevData));
-          
-          toast.success("녹음이 처리되었습니다.", {
-            position: "top-center",
-            autoClose: 2000,
-          });
-        } catch (error) {
-          console.error("Failed to process audio segment:", error);
-          toast.error("음성 처리에 실패했습니다.", {
-            position: "top-center",
-            autoClose: 3000,
-          });
-        } finally {
-          setIsUploading(false);
+        if (slideMetaRef.current.length > 0) {
+          slideMetaRef.current[slideMetaRef.current.length - 1].end_time = endTimeFormatted;
         }
+        
+        await processCurrentSegment();
       }
       
+      // Stop recording completely
+      await stopRecording();
+      
+      // Clean up
+      setIsRecording(false);
       setIsRealTimeActive(false);
       setJobId(null);
+      setRecordingTime("00:00.000");
+      setCurrentSegmentTime("00:00.000");
+      slideMetaRef.current = [];
+      
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+      
+      toast.success("실시간 변환이 종료되었습니다.", {
+        position: "top-center",
+        autoClose: 2000,
+      });
     } catch (error) {
       console.error("Error pausing recording:", error);
     }
@@ -348,6 +478,8 @@ export default function RealTimePage() {
           isRecording={isRecording}
           startRecording={startRecording}
           showGuidanceModal={showGuidanceModal}
+          recordingTime={recordingTime}
+          currentSegmentTime={currentSegmentTime}
         />
         <SummaryPanel
           activeTab={activeTab}
