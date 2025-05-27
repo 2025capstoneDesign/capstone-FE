@@ -1,5 +1,32 @@
 /* /src/styles/TestPage.css */
 
+/* Real-time recording animations */
+@keyframes pulsate {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(92, 191, 188, 0.7);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(92, 191, 188, 0.3);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(92, 191, 188, 0);
+  }
+}
+
+.audio-icon.pulsate {
+  animation: pulsate 2s infinite;
+  border-radius: 50%;
+}
+
+.audio-icon.recording {
+  background-color: rgba(255, 68, 68, 0.1);
+  border-radius: 50%;
+  padding: 5px;
+}
+
 /* 기본 리셋 및 전체 레이아웃 */
 * {
   margin: 0;
@@ -682,6 +709,7 @@ body {
   border-bottom: 3px solid ;
   border-color: #455E5C;
 }
+
 
 .view-btn, .history-btn {
   padding: 8px 16px;

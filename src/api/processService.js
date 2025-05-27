@@ -6,6 +6,65 @@ const API_URL = process.env.REACT_APP_API_URL;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const processService = {
+  // Start real-time conversion process
+  startRealTime: async (pdfFile = null) => {
+    try {
+      const formData = new FormData();
+      
+      // Add PDF file if provided
+      if (pdfFile) {
+        formData.append("doc_file", pdfFile);
+      }
+
+      const headers = { "Content-Type": "multipart/form-data" };
+      
+      // Get auth token from localStorage if it exists
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await axios.post(
+        `${API_URL}/api/realTime/start-realtime`,
+        pdfFile ? formData : {},
+        { headers }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error starting real-time process:", error);
+      throw error;
+    }
+  },
+
+  // Process real-time audio segment
+  processRealTimeSegment: async (jobId, audioBlob, metaJson) => {
+    try {
+      const formData = new FormData();
+      formData.append("audio_file", audioBlob);
+      formData.append("meta_json", JSON.stringify(metaJson));
+
+      const headers = { "Content-Type": "multipart/form-data" };
+      
+      // Get auth token from localStorage if it exists
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await axios.post(
+        `${API_URL}/api/realTime/real-time-process/${jobId}`,
+        formData,
+        { headers }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error processing real-time segment:", error);
+      throw error;
+    }
+  },
+
   // Start the conversion process
   startProcess: async (files) => {
     try {
@@ -16,7 +75,7 @@ export const processService = {
       }
 
       if (files.document) {
-        formData.append("ppt_file", files.document);
+        formData.append("doc_file", files.document);
       }
 
       formData.append("skip_transcription", "true");
@@ -31,7 +90,7 @@ export const processService = {
       }
 
       const response = await axios.post(
-        `${API_URL}/api/process/start-process`,
+        `${API_URL}/api/process2/start-process-v2`,
         formData,
         { headers }
       );
@@ -47,7 +106,7 @@ export const processService = {
   checkProcessStatus: async (jobId, retryCount = 0) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/process/process-status/${jobId}`
+        `${API_URL}/api/process2/process-status-v2/${jobId}`
       );
       return response.data;
     } catch (error) {
@@ -69,7 +128,7 @@ export const processService = {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
       const response = await axios.get(
-        `${API_URL}/api/process/process-result/${jobId}`,
+        `${API_URL}/api/process2/process-result-v2/${jobId}`,
         { headers }
       );
       return response.data;

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import useDetectClose from "../../hooks/useDetectClose";
-import "../../css/Dropdown.css";
-import DropdownMenu from "../common/DropdownMenu";
+import useDetectClose from "../../../hooks/useDetectClose";
+import "../../../css/Dropdown.css";
+import DropdownMenu from "../../common/DropdownMenu";
 
-function SummarySection({
+function RealTimeSummarySection({
   activeTab,
   setActiveTab,
   highlightColor,
@@ -33,17 +33,17 @@ function SummarySection({
             <p className="text-[0.9rem]">AI 필기</p>
           </button>
           <button
-            className={`tab ${activeTab === "voice" ? "active" : ""}`}
-            onClick={() => setActiveTab("voice")}
+            className={`tab ${activeTab === "original" ? "active" : ""}`}
+            onClick={() => setActiveTab("original")}
           >
-            <p className="text-[0.9rem]">음성 원본</p>
+            <p className="text-[0.9rem]">원본 문서</p>
           </button>
         </div>
 
-        {activeTab === "voice" ? (
+        {activeTab === "original" ? (
           <div
             className={`color-selector ${
-              activeTab === "voice" ? "visible" : "hidden"
+              activeTab === "original" ? "visible" : "hidden"
             }`}
           >
             <button
@@ -87,15 +87,14 @@ function SummarySection({
                 const commonContent = (
                   <>
                     <span className="text-[1.4rem] font-semibold">
-                      필기요정 사용 방법
+                      실시간 강의 사용 방법
                     </span>
                     <br />
                     <br />
-                    🔹 왼쪽 업로드 영역에 강의록 파일과 음성 파일을
-                    업로드해주세요.
+                    🔹 왼쪽 업로드 영역에 강의록 파일을 업로드해주세요.
                     <br />
-                    🔹 파일을 업로드하고 변환을 시작하면 AI가 작성한 필기를
-                    확인할 수 있습니다.
+                    🔹 파일을 업로드하고 실시간 강의 변환을 시작하면 실시간으로
+                    강의 내용을 확인할 수 있습니다.
                     <br />
                     <br />
                     <br />
@@ -152,17 +151,17 @@ function SummarySection({
             </p>
           </div>
         ) : (
-          <div className="voice-content">
+          <div className="original-content">
             <p className="text-[1.1rem] text-gray-700">
               <span className="text-[1.4rem] font-semibold">
-                필기요정 사용 방법
+                실시간 강의 사용 방법
               </span>
               <br />
               <br />
-              🔹 왼쪽 업로드 영역에 강의록 파일과 음성 파일을 업로드해주세요.
+              🔹 왼쪽 업로드 영역에 강의록 파일을 업로드해주세요.
               <br />
-              🔹파일을 업로드하고 변환을 시작하면 음성 원본을 확인할 수
-              있습니다.
+              🔹 파일을 업로드하고 실시간 강의 변환을 시작하면 원본 문서를
+              실시간으로 확인할 수 있습니다.
             </p>
             <p className="text-[1.1rem] text-gray-700">
               <br />
@@ -184,10 +183,10 @@ function SummarySection({
                 }}
               >
                 <br />
-                🔹중요한 내용은 하이라이트로 표시됩니다. 오른쪽 상단의 색상
+                🔹 중요한 내용은 하이라이트로 표시됩니다. 오른쪽 상단의 색상
                 팔레트에서 색상을 바꿔보세요.
                 <br />
-                🔹문장 위에 마우스를 올리면 해당 내용이 중요한 이유를 확인할 수
+                🔹 문장 위에 마우스를 올리면 해당 내용이 중요한 이유를 확인할 수
                 있습니다.
                 <span className="reason-tooltip">중요한 이유 확인</span>
               </span>
@@ -199,4 +198,4 @@ function SummarySection({
   );
 }
 
-export default SummarySection;
+export default RealTimeSummarySection;
