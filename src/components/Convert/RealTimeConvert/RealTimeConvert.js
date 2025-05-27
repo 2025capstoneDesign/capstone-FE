@@ -8,6 +8,7 @@ import { useHistory } from "../../../context/HistoryContext";
 import { useAuth } from "../../../context/AuthContext";
 import { showError } from "../../../utils/errorHandler";
 import PdfViewer from "../../TestPage/PdfViewer";
+import { processService } from "../../../api/processService";
 
 function RealTimeConvert() {
   const navigate = useNavigate();
@@ -79,14 +80,11 @@ function RealTimeConvert() {
         return;
       }
 
-      let audioFile = null;
       let docFile = null;
 
       for (const file of files) {
         const extension = file.name.split(".").pop().toLowerCase();
-        if (["mp3", "wav"].includes(extension)) {
-          audioFile = file;
-        } else if (["ppt", "pptx", "pdf", "doc", "docx"].includes(extension)) {
+        if (["ppt", "pptx", "pdf", "doc", "docx"].includes(extension)) {
           docFile = file;
         }
       }
@@ -97,18 +95,40 @@ function RealTimeConvert() {
         return;
       }
 
-      navigate("/real-time-page", {
-        state: {
-          pdfFile: URL.createObjectURL(docFile),
-          pdfData: {
-            summaryData: {},
-            voiceData: {},
-          },
-        },
-      });
+      // Start loading
+      startLoading();
+
+      try {
+        // Upload PDF and start real-time conversion
+        const response = await processService.startRealTime(docFile);
+        
+        if (response.jobId) {
+          // Navigate to real-time page with jobId and PDF file
+          navigate("/real-time-page", {
+            state: {
+              pdfFile: URL.createObjectURL(docFile),
+              pdfData: {
+                summaryData: {},
+                voiceData: {},
+              },
+              jobId: response.jobId,
+              isRealTimeMode: true,
+            },
+          });
+        } else {
+          throw new Error("JobId not received from server");
+        }
+      } catch (apiError) {
+        console.error("API 요청 실패:", apiError);
+        showError("실시간 변환 시작에 실패했습니다. 다시 시도해주세요.");
+        setError("실시간 변환 시작에 실패했습니다.");
+      } finally {
+        stopLoading();
+      }
     } catch (error) {
       console.error("변환 실패:", error);
       showError("파일 변환에 실패했습니다. 다시 시도해주세요.");
+      stopLoading();
     }
   };
 

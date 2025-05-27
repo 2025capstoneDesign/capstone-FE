@@ -10,6 +10,10 @@ export default function PdfViewer({
   onDocumentLoadError,
   goPrevPage,
   goNextPage,
+  isRealTimeActive = false,
+  isRecording = false,
+  startRecording = null,
+  showGuidanceModal = false,
 }) {
   // Document 컴포넌트는 파일 경로와 blob URL을 모두 올바르게 처리하므로,
   // 여기서 특별한 변환 작업이 필요X
@@ -49,17 +53,25 @@ export default function PdfViewer({
     <div className="slide-container">
       <div className="slide-header">
         <div
-          className="audio-icon"
-          onClick={() =>
-            toast.info("음성 기능이 활성화 되었습니다.", {
-              position: "top-center",
-              autoClose: 1500,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-            })
-          }
+          className={`audio-icon ${
+            isRealTimeActive && showGuidanceModal ? 'pulsate' : ''
+          } ${
+            isRecording ? 'recording' : ''
+          }`}
+          onClick={() => {
+            if (isRealTimeActive && !isRecording && startRecording) {
+              startRecording();
+            } else if (!isRealTimeActive) {
+              toast.info("실시간 변환을 먼저 시작해주세요.", {
+                position: "top-center",
+                autoClose: 1500,
+              });
+            }
+          }}
+          style={{
+            cursor: isRealTimeActive ? 'pointer' : 'default',
+            opacity: isRealTimeActive ? 1 : 0.6
+          }}
         >
           <svg
             width="28"
@@ -70,10 +82,11 @@ export default function PdfViewer({
           >
             <path
               d="M12 15.5C14.21 15.5 16 13.71 16 11.5V6C16 3.79 14.21 2 12 2C9.79 2 8 3.79 8 6V11.5C8 13.71 9.79 15.5 12 15.5Z"
-              stroke="#5CBFBC"
+              stroke={isRecording ? "#ff4444" : "#5CBFBC"}
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              fill={isRecording ? "#ff4444" : "none"}
             />
             <path
               d="M4.35 9.65V11.35C4.35 15.57 7.78 19 12 19C16.22 19 19.65 15.57 19.65 11.35V9.65"

@@ -6,6 +6,65 @@ const API_URL = process.env.REACT_APP_API_URL;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const processService = {
+  // Start real-time conversion process
+  startRealTime: async (pdfFile = null) => {
+    try {
+      const formData = new FormData();
+      
+      // Add PDF file if provided
+      if (pdfFile) {
+        formData.append("doc_file", pdfFile);
+      }
+
+      const headers = { "Content-Type": "multipart/form-data" };
+      
+      // Get auth token from localStorage if it exists
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await axios.post(
+        `${API_URL}/api/realTime/start-realtime`,
+        pdfFile ? formData : {},
+        { headers }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error starting real-time process:", error);
+      throw error;
+    }
+  },
+
+  // Process real-time audio segment
+  processRealTimeSegment: async (jobId, audioBlob, metaJson) => {
+    try {
+      const formData = new FormData();
+      formData.append("audio_file", audioBlob);
+      formData.append("meta_json", JSON.stringify(metaJson));
+
+      const headers = { "Content-Type": "multipart/form-data" };
+      
+      // Get auth token from localStorage if it exists
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await axios.post(
+        `${API_URL}/api/realTime/real-time-process/${jobId}`,
+        formData,
+        { headers }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error processing real-time segment:", error);
+      throw error;
+    }
+  },
+
   // Start the conversion process
   startProcess: async (files) => {
     try {
