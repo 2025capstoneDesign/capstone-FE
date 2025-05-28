@@ -42,7 +42,7 @@ export const createMetaJson = (slideId, startTime, endTime) => {
 };
 
 /**
- * Parses real-time API response and merges with existing data
+ * Parses real-time API response and replaces existing data completely
  * @param {Object} apiResponse - API response data
  * @param {Object} existingData - Current PDF data {summaryData, voiceData}
  * @returns {Object} - Updated data object {summaryData, voiceData}
@@ -78,7 +78,7 @@ export const parseRealTimeResponse = (apiResponse, existingData) => {
 
     console.log(`RealTimeDataParser - Processing slide ${pageNumber}`);
 
-    // Update summary data
+    // Replace summary data completely
     updatedSummaryData[pageNumber] = {
       "Concise Summary Notes": slideData["Concise Summary Notes"] || "",
       "Bullet Point Notes": slideData["Bullet Point Notes"] || "",
@@ -86,7 +86,7 @@ export const parseRealTimeResponse = (apiResponse, existingData) => {
       "Chart/Table Summary": slideData["Chart/Table Summary"] || "",
     };
 
-    // Update voice data (segments)
+    // Replace voice data (segments) completely
     if (slideData.Segments && typeof slideData.Segments === "object") {
       const segments = Object.keys(slideData.Segments).map(segmentKey => {
         const segment = slideData.Segments[segmentKey] || {};
@@ -100,9 +100,8 @@ export const parseRealTimeResponse = (apiResponse, existingData) => {
         };
       });
 
-      // Merge with existing segments for this page
-      const existingSegments = updatedVoiceData[pageNumber] || [];
-      updatedVoiceData[pageNumber] = [...existingSegments, ...segments];
+      // Replace segments completely for this page instead of merging
+      updatedVoiceData[pageNumber] = segments;
     }
   });
 

@@ -9,6 +9,9 @@ import { useHistory } from "../../context/HistoryContext";
 import { processService } from "../../api/processService";
 import { parseRealTimeResponse } from "../Convert/RealTimeConvert/realTimeDataParser";
 
+const MIN_SEGMENT_DURATION = 5; // 최소 세그먼트 지속 시간 (초)
+const AUTO_FETCH_DURATION = 30; // 자동 fetch 지속 시간 (초)
+
 export default function RealTimePage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -92,9 +95,13 @@ export default function RealTimePage() {
         const segmentElapsed = now - segmentStartTimeRef.current;
         setRecordingTime(formatRecordingTime(totalElapsed));
         setCurrentSegmentTime(formatRecordingTime(segmentElapsed));
-        
+
         // 10초가 되면 자동으로 fetch 진행 (한 번만)
-        if (segmentElapsed >= 10000 && !isUploading && !autoFetchTriggeredRef.current) {
+        if (
+          segmentElapsed >= AUTO_FETCH_DURATION * 1000 &&
+          !isUploading &&
+          !autoFetchTriggeredRef.current
+        ) {
           autoFetchTriggeredRef.current = true;
           handleAutoSegmentFetch();
         }
@@ -291,7 +298,7 @@ export default function RealTimePage() {
     });
 
     // 5초 이상인 경우만 API 호출 (10초 자동 fetch가 아닌 경우)
-    if (segmentDuration >= 5) {
+    if (segmentDuration >= MIN_SEGMENT_DURATION) {
       await processCurrentSegment();
       // 새로운 세그먼트 후 초기화
       restartSegmentRecording();
@@ -392,7 +399,7 @@ export default function RealTimePage() {
           end_time: null,
         },
       ];
-      
+
       // 자동 fetch 트리거 초기화
       autoFetchTriggeredRef.current = false;
 
@@ -417,7 +424,7 @@ export default function RealTimePage() {
       const now = new Date();
       const segmentDuration = (now - segmentStartTimeRef.current) / 1000;
 
-      if (segmentDuration >= 5) {
+      if (segmentDuration >= MIN_SEGMENT_DURATION) {
         // 처리 전 마지막 슬라이드의 끝 시간 업데이트
         const currentSegmentElapsed = now - segmentStartTimeRef.current;
         const endTimeFormatted = formatRecordingTime(currentSegmentElapsed);
