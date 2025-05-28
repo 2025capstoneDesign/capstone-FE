@@ -1,10 +1,12 @@
-/**
- * Recording Manager for handling audio recording and segment management
- * Extracted from RealTimePage.js for better separation of concerns
- */
+// 오디오 녹음 및 세그먼트 관리를 위한 녹음 관리자
+//관심사 분리를 위해 RealTimePage.js에서 추출됨
 
 export class RecordingManager {
   constructor() {
+    // 녹음 시간 상수 (밀리초 단위)
+    this.AUTO_FETCH_THRESHOLD = 30000; // 30초
+    this.MIN_SEGMENT_DURATION = 5000; // 5초
+
     this.mediaRecorderRef = null;
     this.audioChunksRef = [];
     this.recordingStartTimeRef = null;
@@ -15,16 +17,14 @@ export class RecordingManager {
     this.autoFetchTriggeredRef = false;
     this.isRecording = false;
     this.isUploading = false;
-    
-    // Callbacks
+
+    // 콜백 함수들
     this.onTimeUpdate = null;
     this.onAutoFetch = null;
     this.onError = null;
   }
 
-  /**
-   * Formats time from milliseconds to MM:SS.sss
-   */
+  // 포맷 변환 (밀리초 -> MM:SS.sss)
   formatRecordingTime(ms) {
     const totalSeconds = Math.floor(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -35,18 +35,14 @@ export class RecordingManager {
       .padStart(2, "0")}.${milliseconds.toString().padStart(3, "0")}`;
   }
 
-  /**
-   * Sets callback functions
-   */
+  // 콜백 함수 설정
   setCallbacks({ onTimeUpdate, onAutoFetch, onError }) {
     this.onTimeUpdate = onTimeUpdate;
     this.onAutoFetch = onAutoFetch;
     this.onError = onError;
   }
 
-  /**
-   * Starts recording audio
-   */
+  // 녹음 시작
   async startRecording(currentSlide = 1) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -60,7 +56,7 @@ export class RecordingManager {
       this.currentSlideRef = currentSlide;
       this.isRecording = true;
 
-      // Initialize slide meta for current slide
+      // 현재 슬라이드 메타 초기화
       this.slideMetaRef = [
         {
           slide_id: this.currentSlideRef,
@@ -89,9 +85,7 @@ export class RecordingManager {
     }
   }
 
-  /**
-   * Starts the recording timer
-   */
+  // 녹음 타이머 시작
   startTimer() {
     if (this.timerIntervalRef) {
       clearInterval(this.timerIntervalRef);
@@ -104,7 +98,7 @@ export class RecordingManager {
       const now = new Date();
       const totalElapsed = now - this.recordingStartTimeRef;
       const segmentElapsed = now - this.segmentStartTimeRef;
-      
+
       const totalTime = this.formatRecordingTime(totalElapsed);
       const segmentTime = this.formatRecordingTime(segmentElapsed);
 
@@ -112,9 +106,9 @@ export class RecordingManager {
         this.onTimeUpdate(totalTime, segmentTime);
       }
 
-      // Auto-fetch after 30 seconds (10초 -> 30초로 수정)
+      // 30초 후 자동 fetch
       if (
-        segmentElapsed >= 30000 && // 30 seconds
+        segmentElapsed >= this.AUTO_FETCH_THRESHOLD &&
         !this.isUploading &&
         !this.autoFetchTriggeredRef
       ) {
@@ -126,9 +120,7 @@ export class RecordingManager {
     }, 10);
   }
 
-  /**
-   * Stops timer
-   */
+  // 타이머 중지
   stopTimer() {
     if (this.timerIntervalRef) {
       clearInterval(this.timerIntervalRef);
@@ -136,25 +128,24 @@ export class RecordingManager {
     }
   }
 
-  /**
-   * Handles slide transition
-   */
+  // 슬라이드 전환 처리
   handleSlideTransition(newSlideNumber) {
     if (!this.isRecording || !this.segmentStartTimeRef) {
       return { shouldProcess: false };
     }
 
     const now = new Date();
-    const segmentDuration = (now - this.segmentStartTimeRef) / 1000;
+    const segmentDuration = now - this.segmentStartTimeRef;
     const currentSegmentElapsed = now - this.segmentStartTimeRef;
     const endTimeFormatted = this.formatRecordingTime(currentSegmentElapsed);
 
-    // Update end time for current slide
+    // 끝 시간 업데이트
     if (this.slideMetaRef.length > 0) {
-      this.slideMetaRef[this.slideMetaRef.length - 1].end_time = endTimeFormatted;
+      this.slideMetaRef[this.slideMetaRef.length - 1].end_time =
+        endTimeFormatted;
     }
 
-    // Add new slide
+    // 새 슬라이드 추가
     this.slideMetaRef.push({
       slide_id: newSlideNumber,
       start_time: this.formatRecordingTime(currentSegmentElapsed),
@@ -163,43 +154,42 @@ export class RecordingManager {
 
     this.currentSlideRef = newSlideNumber;
 
-    // Return whether we should process (5+ seconds)
+    // 처리 여부 반환 (5초 이상)
     return {
-      shouldProcess: segmentDuration >= 5,
-      segmentDuration,
-      metaJson: this.slideMetaRef.filter(slide => slide.end_time !== null)
+      shouldProcess: segmentDuration >= this.MIN_SEGMENT_DURATION,
+      segmentDuration: segmentDuration / 1000, // Convert to seconds for display
+      metaJson: this.slideMetaRef.filter((slide) => slide.end_time !== null),
     };
   }
 
-  /**
-   * Prepares current segment for processing
-   */
+  // 현재 세그먼트 처리 준비
   async prepareSegmentForProcessing() {
     if (!this.mediaRecorderRef || !this.isRecording) {
       return { audioBlob: null, metaJson: [] };
     }
 
-    // Update end time for current segment
+    // 끝 시간 업데이트
     const now = new Date();
     const currentSegmentElapsed = now - this.segmentStartTimeRef;
     const endTimeFormatted = this.formatRecordingTime(currentSegmentElapsed);
 
     if (this.slideMetaRef.length > 0) {
-      this.slideMetaRef[this.slideMetaRef.length - 1].end_time = endTimeFormatted;
+      this.slideMetaRef[this.slideMetaRef.length - 1].end_time =
+        endTimeFormatted;
     }
 
-    // Get audio blob
+    // 오디오 블롭 가져오기
     const audioBlob = await this.stopRecordingForSegment();
-    
-    // Get complete slides (those with end_time)
-    const metaJson = this.slideMetaRef.filter(slide => slide.end_time !== null);
+
+    // 완료된 슬라이드 가져오기 (end_time이 있는 것들)
+    const metaJson = this.slideMetaRef.filter(
+      (slide) => slide.end_time !== null
+    );
 
     return { audioBlob, metaJson };
   }
 
-  /**
-   * Stops recording temporarily for segment processing
-   */
+  // 세그먼트 처리를 위해 일시적으로 녹음 중지
   stopRecordingForSegment() {
     return new Promise((resolve) => {
       if (
@@ -220,14 +210,12 @@ export class RecordingManager {
     });
   }
 
-  /**
-   * Restarts recording after segment processing
-   */
+  // 세그먼트 처리 후 녹음 재시작
   async restartRecording() {
     if (!this.isRecording) return false;
 
     try {
-      // Get new media stream
+      // 새 미디어 스트림 가져오기
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
 
@@ -235,7 +223,7 @@ export class RecordingManager {
       this.audioChunksRef = [];
       this.segmentStartTimeRef = new Date();
 
-      // Reset slide meta for new segment, starting from 00:00.000
+      // 새 세그먼트를 위해 슬라이드 메타 초기화, 00:00.000부터 시작
       this.slideMetaRef = [
         {
           slide_id: this.currentSlideRef,
@@ -244,7 +232,7 @@ export class RecordingManager {
         },
       ];
 
-      // Reset auto fetch trigger
+      // 자동 fetch 트리거 초기화
       this.autoFetchTriggeredRef = false;
 
       mediaRecorder.ondataavailable = (event) => {
@@ -254,8 +242,8 @@ export class RecordingManager {
       };
 
       mediaRecorder.start();
-      
-      // Update segment time display
+
+      // 세그먼트 시간 표시 업데이트
       if (this.onTimeUpdate) {
         this.onTimeUpdate(
           this.formatRecordingTime(new Date() - this.recordingStartTimeRef),
@@ -274,27 +262,28 @@ export class RecordingManager {
     }
   }
 
-  /**
-   * Completely stops recording
-   */
+  // 녹음 완전 중지
   async stopRecording() {
     return new Promise((resolve) => {
       this.isRecording = false;
       this.stopTimer();
 
-      if (this.mediaRecorderRef && this.mediaRecorderRef.state === "recording") {
+      if (
+        this.mediaRecorderRef &&
+        this.mediaRecorderRef.state === "recording"
+      ) {
         this.mediaRecorderRef.onstop = () => {
           const audioBlob = new Blob(this.audioChunksRef, {
             type: "audio/wav",
           });
-          
-          // Stop all tracks
+
+          // 모든 트랙 중지
           if (this.mediaRecorderRef.stream) {
             this.mediaRecorderRef.stream
               .getTracks()
               .forEach((track) => track.stop());
           }
-          
+
           resolve({ audioBlob, endTime: new Date() });
         };
 
@@ -305,34 +294,26 @@ export class RecordingManager {
     });
   }
 
-  /**
-   * Sets uploading state
-   */
+  // 업로드 상태 설정
   setUploading(isUploading) {
     this.isUploading = isUploading;
   }
 
-  /**
-   * Gets current recording state
-   */
+  // 현재 녹음 상태 가져오기
   getState() {
     return {
       isRecording: this.isRecording,
       isUploading: this.isUploading,
       currentSlide: this.currentSlideRef,
-      slideMetaLength: this.slideMetaRef.length
+      slideMetaLength: this.slideMetaRef.length,
     };
   }
 
-  /**
-   * Cleanup resources
-   */
+  // 리소스 정리
   cleanup() {
     this.stopTimer();
     if (this.mediaRecorderRef && this.mediaRecorderRef.stream) {
-      this.mediaRecorderRef.stream
-        .getTracks()
-        .forEach((track) => track.stop());
+      this.mediaRecorderRef.stream.getTracks().forEach((track) => track.stop());
     }
     this.isRecording = false;
     this.slideMetaRef = [];

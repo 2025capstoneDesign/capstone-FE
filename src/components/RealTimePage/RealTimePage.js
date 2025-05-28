@@ -36,7 +36,7 @@ export default function RealTimePage() {
         isRealTimeMode: false,
       };
 
-  // Use the new real-time state manager
+  // 실시간 상태 관리
   const {
     isRealTimeActive,
     isRecording,
