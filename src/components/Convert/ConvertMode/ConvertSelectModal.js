@@ -13,7 +13,17 @@ const ConvertSelectModal = ({ isOpen, onClose }) => {
       navigate("/upload-convert");
       onClose();
     } else {
-      navigate("/login");
+      navigate("/login", { state: { redirectTo: "/upload-convert" } });
+      onClose();
+    }
+  };
+
+  const handleRealTimeConvert = () => {
+    if (isAuthenticated()) {
+      navigate("/realtime-convert");
+      onClose();
+    } else {
+      navigate("/login", { state: { redirectTo: "/realtime-convert" } });
       onClose();
     }
   };
@@ -30,10 +40,7 @@ const ConvertSelectModal = ({ isOpen, onClose }) => {
             파일 업로드 변환
           </button>
           <button
-            onClick={() => {
-              navigate("/realtime-convert");
-              onClose();
-            }}
+            onClick={handleRealTimeConvert}
             className="w-full py-3 px-4 bg-[#5B7F7C] text-white rounded-lg hover:bg-[#455E5C] transition-colors"
           >
             실시간 변환

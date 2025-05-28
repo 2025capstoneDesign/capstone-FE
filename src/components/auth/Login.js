@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import loginImage from "../../assets/images/login2.png";
 import { useAuth } from "../../context/AuthContext";
 import { useHistory } from "../../context/HistoryContext";
@@ -9,6 +9,7 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, loading: authLoading } = useAuth();
   const { refreshHistory, loading: historyLoading } = useHistory();
   const [showLoading, setShowLoading] = useState(false);
@@ -27,7 +28,10 @@ const Login = () => {
         // Fetch history after successful login
         setLoadingMessage("기록을 불러오는 중...");
         await refreshHistory();
-        navigate("/");
+        
+        // 리다이렉트 처리
+        const redirectTo = location.state?.redirectTo || "/";
+        navigate(redirectTo);
       } else {
         showError(result.message || "로그인에 실패했습니다.");
       }
