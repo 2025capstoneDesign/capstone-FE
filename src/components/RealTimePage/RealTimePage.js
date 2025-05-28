@@ -7,7 +7,7 @@ import SummaryPanel from "../TestPage/SummaryPanel";
 import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
 import { processService } from "../../api/processService";
-import { parseRealTimeResponse } from "../Convert/RealTimeConvert/realTimeDataParser";
+import { parseRealTimeResponse } from "./realTimeDataParser";
 
 const MIN_SEGMENT_DURATION = 5; // 최소 세그먼트 지속 시간 (초)
 const AUTO_FETCH_DURATION = 30; // 자동 fetch 지속 시간 (초)
