@@ -6,8 +6,7 @@ import PdfViewer from "./PdfViewer";
 import SummaryPanel from "../TestPage/SummaryPanel";
 import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
-import { processService } from "../../api/processService";
-import { parseRealTimeResponse } from "../Convert/RealTimeConvert/realTimeDataParser";
+import { useRealTimeState } from "./realTimeStateManager";
 
 export default function RealTimePage() {
   const location = useLocation();
@@ -21,7 +20,6 @@ export default function RealTimePage() {
     pdfFile,
     pdfData,
     jobId: initialJobId,
-    isRealTimeMode,
   } = location.state
     ? location.state
     : convertedData && contextPdfFile
@@ -38,6 +36,24 @@ export default function RealTimePage() {
         isRealTimeMode: false,
       };
 
+  // 실시간 상태 관리
+  const {
+    isRealTimeActive,
+    isRecording,
+    isUploading,
+    showGuidanceModal,
+    realTimePdfData,
+    recordingTime,
+    currentSegmentTime,
+    handleStartRealTime,
+    startRecording,
+    handlePauseRecording,
+    handleSlideTransition,
+    setShowGuidanceModal,
+    queueLength,
+    isProcessingQueue,
+  } = useRealTimeState(pdfData, initialJobId);
+
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -48,62 +64,8 @@ export default function RealTimePage() {
   const [activeTab, setActiveTab] = useState("ai"); // "ai" or "voice"
   const [highlightColor, setHighlightColor] = useState("red");
 
-  // Real-time recording states
-  const [isRealTimeActive, setIsRealTimeActive] = useState(isRealTimeMode);
-  const [isRecording, setIsRecording] = useState(false);
-  const [jobId, setJobId] = useState(initialJobId);
-  const [showGuidanceModal, setShowGuidanceModal] = useState(isRealTimeMode);
-  const [isUploading, setIsUploading] = useState(false);
-  const [realTimePdfData, setRealTimePdfData] = useState(pdfData);
-  const [recordingTime, setRecordingTime] = useState("00:00.000");
-  const [currentSegmentTime, setCurrentSegmentTime] = useState("00:00.000");
-
-  // Recording refs
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
-  const recordingStartTimeRef = useRef(null);
-  const segmentStartTimeRef = useRef(null);
-  const currentSlideRef = useRef(pageNumber);
-  const slideMetaRef = useRef([]);
-  const timerIntervalRef = useRef(null);
-
   // 각 페이지 섹션에 대한 ref를 저장할 객체
   const pageSectionRefs = useRef({});
-
-  // Format time from milliseconds to MM:SS.sss
-  const formatRecordingTime = (ms) => {
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    const milliseconds = ms % 1000;
-    return `${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}.${milliseconds.toString().padStart(3, "0")}`;
-  };
-
-  // 녹음 타이머 업데이트
-  useEffect(() => {
-    if (isRecording && recordingStartTimeRef.current) {
-      timerIntervalRef.current = setInterval(() => {
-        const now = new Date();
-        const totalElapsed = now - recordingStartTimeRef.current;
-        const segmentElapsed = now - segmentStartTimeRef.current;
-        setRecordingTime(formatRecordingTime(totalElapsed));
-        setCurrentSegmentTime(formatRecordingTime(segmentElapsed));
-      }, 10);
-    } else {
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
-        timerIntervalRef.current = null;
-      }
-    }
-
-    return () => {
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
-      }
-    };
-  }, [isRecording]);
 
   const pdfUrl = pdfFile;
 
@@ -127,7 +89,6 @@ export default function RealTimePage() {
         handleSlideTransition(newPage);
       }
       setPageNumber(newPage);
-      currentSlideRef.current = newPage;
     }
   };
 
@@ -141,283 +102,6 @@ export default function RealTimePage() {
 
   const handleConvertClick = () => {
     navigate("/real-time-convert");
-  };
-
-  // 실시간 변환 핸들러
-  const handleStartRealTime = async () => {
-    try {
-      // 만약 jobId가 없으면 새로운 실시간 세션 시작
-      if (!jobId) {
-        const response = await processService.startRealTime();
-        setJobId(response.jobId);
-      }
-
-      setIsRealTimeActive(true);
-      setShowGuidanceModal(true);
-      toast.success("실시간 변환이 시작되었습니다!", {
-        position: "top-center",
-        autoClose: 2000,
-      });
-    } catch (error) {
-      console.error("Failed to start real-time conversion:", error);
-      toast.error("실시간 변환 시작에 실패했습니다.", {
-        position: "top-center",
-        autoClose: 3000,
-      });
-    }
-  };
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-      const now = new Date();
-      recordingStartTimeRef.current = now;
-      segmentStartTimeRef.current = now;
-
-      // 현재 슬라이드에 대한 slide meta 초기화
-      slideMetaRef.current = [
-        {
-          slide_id: currentSlideRef.current,
-          start_time: "00:00.000",
-          end_time: null,
-        },
-      ];
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.start();
-      setIsRecording(true);
-      setRecordingTime("00:00.000");
-      setCurrentSegmentTime("00:00.000");
-      setShowGuidanceModal(false);
-
-      toast.info("녹음이 시작되었습니다.", {
-        position: "top-center",
-        autoClose: 1500,
-      });
-    } catch (error) {
-      console.error("Failed to start recording:", error);
-      toast.error("마이크 접근에 실패했습니다.", {
-        position: "top-center",
-        autoClose: 3000,
-      });
-    }
-  };
-
-  const stopRecording = () => {
-    return new Promise((resolve) => {
-      if (mediaRecorderRef.current && isRecording) {
-        mediaRecorderRef.current.onstop = () => {
-          const audioBlob = new Blob(audioChunksRef.current, {
-            type: "audio/wav",
-          });
-          const endTime = new Date();
-          resolve({ audioBlob, endTime });
-        };
-
-        mediaRecorderRef.current.stop();
-        mediaRecorderRef.current.stream
-          .getTracks()
-          .forEach((track) => track.stop());
-        setIsRecording(false);
-      } else {
-        resolve({ audioBlob: null, endTime: new Date() });
-      }
-    });
-  };
-
-  const handleSlideTransition = async (newSlideNumber) => {
-    if (!isRecording || !segmentStartTimeRef.current || isUploading) {
-      return;
-    }
-
-    const now = new Date();
-    const segmentDuration = (now - segmentStartTimeRef.current) / 1000;
-
-    // 현재 슬라이드의 끝 시간 업데이트
-    const currentSegmentElapsed = now - segmentStartTimeRef.current;
-    const endTimeFormatted = formatRecordingTime(currentSegmentElapsed);
-
-    if (slideMetaRef.current.length > 0) {
-      slideMetaRef.current[slideMetaRef.current.length - 1].end_time =
-        endTimeFormatted;
-    }
-
-    // 새로운 슬라이드 추가
-    slideMetaRef.current.push({
-      slide_id: newSlideNumber,
-      start_time: formatRecordingTime(currentSegmentElapsed),
-      end_time: null,
-    });
-
-    // 마지막 API 호출 이후 총 지속 시간이 10초 이상인지 확인
-    if (segmentDuration >= 10) {
-      await processCurrentSegment();
-      // 새로운 세그먼트 후 초기화
-      restartSegmentRecording();
-    }
-
-    console.log("Slide transition recorded:", slideMetaRef.current);
-  };
-
-  const processCurrentSegment = async () => {
-    if (!mediaRecorderRef.current || isUploading) return;
-
-    try {
-      setIsUploading(true);
-
-      // 현재 녹음 중단 임시로 오디오 데이터 가져오기
-      const { audioBlob } = await stopRecordingForSegment();
-
-      if (audioBlob) {
-        // 끝 시간이 null인 슬라이드 제외
-        const metaJson = slideMetaRef.current.filter(
-          (slide) => slide.end_time !== null
-        );
-
-        // Only process if we have complete slides
-        if (metaJson.length === 0) {
-          console.log("No complete slides to process");
-          return;
-        }
-
-        try {
-          const response = await processService.processRealTimeSegment(
-            jobId,
-            audioBlob,
-            metaJson
-          );
-
-          // PDF 데이터 업데이트
-          setRealTimePdfData((prevData) =>
-            parseRealTimeResponse(response, prevData)
-          );
-
-          toast.success(`세그먼트 처리 완료 (${metaJson.length}개 슬라이드)`, {
-            position: "top-center",
-            autoClose: 2000,
-          });
-        } catch (error) {
-          console.error("Failed to process audio segment:", error);
-          toast.error("음성 처리에 실패했습니다.", {
-            position: "top-center",
-            autoClose: 3000,
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Error processing segment:", error);
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const stopRecordingForSegment = () => {
-    return new Promise((resolve) => {
-      if (
-        mediaRecorderRef.current &&
-        mediaRecorderRef.current.state === "recording"
-      ) {
-        mediaRecorderRef.current.onstop = () => {
-          const audioBlob = new Blob(audioChunksRef.current, {
-            type: "audio/wav",
-          });
-          resolve({ audioBlob });
-        };
-
-        mediaRecorderRef.current.stop();
-      } else {
-        resolve({ audioBlob: null });
-      }
-    });
-  };
-
-  const restartSegmentRecording = async () => {
-    if (!isRecording) return;
-
-    try {
-      // 새로운 미디어 스트림 가져오기
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-      segmentStartTimeRef.current = new Date();
-
-      // 새로운 세그먼트에 대한 slide meta 초기화, 00:00.000부터 시작
-      slideMetaRef.current = [
-        {
-          slide_id: currentSlideRef.current,
-          start_time: "00:00.000",
-          end_time: null,
-        },
-      ];
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.start();
-      setCurrentSegmentTime("00:00.000");
-    } catch (error) {
-      console.error("Failed to restart recording:", error);
-    }
-  };
-
-  const handlePauseRecording = async () => {
-    if (!isRecording) return;
-
-    try {
-      // 충분한 지속 시간이 있는 경우 마지막 세그먼트 처리
-      const now = new Date();
-      const segmentDuration = (now - segmentStartTimeRef.current) / 1000;
-
-      if (segmentDuration >= 10) {
-        // 처리 전 마지막 슬라이드의 끝 시간 업데이트
-        const currentSegmentElapsed = now - segmentStartTimeRef.current;
-        const endTimeFormatted = formatRecordingTime(currentSegmentElapsed);
-
-        if (slideMetaRef.current.length > 0) {
-          slideMetaRef.current[slideMetaRef.current.length - 1].end_time =
-            endTimeFormatted;
-        }
-
-        await processCurrentSegment();
-      }
-
-      // 완전히 녹음 중단
-      await stopRecording();
-
-      // 녹음 중단 후 상태 초기화
-      setIsRecording(false);
-      setIsRealTimeActive(false);
-      setJobId(null);
-      setRecordingTime("00:00.000");
-      setCurrentSegmentTime("00:00.000");
-      slideMetaRef.current = [];
-
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
-        timerIntervalRef.current = null;
-      }
-
-      toast.success("실시간 변환이 종료되었습니다.", {
-        position: "top-center",
-        autoClose: 2000,
-      });
-    } catch (error) {
-      console.error("Error pausing recording:", error);
-    }
   };
 
   const handleDownload = () => {
@@ -446,7 +130,11 @@ export default function RealTimePage() {
               onClick={handlePauseRecording}
               disabled={isUploading}
             >
-              {isUploading ? "처리 중..." : "실시간 변환 종료"}
+              {isUploading || isProcessingQueue
+                ? `처리 중... ${
+                    queueLength > 0 ? `(대기: ${queueLength})` : ""
+                  }`
+                : "실시간 변환 종료"}
             </button>
           )}
           <button className="convert-btn" onClick={handleConvertClick}>
@@ -522,11 +210,13 @@ export default function RealTimePage() {
           goNextPage={goNextPage}
           isRealTimeActive={isRealTimeActive}
           isRecording={isRecording}
-          startRecording={startRecording}
+          startRecording={() => startRecording(pageNumber)}
           stopRecording={handlePauseRecording}
           showGuidanceModal={showGuidanceModal}
           recordingTime={recordingTime}
           currentSegmentTime={currentSegmentTime}
+          queueLength={queueLength}
+          isProcessingQueue={isProcessingQueue}
         />
         <SummaryPanel
           activeTab={activeTab}
