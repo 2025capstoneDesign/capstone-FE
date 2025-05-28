@@ -66,6 +66,7 @@ export default function RealTimePage() {
   const currentSlideRef = useRef(pageNumber);
   const slideMetaRef = useRef([]);
   const timerIntervalRef = useRef(null);
+  const autoFetchTriggeredRef = useRef(false);
 
   // 각 페이지 섹션에 대한 ref를 저장할 객체
   const pageSectionRefs = useRef({});
@@ -84,12 +85,19 @@ export default function RealTimePage() {
   // 녹음 타이머 업데이트
   useEffect(() => {
     if (isRecording && recordingStartTimeRef.current) {
+      autoFetchTriggeredRef.current = false;
       timerIntervalRef.current = setInterval(() => {
         const now = new Date();
         const totalElapsed = now - recordingStartTimeRef.current;
         const segmentElapsed = now - segmentStartTimeRef.current;
         setRecordingTime(formatRecordingTime(totalElapsed));
         setCurrentSegmentTime(formatRecordingTime(segmentElapsed));
+        
+        // 10초가 되면 자동으로 fetch 진행 (한 번만)
+        if (segmentElapsed >= 10000 && !isUploading && !autoFetchTriggeredRef.current) {
+          autoFetchTriggeredRef.current = true;
+          handleAutoSegmentFetch();
+        }
       }, 10);
     } else {
       if (timerIntervalRef.current) {
@@ -103,7 +111,31 @@ export default function RealTimePage() {
         clearInterval(timerIntervalRef.current);
       }
     };
-  }, [isRecording]);
+  }, [isRecording, isUploading]);
+
+  // 10초 자동 fetch 핸들러
+  const handleAutoSegmentFetch = async () => {
+    if (!isRecording || !segmentStartTimeRef.current || isUploading) {
+      return;
+    }
+
+    try {
+      // 현재 슬라이드의 끝 시간 업데이트
+      const now = new Date();
+      const currentSegmentElapsed = now - segmentStartTimeRef.current;
+      const endTimeFormatted = formatRecordingTime(currentSegmentElapsed);
+
+      if (slideMetaRef.current.length > 0) {
+        slideMetaRef.current[slideMetaRef.current.length - 1].end_time =
+          endTimeFormatted;
+      }
+
+      await processCurrentSegment();
+      restartSegmentRecording();
+    } catch (error) {
+      console.error("Error in auto segment fetch:", error);
+    }
+  };
 
   const pdfUrl = pdfFile;
 
@@ -258,8 +290,8 @@ export default function RealTimePage() {
       end_time: null,
     });
 
-    // 마지막 API 호출 이후 총 지속 시간이 10초 이상인지 확인
-    if (segmentDuration >= 10) {
+    // 5초 이상인 경우만 API 호출 (10초 자동 fetch가 아닌 경우)
+    if (segmentDuration >= 5) {
       await processCurrentSegment();
       // 새로운 세그먼트 후 초기화
       restartSegmentRecording();
@@ -360,6 +392,9 @@ export default function RealTimePage() {
           end_time: null,
         },
       ];
+      
+      // 자동 fetch 트리거 초기화
+      autoFetchTriggeredRef.current = false;
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -382,7 +417,7 @@ export default function RealTimePage() {
       const now = new Date();
       const segmentDuration = (now - segmentStartTimeRef.current) / 1000;
 
-      if (segmentDuration >= 10) {
+      if (segmentDuration >= 5) {
         // 처리 전 마지막 슬라이드의 끝 시간 업데이트
         const currentSegmentElapsed = now - segmentStartTimeRef.current;
         const endTimeFormatted = formatRecordingTime(currentSegmentElapsed);
