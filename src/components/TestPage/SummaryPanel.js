@@ -24,6 +24,7 @@ export default function SummaryPanel({
   const prevPageRef = useRef(pageNumber);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedText, setSelectedText] = useState("");
+  const [selectedPage, setSelectedPage] = useState(null);
   const [showMoveButton, setShowMoveButton] = useState(false);
 
   // 특정 페이지 섹션으로 스크롤하는 함수 - 부드러운 스크롤 적용
@@ -122,11 +123,18 @@ export default function SummaryPanel({
     }
   };
 
-  // 드래그 이벤트 처리 함수
-  const handleDragStart = (e, segment) => {
-    e.dataTransfer.setData("text/plain", segment.text);
-    setSelectedText(segment.text);
-    setIsModalOpen(true);
+  // 텍스트가 속한 페이지 번호 찾기
+  const findTextPageNumber = (text) => {
+    if (!voiceData) return null;
+    
+    // 모든 페이지를 순회하면서 텍스트가 포함된 페이지 찾기
+    for (const [pageNum, segments] of Object.entries(voiceData)) {
+      const pageText = segments.map(segment => segment.text).join(' ');
+      if (pageText.includes(text)) {
+        return parseInt(pageNum);
+      }
+    }
+    return null;
   };
 
   // 텍스트 선택 이벤트 처리
@@ -136,14 +144,18 @@ export default function SummaryPanel({
     
     if (selectedText) {
       setSelectedText(selectedText);
+      const textPage = findTextPageNumber(selectedText);
+      setSelectedPage(textPage);
       setShowMoveButton(true);
     } else {
       setShowMoveButton(false);
+      setSelectedPage(null);
     }
   };
 
   const handleModalConfirm = (targetPage, text) => {
     console.log('선택된 텍스트:', text);
+    console.log('원래 페이지:', selectedPage);
     console.log('이동할 페이지:', targetPage);
   };
 
