@@ -8,7 +8,7 @@ export default function PageMoveModal({ isOpen, onClose, onConfirm, maxPage, sel
   const handleSubmit = (e) => {
     e.preventDefault();
     const num = parseInt(pageNum);
-    if (num >= 1 && num <= maxPage) {
+    if (num >= 0 && num <= maxPage) {
       onConfirm(num, selectedText);
       onClose();
     } else {
@@ -26,7 +26,6 @@ export default function PageMoveModal({ isOpen, onClose, onConfirm, maxPage, sel
           <button className="close-button" onClick={onClose}>×</button>
         </div>
         <div className="page-move-modal-body">
-          {/* <p className="selected-text">선택된 텍스트: {selectedText}</p> */}
           <form onSubmit={handleSubmit}>
             <div className="input-group">
               <label htmlFor="pageNumber">이동할 페이지 번호</label>

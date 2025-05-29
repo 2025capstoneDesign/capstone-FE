@@ -352,16 +352,22 @@ export default function SummaryPanel({
       </div>
 
       {showMoveButton && !isModalOpen && (
-        <div className="fixed bottom-8 right-8 z-50">
+        <div className="fixed bottom-8 right-8 z-50 flex gap-2">
           <button
             className="flex items-center gap-2 px-6 py-3 bg-[#80cbc4] text-white rounded-lg shadow-lg hover:bg-[#4db6ac] hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:shadow-md transition-all duration-300 text-[15px] font-medium"
             onClick={() => setIsModalOpen(true)}
           >
-            <span className="text-lg font-bold">→</span>
             이동
+          </button>
+          <button
+            className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-lg shadow-lg hover:bg-red-600 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:shadow-md transition-all duration-300 text-[15px] font-medium"
+            onClick={() => handleModalConfirm(0, selectedText)}//삭제 버튼 누를 때는 targetpage 0으로 설정
+          >
+            삭제
           </button>
         </div>
       )}
+
 
       <PageMoveModal
         isOpen={isModalOpen}
