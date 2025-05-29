@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import bannerImage from '../../assets/images/banner_image2.png';
 import overlayImage from '../../assets/images/overlay3.png';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import ConvertSelectModal from '../Convert/ConvertMode/ConvertSelectModal';
 
 const Banner = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleButtonClick = () => {
     if (isAuthenticated()) {
-      navigate('/convert');
+      setIsModalOpen(true);
     } else {
       navigate('/login');
     }
@@ -66,6 +68,11 @@ const Banner = () => {
           />
         </div>
       </div>
+
+      <ConvertSelectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };

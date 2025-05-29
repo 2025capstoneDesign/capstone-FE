@@ -21,6 +21,13 @@ function RealTimeConvert() {
 
   const API_URL = process.env.REACT_APP_API_URL;
 
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
   const startRealTime = async (pdfFile = null) => {
     try {
       const formData = new FormData();

@@ -5,6 +5,7 @@ import useDetectClose from "../../hooks/useDetectClose";
 import "../../css/Dropdown.css";
 import remarkGfm from "remark-gfm";
 import DropdownMenu from "../common/DropdownMenu";
+import PageMoveModal from "../common/PageMoveModal";
 
 export default function SummaryPanel({
   activeTab,
@@ -21,6 +22,10 @@ export default function SummaryPanel({
   const contentContainerRef = useRef(null);
   const prevTabRef = useRef(activeTab);
   const prevPageRef = useRef(pageNumber);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedText, setSelectedText] = useState("");
+  const [selectedPage, setSelectedPage] = useState(null);
+  const [showMoveButton, setShowMoveButton] = useState(false);
 
   // 특정 페이지 섹션으로 스크롤하는 함수 - 부드러운 스크롤 적용
   const scrollToPageSection = useCallback(
@@ -116,6 +121,42 @@ export default function SummaryPanel({
       setPageNumber(segment.pageNumber);
       scrollToPageSection(segment.pageNumber);
     }
+  };
+
+  // 텍스트가 속한 페이지 번호 찾기
+  const findTextPageNumber = (text) => {
+    if (!voiceData) return null;
+    
+    // 모든 페이지를 순회하면서 텍스트가 포함된 페이지 찾기
+    for (const [pageNum, segments] of Object.entries(voiceData)) {
+      const pageText = segments.map(segment => segment.text).join(' ');
+      if (pageText.includes(text)) {
+        return parseInt(pageNum);
+      }
+    }
+    return null;
+  };
+
+  // 텍스트 선택 이벤트 처리
+  const handleTextSelection = (e) => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
+    
+    if (selectedText) {
+      setSelectedText(selectedText);
+      const textPage = findTextPageNumber(selectedText);
+      setSelectedPage(textPage);
+      setShowMoveButton(true);
+    } else {
+      setShowMoveButton(false);
+      setSelectedPage(null);
+    }
+  };
+
+  const handleModalConfirm = (targetPage, text) => {
+    console.log('선택된 텍스트:', text);
+    console.log('원래 페이지:', selectedPage);
+    console.log('이동할 페이지:', targetPage);
   };
 
   // 전체 voiceData를 렌더링하는 함수
@@ -274,7 +315,11 @@ export default function SummaryPanel({
         )}
       </div>
 
-      <div className="content-container" ref={contentContainerRef}>
+      <div 
+        className="content-container" 
+        ref={contentContainerRef}
+        onMouseUp={handleTextSelection}
+      >
         {activeTab === "ai" ? (
           <div className="ai-content">
             <ReactMarkdown
@@ -305,6 +350,35 @@ export default function SummaryPanel({
           <div className="voice-content">{renderAllVoiceContent()}</div>
         )}
       </div>
+
+      {showMoveButton && !isModalOpen && (
+        <div className="fixed bottom-8 right-8 z-50 flex gap-2">
+          <button
+            className="flex items-center gap-2 px-6 py-3 bg-[#80cbc4] text-white rounded-lg shadow-lg hover:bg-[#4db6ac] hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:shadow-md transition-all duration-300 text-[15px] font-medium"
+            onClick={() => setIsModalOpen(true)}
+          >
+            이동
+          </button>
+          <button
+            className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-lg shadow-lg hover:bg-red-600 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:shadow-md transition-all duration-300 text-[15px] font-medium"
+            onClick={() => handleModalConfirm(0, selectedText)}//삭제 버튼 누를 때는 targetpage 0으로 설정
+          >
+            삭제
+          </button>
+        </div>
+      )}
+
+
+      <PageMoveModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setShowMoveButton(false);
+        }}
+        onConfirm={handleModalConfirm}
+        maxPage={numPages}
+        selectedText={selectedText}
+      />
     </div>
   );
 }

@@ -349,6 +349,11 @@ body {
   padding: 20px;
   scroll-behavior: smooth;
   min-height: 0;
+  position: relative;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 /* AI 콘텐츠 스타일 */
@@ -682,4 +687,137 @@ body {
 .manual-content li {
   margin-bottom: 0.5rem;
   color: #555;
+}
+
+/* 페이지 이동 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 300px;
+}
+
+.modal-content h3 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 18px;
+  text-align: center;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-content input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.modal-content input:focus {
+  outline: none;
+  border-color: #80cbc4;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-buttons button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.modal-buttons button[type="submit"] {
+  background-color: #80cbc4;
+  color: white;
+}
+
+.modal-buttons button[type="submit"]:hover {
+  background-color: #4db6ac;
+}
+
+.modal-buttons button[type="button"] {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.modal-buttons button[type="button"]:hover {
+  background-color: #e0e0e0;
+}
+
+/* 이동 버튼 컨테이너 스타일 */
+.move-button-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+}
+
+/* 이동 버튼 스타일 */
+.move-button {
+  padding: 12px 24px;
+  background-color: #80cbc4;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.move-button::before {
+  content: "→";
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.move-button:hover {
+  background-color: #4db6ac;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.move-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 선택 영역 스타일 */
+::selection {
+  background-color: rgba(128, 203, 196, 0.3);
+  color: inherit;
+}
+
+::-moz-selection {
+  background-color: rgba(128, 203, 196, 0.3);
+  color: inherit;
 }
