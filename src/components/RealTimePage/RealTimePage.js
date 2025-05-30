@@ -52,6 +52,11 @@ export default function RealTimePage() {
     setShowGuidanceModal,
     queueLength,
     isProcessingQueue,
+    voiceMap,
+    currentSlide,
+    isConnected,
+    getTranscriptForSlide,
+    getCurrentTranscript,
   } = useRealTimeState(pdfData, initialJobId);
 
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
@@ -176,13 +181,25 @@ export default function RealTimePage() {
               }}
             >
               <h3 style={{ marginBottom: "20px", color: "#333" }}>
-                실시간 변환 가이드
+                실시간 음성 인식
               </h3>
               <p style={{ marginBottom: "25px", lineHeight: "1.5" }}>
-                마이크 버튼을 누르면 녹음이 시작됩니다.
+                마이크 버튼을 누르면 음성 인식이 시작됩니다.
                 <br />
-                슬라이드를 넘기거나 종료 버튼을 누르면 음성이 처리됩니다.
+                슬라이드별로 실시간 음성 인식 결과를 확인할 수 있습니다.
               </p>
+              {isConnected && (
+                <div style={{ marginBottom: "15px", padding: "10px", backgroundColor: "#f0f8ff", borderRadius: "5px" }}>
+                  <strong>연결 상태:</strong> 🟢 연결됨
+                  <br />
+                  <strong>현재 슬라이드:</strong> {pageNumber}
+                  <br />
+                  <strong>음성 인식 결과:</strong>
+                  <div style={{ marginTop: "5px", padding: "8px", backgroundColor: "#fff", borderRadius: "3px", fontSize: "14px", minHeight: "40px" }}>
+                    {getCurrentTranscript() || "음성을 인식 중입니다..."}
+                  </div>
+                </div>
+              )}
               <button
                 onClick={() => setShowGuidanceModal(false)}
                 style={{
@@ -210,7 +227,7 @@ export default function RealTimePage() {
           goNextPage={goNextPage}
           isRealTimeActive={isRealTimeActive}
           isRecording={isRecording}
-          startRecording={() => startRecording(pageNumber)}
+          startRecording={() => startRecording(pageNumber, initialJobId)}
           stopRecording={handlePauseRecording}
           showGuidanceModal={showGuidanceModal}
           recordingTime={recordingTime}
@@ -229,6 +246,8 @@ export default function RealTimePage() {
           summaryData={realTimePdfData?.summaryData || {}}
           voiceData={realTimePdfData?.voiceData || {}}
           pageSectionRefs={pageSectionRefs}
+          voiceMap={voiceMap}
+          isStreaming={isRecording}
         />
       </div>
     </div>

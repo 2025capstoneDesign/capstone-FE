@@ -21,12 +21,13 @@ function RealTimeConvert() {
 
   const API_URL = process.env.REACT_APP_API_URL;
 
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      navigate("/login");
-    }
-  }, [navigate]);
+  // 실시간 변환은 로그인 없이 사용 가능
+  // useEffect(() => {
+  //   const token = localStorage.getItem("accessToken");
+  //   if (!token) {
+  //     navigate("/login");
+  //   }
+  // }, [navigate]);
 
   const startRealTime = async (pdfFile = null) => {
     try {
