@@ -27,29 +27,33 @@ export const useRealTimeState = (initialData, initialJobId) => {
     // 콜백 설정
     streamingSTTRef.current.setCallbacks({
       onTranscriptUpdate: (data) => {
-        console.log('음성 인식 결과 업데이트:', data);
-        
+        console.log("음성 인식 결과 업데이트:", data);
+
         // 백엔드에서 전체 슬라이드 데이터를 받아서 처리
         if (data) {
           // realTimeDataParser를 사용해서 기존 데이터와 병합
           setRealTimePdfData((prevData) => {
-            const { parseRealTimeResponse } = require('./realTimeDataParser');
+            const { parseRealTimeResponse } = require("./realTimeDataParser");
             return parseRealTimeResponse(data, prevData);
           });
-          
+
           // 슬라이드별 음성 인식 결과만 별도로 추출 (UI 표시용)
-          const slideKeys = Object.keys(data).filter(key => key.startsWith('slide'));
+          const slideKeys = Object.keys(data).filter((key) =>
+            key.startsWith("slide")
+          );
           const newVoiceMap = {};
-          slideKeys.forEach(slideKey => {
-            const slideNumber = slideKey.replace('slide', '');
+          slideKeys.forEach((slideKey) => {
+            const slideNumber = slideKey.replace("slide", "");
             const segments = data[slideKey].Segments || {};
-            const segmentTexts = Object.values(segments).map(segment => segment.text).join(' ');
+            const segmentTexts = Object.values(segments)
+              .map((segment) => segment.text)
+              .join(" ");
             if (segmentTexts.trim()) {
               newVoiceMap[slideNumber] = segmentTexts;
             }
           });
-          
-          setVoiceMap(prev => ({ ...prev, ...newVoiceMap }));
+
+          setVoiceMap((prev) => ({ ...prev, ...newVoiceMap }));
         }
       },
       onError: (message) => {

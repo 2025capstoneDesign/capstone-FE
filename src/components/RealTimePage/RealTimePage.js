@@ -38,25 +38,22 @@ export default function RealTimePage() {
 
   // 실시간 상태 관리
   const {
-    isRealTimeActive,
-    isRecording,
-    isUploading,
-    showGuidanceModal,
-    realTimePdfData,
-    recordingTime,
-    currentSegmentTime,
-    handleStartRealTime,
-    startRecording,
-    handlePauseRecording,
-    handleSlideTransition,
-    setShowGuidanceModal,
-    queueLength,
-    isProcessingQueue,
-    voiceMap,
-    currentSlide,
-    isConnected,
-    getTranscriptForSlide,
-    getCurrentTranscript,
+    isRealTimeActive, // 실시간 모드 활성화 여부
+    isRecording, // 녹음 중 여부
+    isUploading, // 업로드 중 여부
+    showGuidanceModal, // 가이드 모달 표시 여부
+    realTimePdfData, // 실시간 변환 결과 데이터
+    recordingTime, // 녹음 시간
+    currentSegmentTime, // 현재 세그먼트 시간
+    handleStartRealTime, // 실시간 변환 시작 핸들러
+    startRecording, // 녹음 시작 핸들러
+    handlePauseRecording, // 녹음 중지 핸들러
+    handleSlideTransition, // 슬라이드 전환 핸들러
+    setShowGuidanceModal, // 가이드 모달 표시 여부 설정
+    queueLength, // 대기 큐 길이
+    voiceMap, // 음성 인식 결과 맵
+    isConnected, // 웹소켓 연결 상태
+    getCurrentTranscript, // 현재 세그먼트 음성 인식 결과 가져오기
   } = useRealTimeState(pdfData, initialJobId);
 
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
@@ -135,7 +132,7 @@ export default function RealTimePage() {
               onClick={handlePauseRecording}
               disabled={isUploading}
             >
-              {isUploading || isProcessingQueue
+              {isUploading
                 ? `처리 중... ${
                     queueLength > 0 ? `(대기: ${queueLength})` : ""
                   }`
@@ -189,13 +186,29 @@ export default function RealTimePage() {
                 슬라이드별로 실시간 음성 인식 결과를 확인할 수 있습니다.
               </p>
               {isConnected && (
-                <div style={{ marginBottom: "15px", padding: "10px", backgroundColor: "#f0f8ff", borderRadius: "5px" }}>
+                <div
+                  style={{
+                    marginBottom: "15px",
+                    padding: "10px",
+                    backgroundColor: "#f0f8ff",
+                    borderRadius: "5px",
+                  }}
+                >
                   <strong>연결 상태:</strong> 🟢 연결됨
                   <br />
                   <strong>현재 슬라이드:</strong> {pageNumber}
                   <br />
                   <strong>음성 인식 결과:</strong>
-                  <div style={{ marginTop: "5px", padding: "8px", backgroundColor: "#fff", borderRadius: "3px", fontSize: "14px", minHeight: "40px" }}>
+                  <div
+                    style={{
+                      marginTop: "5px",
+                      padding: "8px",
+                      backgroundColor: "#fff",
+                      borderRadius: "3px",
+                      fontSize: "14px",
+                      minHeight: "40px",
+                    }}
+                  >
                     {getCurrentTranscript() || "음성을 인식 중입니다..."}
                   </div>
                 </div>
@@ -233,7 +246,6 @@ export default function RealTimePage() {
           recordingTime={recordingTime}
           currentSegmentTime={currentSegmentTime}
           queueLength={queueLength}
-          isProcessingQueue={isProcessingQueue}
         />
         <SummaryPanel
           activeTab={activeTab}

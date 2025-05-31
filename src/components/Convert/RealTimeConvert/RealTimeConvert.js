@@ -6,7 +6,7 @@ import RealTimeSummarySection from "./RealTimeSummarySection";
 import { useLoading } from "../../../context/LoadingContext";
 import { useHistory } from "../../../context/HistoryContext";
 import { showError } from "../../../utils/errorHandler";
-import PdfViewer from "../../TestPage/PdfViewer";
+import PdfViewer from "../../RealTimePage/PdfViewer";
 import axios from "axios";
 
 function RealTimeConvert() {
@@ -21,7 +21,7 @@ function RealTimeConvert() {
 
   const API_URL = process.env.REACT_APP_API_URL;
 
-  // 실시간 변환은 로그인 없이 사용 가능
+  // 실시간 변환은 로그인 없이 사용 가능 (백엔드 완성 전 테스트용)
   // useEffect(() => {
   //   const token = localStorage.getItem("accessToken");
   //   if (!token) {
@@ -29,6 +29,7 @@ function RealTimeConvert() {
   //   }
   // }, [navigate]);
 
+  // 실시간 변환 요청
   const startRealTime = async (pdfFile = null) => {
     try {
       const formData = new FormData();
@@ -57,6 +58,7 @@ function RealTimeConvert() {
     }
   };
 
+  // 실시간 변환 결과 처리
   const { loading, pdfFile, convertedData, processingError, setConvertedData } =
     useLoading();
 
