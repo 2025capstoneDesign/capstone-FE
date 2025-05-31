@@ -1,7 +1,7 @@
 // 새로운 스트리밍 방식의 실시간 상태 관리자
 // WebSocket 기반 실시간 음성 인식 시스템
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 import { StreamingSTT } from "./streamingSTT";
 
@@ -11,14 +11,67 @@ export const useRealTimeState = (initialData, initialJobId) => {
   const [showGuidanceModal, setShowGuidanceModal] = useState(!!initialJobId);
   const [realTimePdfData, setRealTimePdfData] = useState(initialData);
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [recordingTime, setRecordingTime] = useState("00:00");
 
   // 슬라이드별 음성 인식 결과 저장
   const [voiceMap, setVoiceMap] = useState({});
   const [currentSlide, setCurrentSlide] = useState(1);
 
-  // 스트리밍 STT 인스턴스
+  // 스트리밍 STT 인스턴스 및 타이머 관련
   const streamingSTTRef = useRef(null);
+  const timerRef = useRef(null);
+  const startTimeRef = useRef(null);
+  const pausedTimeRef = useRef(0);
+
+  // 타이머 시작 함수
+  const startTimer = useCallback(() => {
+    if (timerRef.current) return;
+    
+    startTimeRef.current = Date.now() - pausedTimeRef.current;
+    
+    timerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTimeRef.current;
+      const minutes = Math.floor(elapsed / 60000);
+      const seconds = Math.floor((elapsed % 60000) / 1000);
+      setRecordingTime(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    }, 1000);
+  }, []);
+
+  // 타이머 일시정지 함수
+  const pauseTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+      pausedTimeRef.current = Date.now() - startTimeRef.current;
+    }
+  }, []);
+
+  // 타이머 재시작 함수
+  const resumeTimer = useCallback(() => {
+    startTimer();
+  }, [startTimer]);
+
+  // 타이머 정지 및 리셋 함수
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    startTimeRef.current = null;
+    pausedTimeRef.current = 0;
+    setRecordingTime("00:00");
+  }, []);
+
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
 
   // 스트리밍 STT 초기화
   if (!streamingSTTRef.current) {
@@ -114,7 +167,9 @@ export const useRealTimeState = (initialData, initialJobId) => {
 
       if (success) {
         setIsRecording(true);
+        setIsPaused(false);
         setShowGuidanceModal(false);
+        startTimer();
 
         toast.info("음성 인식이 시작되었습니다.", {
           position: "top-center",
@@ -133,8 +188,46 @@ export const useRealTimeState = (initialData, initialJobId) => {
     }
   }, []);
 
-  // 녹음 중지
+  // 녹음 일시정지/재개 토글
   const handlePauseRecording = useCallback(async () => {
+    try {
+      const stt = streamingSTTRef.current;
+      if (!stt) return;
+
+      if (isPaused) {
+        // 재개
+        const resumed = stt.resumeRecording();
+        if (resumed) {
+          setIsPaused(false);
+          resumeTimer();
+          toast.info("음성 인식을 재개합니다.", {
+            position: "top-center",
+            autoClose: 1500,
+          });
+        }
+      } else {
+        // 일시정지
+        const paused = stt.pauseRecording();
+        if (paused) {
+          setIsPaused(true);
+          pauseTimer();
+          toast.info("음성 인식을 일시정지했습니다.", {
+            position: "top-center",
+            autoClose: 1500,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("녹음 일시정지/재개 중 오류:", error);
+      toast.error("음성 인식 제어 중 오류가 발생했습니다.", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    }
+  }, [isPaused, resumeTimer, pauseTimer]);
+
+  // 녹음 완전 종료 및 홈으로 이동
+  const handleStopRecording = useCallback(async (navigate = null) => {
     try {
       const stt = streamingSTTRef.current;
       if (!stt) return;
@@ -143,22 +236,31 @@ export const useRealTimeState = (initialData, initialJobId) => {
 
       // 상태 초기화
       setIsRecording(false);
+      setIsPaused(false);
       setIsRealTimeActive(false);
       setIsConnected(false);
       setCurrentSlide(1);
+      stopTimer();
 
       toast.success("음성 인식이 종료되었습니다.", {
         position: "top-center",
-        autoClose: 2000,
+        autoClose: 1500,
       });
+
+      // 홈으로 이동
+      if (navigate) {
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
+      }
     } catch (error) {
-      console.error("녹음 중지 중 오류:", error);
+      console.error("녹음 종료 중 오류:", error);
       toast.error("음성 인식 종료 중 오류가 발생했습니다.", {
         position: "top-center",
         autoClose: 3000,
       });
     }
-  }, []);
+  }, [stopTimer]);
 
   // 슬라이드 전환 처리
   const handleSlideTransition = useCallback((newSlideNumber) => {
@@ -208,17 +310,15 @@ export const useRealTimeState = (initialData, initialJobId) => {
     currentSlide,
     voiceMap,
 
-    // 기존 호환성을 위한 더미 값들
-    recordingTime: "00:00.000",
-    currentSegmentTime: "00:00.000",
-    isUploading: false,
-    queueLength: 0,
-    isProcessingQueue: false,
+    // 타이머 관련
+    recordingTime,
+    isPaused,
 
     // 액션
     handleStartRealTime,
     startRecording,
     handlePauseRecording,
+    handleStopRecording,
     handleSlideTransition,
     setShowGuidanceModal,
 

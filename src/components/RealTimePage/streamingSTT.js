@@ -8,6 +8,7 @@ export class StreamingSTT {
     this.processor = null;
     this.microphone = null;
     this.isActive = false;
+    this.isPaused = false;
     this.currentSlide = 1;
     
     // 콜백 함수들
@@ -123,7 +124,7 @@ export class StreamingSTT {
       
       // 오디오 데이터 처리
       this.processor.port.onmessage = (event) => {
-        if (this.webSocket && this.webSocket.readyState === WebSocket.OPEN) {
+        if (this.webSocket && this.webSocket.readyState === WebSocket.OPEN && !this.isPaused) {
           // Int16Array를 base64로 인코딩
           const base64Audio = btoa(String.fromCharCode(...new Uint8Array(event.data)));
           
@@ -186,10 +187,36 @@ export class StreamingSTT {
     }
   }
 
+  // 녹음 일시정지 (연결 유지)
+  pauseRecording() {
+    if (this.isActive && !this.isPaused) {
+      this.isPaused = true;
+      console.log('음성 전송 일시정지됨');
+      return true;
+    }
+    return false;
+  }
+
+  // 녹음 재개
+  resumeRecording() {
+    if (this.isActive && this.isPaused) {
+      this.isPaused = false;
+      console.log('음성 전송 재개됨');
+      return true;
+    }
+    return false;
+  }
+
+  // 일시정지 상태 확인
+  isPausedState() {
+    return this.isPaused;
+  }
+
   // 스트리밍 STT 중지
   async stopStreaming() {
     try {
       this.isActive = false;
+      this.isPaused = false;
 
       // 프로세서 중지
       if (this.processor) {

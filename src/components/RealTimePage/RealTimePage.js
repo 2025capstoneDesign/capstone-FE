@@ -40,17 +40,16 @@ export default function RealTimePage() {
   const {
     isRealTimeActive, // 실시간 모드 활성화 여부
     isRecording, // 녹음 중 여부
-    isUploading, // 업로드 중 여부
     showGuidanceModal, // 가이드 모달 표시 여부
     realTimePdfData, // 실시간 변환 결과 데이터
     recordingTime, // 녹음 시간
-    currentSegmentTime, // 현재 세그먼트 시간
     handleStartRealTime, // 실시간 변환 시작 핸들러
     startRecording, // 녹음 시작 핸들러
-    handlePauseRecording, // 녹음 중지 핸들러
+    handlePauseRecording, // 녹음 일시정지/재개 핸들러
+    handleStopRecording, // 녹음 완전 종료 핸들러
+    isPaused, // 일시정지 상태
     handleSlideTransition, // 슬라이드 전환 핸들러
     setShowGuidanceModal, // 가이드 모달 표시 여부 설정
-    queueLength, // 대기 큐 길이
     voiceMap, // 음성 인식 결과 맵
     isConnected, // 웹소켓 연결 상태
     getCurrentTranscript, // 현재 세그먼트 음성 인식 결과 가져오기
@@ -102,9 +101,6 @@ export default function RealTimePage() {
     goToPage(1);
   };
 
-  const handleConvertClick = () => {
-    navigate("/real-time-convert");
-  };
 
   const handleDownload = () => {
     if (pdfUrl && typeof pdfUrl === "string") {
@@ -129,19 +125,12 @@ export default function RealTimePage() {
           ) : (
             <button
               className="convert-btn"
-              onClick={handlePauseRecording}
-              disabled={isUploading}
+              onClick={() => handleStopRecording(navigate)}
+              style={{ backgroundColor: "#dc3545" }}
             >
-              {isUploading
-                ? `처리 중... ${
-                    queueLength > 0 ? `(대기: ${queueLength})` : ""
-                  }`
-                : "실시간 변환 종료"}
+              실시간 변환 종료
             </button>
           )}
-          <button className="convert-btn" onClick={handleConvertClick}>
-            다시 변환하기
-          </button>
           <button className="download-btn" onClick={handleDownload}>
             다운로드
           </button>
@@ -244,8 +233,7 @@ export default function RealTimePage() {
           stopRecording={handlePauseRecording}
           showGuidanceModal={showGuidanceModal}
           recordingTime={recordingTime}
-          currentSegmentTime={currentSegmentTime}
-          queueLength={queueLength}
+          isPaused={isPaused}
         />
         <SummaryPanel
           activeTab={activeTab}
