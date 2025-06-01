@@ -127,6 +127,25 @@ export function HistoryProvider({ children }) {
     await fetchHistory();
   }, [fetchHistory]);
 
+  const deleteHistoryItem = useCallback(async (filename) => {
+    if (!filename) return false;
+    try {
+      setLoading(true);
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL}/api/history/my/${filename}`,
+        { headers: { ...getAuthHeader() } }
+      );
+      // 삭제 후 히스토리 새로고침
+      await fetchHistory();
+      return true;
+    } catch (err) {
+      setError("삭제에 실패했습니다.");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [getAuthHeader, fetchHistory]);
+
   return (
     <HistoryContext.Provider
       value={{
@@ -136,6 +155,7 @@ export function HistoryProvider({ children }) {
         downloadPdf,
         refreshHistory,
         setHistoryData,
+        deleteHistoryItem,
       }}
     >
       {children}
