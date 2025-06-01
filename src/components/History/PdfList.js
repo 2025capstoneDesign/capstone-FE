@@ -6,6 +6,9 @@ import mp3_icon from "../../assets/images/mp3.png";
 import wav_icon from "../../assets/images/wav.png";
 import ppt_icon from "../../assets/images/ppt.png";
 import word_icon from "../../assets/images/docx.png";
+import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
+import { PiDownloadSimpleBold } from "react-icons/pi";
+import { TbSettings } from "react-icons/tb";
 
 export default function PdfList({
   sortedHistory,
@@ -64,11 +67,17 @@ export default function PdfList({
     buttons.push(
       <button
         key="prev"
-        className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
+        className={`flex items-center gap-1 px-3 py-1 transition-colors
+          ${currentPage === 1 
+            ? 'text-gray-400 cursor-not-allowed' 
+            : 'text-gray-700'}`}
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
-        이전
+        <div className="flex items-center">
+          <MdNavigateBefore className="text-xl mt-0.5" />
+          <span className="ml-1">Prev</span>
+        </div>
       </button>
     );
 
@@ -89,11 +98,17 @@ export default function PdfList({
     buttons.push(
       <button
         key="next"
-        className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
+        className={`flex items-center gap-1 px-3 py-1 transition-colors
+          ${currentPage === totalPages 
+            ? 'text-gray-400 cursor-not-allowed' 
+            : 'text-gray-700 '}`}
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
       >
-        다음
+        <div className="flex items-center">
+          <span className="mr-1">Next</span>
+          <MdNavigateNext className="text-xl mt-0.5" />
+        </div>
       </button>
     );
 
@@ -194,8 +209,8 @@ export default function PdfList({
         </div>
         <div className="edit-options">
           {!isEditMode ? (
-            <button className="edit-btn" onClick={handleEditClick}>
-              편집
+            <button className="" onClick={handleEditClick}>
+              <TbSettings className="text-3xl text-gray-600 hover:text-black"/>
             </button>
           ) : (
             <div className="flex gap-2">
@@ -292,10 +307,10 @@ export default function PdfList({
                   열람하기
                 </button>
                 <button
-                  className="download-btn"
+                  className=""
                   onClick={() => handleDownload(item)}
                 >
-                  다운로드
+                  <PiDownloadSimpleBold className="text-2xl ml-4 mr-2 text-gray-600 hover:text-black"/>
                 </button>
               </div>
             )}
