@@ -15,8 +15,8 @@ export default function PdfViewer({
   startRecording = null,
   stopRecording = null,
   showGuidanceModal = false,
-  recordingTime = "00:00.000",
-  currentSegmentTime = "00:00.000",
+  recordingTime = "00:00",
+  isPaused = false,
 }) {
   // Document 컴포넌트는 파일 경로와 blob URL을 모두 올바르게 처리하므로,
   // 여기서 특별한 변환 작업이 필요X
@@ -66,7 +66,7 @@ export default function PdfViewer({
               if (isRealTimeActive && !isRecording && startRecording) {
                 startRecording();
               } else if (isRealTimeActive && isRecording && stopRecording) {
-                stopRecording();
+                stopRecording(); // 이제 일시정지/재개 토글 역할
               } else if (!isRealTimeActive) {
                 toast.info("실시간 변환을 먼저 시작해주세요.", {
                   position: "top-center",
@@ -126,14 +126,11 @@ export default function PdfViewer({
               fontSize: '12px',
               color: '#333'
             }}>
-              <div style={{ color: '#ff4444', fontWeight: 'bold', marginBottom: '2px' }}>
-                🔴 녹음 중..
+              <div style={{ color: isPaused ? '#ff8c00' : '#ff4444', fontWeight: 'bold', marginBottom: '2px' }}>
+                {isPaused ? '⏸️ 일시정지' : '🔴 녹음 중..'}
               </div>
               <div style={{ color: '#666' }}>
                 전체: {recordingTime}
-              </div>
-              <div style={{ color: '#666' }}>
-                세그먼트: {currentSegmentTime}
               </div>
             </div>
           )}

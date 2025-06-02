@@ -5,6 +5,7 @@ import ConvertSelectModal from "./components/Convert/ConvertMode/ConvertSelectMo
 import Convert from "./components/Convert/UploadConvert/Convert";
 import RealTimeConvert from "./components/Convert/RealTimeConvert/RealTimeConvert";
 import RealTimePage from "./components/RealTimePage/RealTimePage";
+import RealTimeEditorPage from "./components/RealTimeEditor/RealTimeEditorPage";
 import TestPage from "./components/TestPage/TestPage";
 import History from "./components/History/History";
 import Setting from "./components/Setting/Setting";
@@ -34,6 +35,7 @@ function App() {
                       element={<RealTimeConvert />}
                     />
                     <Route path="/real-time-page" element={<RealTimePage />} />
+                    <Route path="/real-time-editor" element={<RealTimeEditorPage />} />
                     <Route path="/test" element={<TestPage />} />
                     <Route path="/history" element={<History />} />
                     <Route path="/setting" element={<Setting />} />

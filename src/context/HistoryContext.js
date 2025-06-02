@@ -1,6 +1,12 @@
 //src/context/HistoryContext.js
 
-import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useCallback,
+} from "react";
 import { dummyData } from "../data/dummyData";
 import { parseData } from "../components/TestPage/DataParser";
 import axios from "axios";
@@ -25,39 +31,41 @@ export function HistoryProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { accessToken, getAuthHeader, isAuthenticated } = useAuth();
-  
+
   // Function to fetch history from API
   const fetchHistory = useCallback(async () => {
     if (!isAuthenticated()) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/api/history/my`,
         { headers: { ...getAuthHeader() } }
       );
-      
+
       console.log("History API response:", response.data);
-      
+
       // Map the response data to our format
-      const mappedHistory = response.data.map(item => ({
+      const mappedHistory = response.data.map((item) => ({
         id: item.id,
+        job_id: item.job_id || null, // job_id가 없는 경우 null로 설정
         filename: item.filename,
         created_at: item.created_at,
-        result: typeof item.notes_json === 'string' ? 
-               JSON.parse(item.notes_json) : 
-               item.notes_json,
-        file: null // Will be downloaded on demand
+        result:
+          typeof item.notes_json === "string"
+            ? JSON.parse(item.notes_json)
+            : item.notes_json,
+        file: null, // Will be downloaded on demand
       }));
-      
+
       // Add the sample PDF to ensure it's always available
       const combinedHistory = [
         ...mappedHistory,
-        initialHistoryData[0] // Sample PDF
+        initialHistoryData[0], // Sample PDF
       ];
-      
+
       setHistoryData(combinedHistory);
     } catch (err) {
       console.error("Error fetching history:", err);
@@ -66,7 +74,7 @@ export function HistoryProvider({ children }) {
       setLoading(false);
     }
   }, [isAuthenticated, getAuthHeader]);
-  
+
   // Fetch history when authenticated or token changes
   useEffect(() => {
     if (isAuthenticated()) {
@@ -75,52 +83,61 @@ export function HistoryProvider({ children }) {
   }, [accessToken, fetchHistory]);
 
   // Download a PDF file by filename
-  const downloadPdf = useCallback(async (historyItem) => {
-    if (!historyItem || !historyItem.filename) {
-      console.error("Cannot download PDF: Invalid history item");
-      return null;
-    }
-    
-    // If it's our sample PDF, use the static path
-    if (historyItem.filename === "sample3.pdf") {
-      return historyItem.pdfFile;
-    }
-    
-    // If we already have the file, return it
-    if (historyItem.file) {
-      return historyItem.file;
-    }
-    
-    try {
-      setLoading(true);
-      
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/history/download/${historyItem.filename}`,
-        { 
-          headers: { ...getAuthHeader() },
-          responseType: 'blob'
-        }
-      );
-      
-      // Update history item with the downloaded file
-      setHistoryData(prev => {
-        return prev.map(item => {
-          if (item.id === historyItem.id) {
-            return { ...item, file: response.data };
+  const downloadPdf = useCallback(
+    async (historyItem) => {
+      if (!historyItem || !historyItem.filename) {
+        console.error("Cannot download PDF: Invalid history item");
+        return null;
+      }
+
+      // If it's our sample PDF, use the static path
+      if (historyItem.filename === "sample3.pdf") {
+        return historyItem.pdfFile;
+      }
+
+      // If we already have the file, return it
+      if (historyItem.file) {
+        return historyItem.file;
+      }
+
+      try {
+        setLoading(true);
+
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/history/download${
+            historyItem.job_id
+              ? `?job_id=${historyItem.job_id}&filename=${historyItem.filename}`
+              : `/${historyItem.filename}`
+          }`,
+          {
+            headers: { ...getAuthHeader() },
+            responseType: "blob",
           }
-          return item;
+        );
+
+        // Update history item with the downloaded file
+        setHistoryData((prev) => {
+          return prev.map((item) => {
+            if (item.id === historyItem.id) {
+              return { ...item, file: response.data };
+            }
+            return item;
+          });
         });
-      });
-      
-      return response.data;
-    } catch (err) {
-      console.error(`Error downloading file ${historyItem.filename}:`, err);
-      setError(`Failed to download ${historyItem.filename}. Please try again.`);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [getAuthHeader]);
+
+        return response.data;
+      } catch (err) {
+        console.error(`Error downloading file ${historyItem.filename}:`, err);
+        setError(
+          `Failed to download ${historyItem.filename}. Please try again.`
+        );
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [getAuthHeader]
+  );
 
   // Add newly converted item to history, or load from API
   const refreshHistory = useCallback(async () => {

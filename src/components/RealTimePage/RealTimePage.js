@@ -38,20 +38,23 @@ export default function RealTimePage() {
 
   // 실시간 상태 관리
   const {
-    isRealTimeActive,
-    isRecording,
-    isUploading,
-    showGuidanceModal,
-    realTimePdfData,
-    recordingTime,
-    currentSegmentTime,
-    handleStartRealTime,
-    startRecording,
-    handlePauseRecording,
-    handleSlideTransition,
-    setShowGuidanceModal,
-    queueLength,
-    isProcessingQueue,
+    isRealTimeActive, // 실시간 모드 활성화 여부
+    isRecording, // 녹음 중 여부
+    showGuidanceModal, // 가이드 모달 표시 여부
+    realTimePdfData, // 실시간 변환 결과 데이터
+    recordingTime, // 녹음 시간
+    handleStartRealTime, // 실시간 변환 시작 핸들러
+    startRecording, // 녹음 시작 핸들러
+    handlePauseRecording, // 녹음 일시정지/재개 핸들러
+    handleStopRecording, // 녹음 완전 종료 핸들러
+    isPaused, // 일시정지 상태
+    handleSlideTransition, // 슬라이드 전환 핸들러
+    setShowGuidanceModal, // 가이드 모달 표시 여부 설정
+    voiceMap, // 음성 인식 결과 맵
+    isConnected, // 웹소켓 연결 상태
+    getCurrentTranscript, // 현재 세그먼트 음성 인식 결과 가져오기
+    showLoadingModal, // 로딩 모달 표시 여부
+    loadingMessage, // 로딩 메시지
   } = useRealTimeState(pdfData, initialJobId);
 
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
@@ -100,9 +103,6 @@ export default function RealTimePage() {
     goToPage(1);
   };
 
-  const handleConvertClick = () => {
-    navigate("/real-time-convert");
-  };
 
   const handleDownload = () => {
     if (pdfUrl && typeof pdfUrl === "string") {
@@ -117,6 +117,20 @@ export default function RealTimePage() {
 
   return (
     <div className="app-wrapper">
+      {/* Loading Modal */}
+      {showLoadingModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
+            <img 
+              src="/loading_listen.gif" 
+              alt="로딩 중" 
+              className="w-[200px] h-[200px] object-contain mb-4"
+            />
+            <p className="text-gray-700 text-lg font-medium">{loadingMessage}</p>
+          </div>
+        </div>
+      )}
+
       <div className="sub-header">
         <h1 className="page-title">실시간 강의</h1>
         <div className="action-buttons">
@@ -127,19 +141,12 @@ export default function RealTimePage() {
           ) : (
             <button
               className="convert-btn"
-              onClick={handlePauseRecording}
-              disabled={isUploading}
+              onClick={() => handleStopRecording(navigate, initialJobId)}
+              style={{ backgroundColor: "#dc3545" }}
             >
-              {isUploading || isProcessingQueue
-                ? `처리 중... ${
-                    queueLength > 0 ? `(대기: ${queueLength})` : ""
-                  }`
-                : "실시간 변환 종료"}
+              실시간 변환 종료
             </button>
           )}
-          <button className="convert-btn" onClick={handleConvertClick}>
-            다시 변환하기
-          </button>
           <button className="download-btn" onClick={handleDownload}>
             다운로드
           </button>
@@ -176,13 +183,41 @@ export default function RealTimePage() {
               }}
             >
               <h3 style={{ marginBottom: "20px", color: "#333" }}>
-                실시간 변환 가이드
+                실시간 음성 인식
               </h3>
               <p style={{ marginBottom: "25px", lineHeight: "1.5" }}>
-                마이크 버튼을 누르면 녹음이 시작됩니다.
+                마이크 버튼을 누르면 음성 인식이 시작됩니다.
                 <br />
-                슬라이드를 넘기거나 종료 버튼을 누르면 음성이 처리됩니다.
+                슬라이드별로 실시간 음성 인식 결과를 확인할 수 있습니다.
               </p>
+              {isConnected && (
+                <div
+                  style={{
+                    marginBottom: "15px",
+                    padding: "10px",
+                    backgroundColor: "#f0f8ff",
+                    borderRadius: "5px",
+                  }}
+                >
+                  <strong>연결 상태:</strong> 🟢 연결됨
+                  <br />
+                  <strong>현재 슬라이드:</strong> {pageNumber}
+                  <br />
+                  <strong>음성 인식 결과:</strong>
+                  <div
+                    style={{
+                      marginTop: "5px",
+                      padding: "8px",
+                      backgroundColor: "#fff",
+                      borderRadius: "3px",
+                      fontSize: "14px",
+                      minHeight: "40px",
+                    }}
+                  >
+                    {getCurrentTranscript() || "음성을 인식 중입니다..."}
+                  </div>
+                </div>
+              )}
               <button
                 onClick={() => setShowGuidanceModal(false)}
                 style={{
@@ -210,13 +245,11 @@ export default function RealTimePage() {
           goNextPage={goNextPage}
           isRealTimeActive={isRealTimeActive}
           isRecording={isRecording}
-          startRecording={() => startRecording(pageNumber)}
+          startRecording={() => startRecording(pageNumber, initialJobId)}
           stopRecording={handlePauseRecording}
           showGuidanceModal={showGuidanceModal}
           recordingTime={recordingTime}
-          currentSegmentTime={currentSegmentTime}
-          queueLength={queueLength}
-          isProcessingQueue={isProcessingQueue}
+          isPaused={isPaused}
         />
         <SummaryPanel
           activeTab={activeTab}
@@ -229,6 +262,8 @@ export default function RealTimePage() {
           summaryData={realTimePdfData?.summaryData || {}}
           voiceData={realTimePdfData?.voiceData || {}}
           pageSectionRefs={pageSectionRefs}
+          voiceMap={voiceMap}
+          isStreaming={isRecording}
         />
       </div>
     </div>

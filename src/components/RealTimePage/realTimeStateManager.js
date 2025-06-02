@@ -1,189 +1,145 @@
-// 실시간 페이지를 위한 상태 관리자
-// 상태 관리와 API 상호작용을 중앙화
+// 새로운 스트리밍 방식의 실시간 상태 관리자
+// WebSocket 기반 실시간 음성 인식 시스템
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
-import { RecordingManager } from "./recordingManager";
-import { apiQueue } from "./apiQueue";
-import { parseRealTimeResponse } from "./realTimeDataParser";
-import { processService } from "../../api/processService";
+import { StreamingSTT } from "./streamingSTT";
 
 export const useRealTimeState = (initialData, initialJobId) => {
   // 상태 변수들
   const [isRealTimeActive, setIsRealTimeActive] = useState(!!initialJobId);
-  const [jobId, setJobId] = useState(initialJobId);
   const [showGuidanceModal, setShowGuidanceModal] = useState(!!initialJobId);
   const [realTimePdfData, setRealTimePdfData] = useState(initialData);
-  const [recordingTime, setRecordingTime] = useState("00:00.000");
-  const [currentSegmentTime, setCurrentSegmentTime] = useState("00:00.000");
   const [isRecording, setIsRecording] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [recordingTime, setRecordingTime] = useState("00:00");
 
-  // 녹음 관리자 인스턴스
-  const recordingManagerRef = useRef(null);
+  // 로딩 모달 상태
+  const [showLoadingModal, setShowLoadingModal] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
 
-  // 녹음 관리자 초기화
-  if (!recordingManagerRef.current) {
-    recordingManagerRef.current = new RecordingManager();
+  // 슬라이드별 음성 인식 결과 저장
+  const [voiceMap, setVoiceMap] = useState({});
+  const [currentSlide, setCurrentSlide] = useState(1);
+
+  // 스트리밍 STT 인스턴스 및 타이머 관련
+  const streamingSTTRef = useRef(null);
+  const timerRef = useRef(null);
+  const startTimeRef = useRef(null);
+  const pausedTimeRef = useRef(0);
+
+  // 타이머 시작 함수
+  const startTimer = useCallback(() => {
+    if (timerRef.current) return;
+    
+    startTimeRef.current = Date.now() - pausedTimeRef.current;
+    
+    timerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTimeRef.current;
+      const minutes = Math.floor(elapsed / 60000);
+      const seconds = Math.floor((elapsed % 60000) / 1000);
+      setRecordingTime(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    }, 1000);
+  }, []);
+
+  // 타이머 일시정지 함수
+  const pauseTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+      pausedTimeRef.current = Date.now() - startTimeRef.current;
+    }
+  }, []);
+
+  // 타이머 재시작 함수
+  const resumeTimer = useCallback(() => {
+    startTimer();
+  }, [startTimer]);
+
+  // 타이머 정지 및 리셋 함수
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    startTimeRef.current = null;
+    pausedTimeRef.current = 0;
+    setRecordingTime("00:00");
+  }, []);
+
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
+
+  // 스트리밍 STT 초기화
+  if (!streamingSTTRef.current) {
+    streamingSTTRef.current = new StreamingSTT();
 
     // 콜백 설정
-    recordingManagerRef.current.setCallbacks({
-      onTimeUpdate: (totalTime, segmentTime) => {
-        setRecordingTime(totalTime);
-        setCurrentSegmentTime(segmentTime);
-      },
-      onAutoFetch: () => {
-        handleAutoSegmentFetch();
+    streamingSTTRef.current.setCallbacks({
+      onTranscriptUpdate: (data) => {
+        console.log("음성 인식 결과 업데이트:", data);
+
+        // 백엔드에서 전체 슬라이드 데이터를 받아서 처리
+        if (data) {
+          // realTimeDataParser를 사용해서 기존 데이터와 병합
+          setRealTimePdfData((prevData) => {
+            const { parseRealTimeResponse } = require("./realTimeDataParser");
+            return parseRealTimeResponse(data, prevData);
+          });
+
+          // 슬라이드별 음성 인식 결과만 별도로 추출 (UI 표시용)
+          const slideKeys = Object.keys(data).filter((key) =>
+            key.startsWith("slide")
+          );
+          const newVoiceMap = {};
+          slideKeys.forEach((slideKey) => {
+            const slideNumber = slideKey.replace("slide", "");
+            const segments = data[slideKey].Segments || {};
+            const segmentTexts = Object.values(segments)
+              .map((segment) => segment.text)
+              .join(" ");
+            if (segmentTexts.trim()) {
+              newVoiceMap[slideNumber] = segmentTexts;
+            }
+          });
+
+          setVoiceMap((prev) => ({ ...prev, ...newVoiceMap }));
+        }
       },
       onError: (message) => {
+        console.error("스트리밍 STT 오류:", message);
         toast.error(message, {
           position: "top-center",
           autoClose: 3000,
         });
       },
-    });
-
-    // API 큐 완료 핸들러 설정
-    apiQueue.setGlobalCompletionHandler((response, requestData, error) => {
-      if (error) {
-        console.error("API 요청 실패:", error);
-        toast.error("음성 처리에 실패했습니다.", {
-          position: "top-center",
-          autoClose: 3000,
-        });
-      } else if (response) {
-        // 응답으로 PDF 데이터 업데이트
-        setRealTimePdfData((prevData) =>
-          parseRealTimeResponse(response, prevData)
-        );
-
-        const slideCount = requestData.metaJson?.length || 0;
-        toast.success(`세그먼트 처리 완료 (${slideCount}개 슬라이드)`, {
-          position: "top-center",
-          autoClose: 2000,
-        });
-      }
-
-      // API 완료 시에는 별도 액션 불필요 (이미 녹음이 재시작됨)
-      restartRecordingAfterAPI();
+      onConnectionChange: (connected) => {
+        setIsConnected(connected);
+        if (connected) {
+          toast.success("음성 인식 서버에 연결되었습니다.", {
+            position: "top-center",
+            autoClose: 2000,
+          });
+        } else {
+          toast.warning("음성 인식 서버 연결이 끊어졌습니다.", {
+            position: "top-center",
+            autoClose: 3000,
+          });
+        }
+      },
     });
   }
-
-  // 즉시 녹음 재시작 (요청 큐에 추가한 직후)
-  const restartRecordingImmediately = useCallback(async () => {
-    const manager = recordingManagerRef.current;
-    if (!manager || !manager.getState().isRecording) {
-      return;
-    }
-
-    try {
-      await manager.restartRecording();
-      console.log("큐 추가 후 즉시 녹음 재시작됨");
-
-      // UI 상태 즉시 업데이트
-      setIsUploading(false);
-      manager.setUploading(false);
-    } catch (error) {
-      console.error("즉시 녹음 재시작 실패:", error);
-      setIsUploading(false);
-      manager.setUploading(false);
-    }
-  }, []);
-
-  // 자동 세그먼트 가져오기 핸들러 (30초 간격)
-  const handleAutoSegmentFetch = useCallback(async () => {
-    const manager = recordingManagerRef.current;
-    if (!manager || !manager.getState().isRecording || isUploading) {
-      return;
-    }
-
-    try {
-      setIsUploading(true);
-      manager.setUploading(true);
-
-      const { audioBlob, metaJson } =
-        await manager.prepareSegmentForProcessing();
-
-      if (audioBlob && metaJson.length > 0) {
-        // 직접 API 호출 대신 큐에 추가
-        apiQueue.enqueue({
-          jobId,
-          audioBlob,
-          metaJson,
-        });
-
-        console.log("자동 세그먼트가 처리 대기열에 추가됨");
-
-        // 요청을 큐에 추가한 즉시 녹음 재시작
-        await restartRecordingImmediately();
-      }
-    } catch (error) {
-      console.error("자동 세그먼트 가져오기 오류:", error);
-      setIsUploading(false);
-      manager.setUploading(false);
-    }
-  }, [jobId, isUploading, restartRecordingImmediately]);
-
-  // API 완료 후 처리 (이제는 UI 업데이트만)
-  const restartRecordingAfterAPI = useCallback(async () => {
-    // API 완료 시에는 별도 액션 불필요 (이미 녹음이 재시작됨)
-    console.log("API 요청 완료 - 추가 액션 불필요 (이미 녹음이 재시작됨)");
-  }, []);
-
-  // 슬라이드 전환 처리
-  const handleSlideTransition = useCallback(
-    async (newSlideNumber) => {
-      const manager = recordingManagerRef.current;
-      if (!manager || !manager.getState().isRecording || isUploading) {
-        return;
-      }
-
-      const result = manager.handleSlideTransition(newSlideNumber);
-
-      // 슬라이드 전환이 처리가 필요한 경우 (5초 이상)
-      if (result.shouldProcess) {
-        try {
-          setIsUploading(true);
-          manager.setUploading(true);
-
-          const { audioBlob, metaJson } =
-            await manager.prepareSegmentForProcessing();
-
-          if (audioBlob && metaJson.length > 0) {
-            // 큐에 추가
-            apiQueue.enqueue({
-              jobId,
-              audioBlob,
-              metaJson,
-            });
-
-            console.log("슬라이드 전환 세그먼트가 처리 대기열에 추가됨");
-
-            // 요청을 큐에 추가한 즉시 녹음 재시작
-            await restartRecordingImmediately();
-          }
-        } catch (error) {
-          console.error("슬라이드 전환 중 오류:", error);
-          setIsUploading(false);
-          manager.setUploading(false);
-        }
-      }
-    },
-    [jobId, isUploading, restartRecordingImmediately]
-  );
 
   // 실시간 세션 시작
   const handleStartRealTime = useCallback(async () => {
     try {
-      let currentJobId = jobId;
-
-      // 필요한 경우 새 작업 생성
-      if (!currentJobId) {
-        const response = await processService.startRealTime();
-        currentJobId = response.jobId;
-        setJobId(currentJobId);
-      }
-
       setIsRealTimeActive(true);
       setShowGuidanceModal(true);
 
@@ -198,102 +154,279 @@ export const useRealTimeState = (initialData, initialJobId) => {
         autoClose: 3000,
       });
     }
-  }, [jobId]);
+  }, []);
 
   // 녹음 시작
-  const startRecording = useCallback(async (currentSlide = 1) => {
-    const manager = recordingManagerRef.current;
-    if (!manager) return;
+  const startRecording = useCallback(async (slideNumber = 1, jobId = null) => {
+    try {
+      const stt = streamingSTTRef.current;
+      if (!stt) return false;
 
-    const success = await manager.startRecording(currentSlide);
-    if (success) {
-      setIsRecording(true);
-      setRecordingTime("00:00.000");
-      setCurrentSegmentTime("00:00.000");
-      setShowGuidanceModal(false);
+      // 현재 슬라이드 설정
+      setCurrentSlide(slideNumber);
+      stt.setCurrentSlide(slideNumber);
 
-      toast.info("녹음이 시작되었습니다.", {
+      // 스트리밍 시작 (jobId와 함께)
+      const success = await stt.startStreaming(jobId);
+
+      if (success) {
+        setIsRecording(true);
+        setIsPaused(false);
+        setShowGuidanceModal(false);
+        startTimer();
+
+        toast.info("음성 인식이 시작되었습니다.", {
+          position: "top-center",
+          autoClose: 1500,
+        });
+      }
+
+      return success;
+    } catch (error) {
+      console.error("녹음 시작 실패:", error);
+      toast.error("음성 인식을 시작할 수 없습니다.", {
         position: "top-center",
-        autoClose: 1500,
+        autoClose: 3000,
       });
+      return false;
     }
   }, []);
 
-  // 녹음 완전 중지
+  // 녹음 일시정지/재개 토글
   const handlePauseRecording = useCallback(async () => {
-    const manager = recordingManagerRef.current;
-    if (!manager || !manager.getState().isRecording) return;
-
     try {
-      // 충분히 긴 경우 마지막 세그먼트 처리
-      const now = new Date();
-      const segmentDuration = (now - manager.segmentStartTimeRef) / 1000;
+      const stt = streamingSTTRef.current;
+      if (!stt) return;
 
-      if (segmentDuration >= 5) {
-        // 5초 이상인 경우
-        setIsUploading(true);
-        manager.setUploading(true);
-
-        const { audioBlob, metaJson } =
-          await manager.prepareSegmentForProcessing();
-
-        if (audioBlob && metaJson.length > 0) {
-          apiQueue.enqueue({
-            jobId,
-            audioBlob,
-            metaJson,
+      if (isPaused) {
+        // 재개
+        const resumed = stt.resumeRecording();
+        if (resumed) {
+          setIsPaused(false);
+          resumeTimer();
+          toast.info("음성 인식을 재개합니다.", {
+            position: "top-center",
+            autoClose: 1500,
+          });
+        }
+      } else {
+        // 일시정지
+        const paused = stt.pauseRecording();
+        if (paused) {
+          setIsPaused(true);
+          pauseTimer();
+          toast.info("음성 인식을 일시정지했습니다.", {
+            position: "top-center",
+            autoClose: 1500,
           });
         }
       }
-
-      // 녹음 중지
-      await manager.stopRecording();
-
-      // 대기 중인 API 요청 정리
-      const clearedCount = apiQueue.clear();
-      console.log(`${clearedCount}개의 대기 중인 API 요청이 정리됨`);
-
-      // 상태 초기화
-      setIsRecording(false);
-      setIsRealTimeActive(false);
-      setJobId(null);
-      setRecordingTime("00:00.000");
-      setCurrentSegmentTime("00:00.000");
-      setIsUploading(false);
-
-      toast.success("실시간 변환이 종료되었습니다.", {
-        position: "top-center",
-        autoClose: 2000,
-      });
     } catch (error) {
-      console.error("녹음 중지 중 오류:", error);
-      toast.error("녹음 종료 중 오류가 발생했습니다.", {
+      console.error("녹음 일시정지/재개 중 오류:", error);
+      toast.error("음성 인식 제어 중 오류가 발생했습니다.", {
         position: "top-center",
         autoClose: 3000,
       });
     }
-  }, [jobId]);
+  }, [isPaused, resumeTimer, pauseTimer]);
+
+  // 녹음 완전 종료 및 홈으로 이동
+  const handleStopRecording = useCallback(async (navigate = null, jobId = null) => {
+    try {
+      // jobId가 있으면 즉시 로딩 모달 표시
+      if (navigate && jobId) {
+        setShowLoadingModal(true);
+        setLoadingMessage("음성 인식을 종료하는 중...");
+      }
+
+      const stt = streamingSTTRef.current;
+      if (!stt) return;
+
+      await stt.stopStreaming();
+
+      // 상태 초기화
+      setIsRecording(false);
+      setIsPaused(false);
+      setIsRealTimeActive(false);
+      setIsConnected(false);
+      setCurrentSlide(1);
+      stopTimer();
+
+      toast.success("음성 인식이 종료되었습니다.", {
+        position: "top-center",
+        autoClose: 1500,
+      });
+
+      // jobId가 있으면 stop API 호출하고 RealTimeEditor로 이동
+      if (navigate && jobId) {
+        setTimeout(async () => {
+          try {
+            // Import axios dynamically
+            const axios = (await import('axios')).default;
+            const API_URL = process.env.REACT_APP_API_URL;
+            
+            const headers = {};
+            const token = localStorage.getItem("accessToken");
+            if (token) {
+              headers["Authorization"] = `Bearer ${token}`;
+            }
+
+            // Step 1: Stop API 호출
+            setShowLoadingModal(true);
+            setLoadingMessage("실시간 변환을 종료하는 중...");
+
+            const response = await axios.post(
+              `${API_URL}/api/realTime/stop-realtime?jobId=${jobId}`,
+              {},
+              { headers }
+            );
+
+            const imageUrls = response.data.image_urls || [];
+            
+            // Step 2: 이미지 프리로딩
+            if (imageUrls.length > 0) {
+              setLoadingMessage("슬라이드 이미지를 불러오는 중...");
+
+              // 이미지 프리로딩 함수
+              const preloadImages = (urls) => {
+                return Promise.all(
+                  urls.map((url) => {
+                    return new Promise((resolve) => {
+                      const img = new Image();
+                      const fullUrl = url.startsWith('http') ? url : `${API_URL}${url}`;
+                      
+                      img.onload = () => resolve(url);
+                      img.onerror = () => {
+                        console.warn(`Failed to load image: ${fullUrl}`);
+                        resolve(url); // 실패해도 계속 진행
+                      };
+                      
+                      // 타임아웃 설정 (10초)
+                      setTimeout(() => {
+                        console.warn(`Image loading timeout: ${fullUrl}`);
+                        resolve(url);
+                      }, 10000);
+                      
+                      img.src = fullUrl;
+                    });
+                  })
+                );
+              };
+
+              // 모든 이미지 로딩 완료 대기
+              await preloadImages(imageUrls);
+              
+              setLoadingMessage("이미지 로딩이 완료되었습니다!");
+              
+              // 잠깐 대기 후 페이지 이동
+              setTimeout(() => {
+                setShowLoadingModal(false);
+                navigate("/real-time-editor", {
+                  state: {
+                    imageUrls: imageUrls,
+                    jobId: jobId
+                  }
+                });
+              }, 1000);
+            } else {
+              setLoadingMessage("생성된 이미지가 없습니다.");
+              setTimeout(() => {
+                setShowLoadingModal(false);
+                navigate("/");
+              }, 2000);
+            }
+          } catch (error) {
+            console.error("Stop API 호출 실패:", error);
+            setLoadingMessage("실시간 변환 종료 중 오류가 발생했습니다.");
+            setTimeout(() => {
+              setShowLoadingModal(false);
+              navigate("/");
+            }, 3000);
+          }
+        }, 1500);
+      } else if (navigate) {
+        // jobId가 없으면 홈으로 이동
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
+      }
+    } catch (error) {
+      console.error("녹음 종료 중 오류:", error);
+      toast.error("음성 인식 종료 중 오류가 발생했습니다.", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    }
+  }, [stopTimer]);
+
+  // 슬라이드 전환 처리
+  const handleSlideTransition = useCallback((newSlideNumber) => {
+    const stt = streamingSTTRef.current;
+    if (!stt || !stt.isStreamingActive()) return;
+
+    // 새 슬라이드 번호로 업데이트
+    setCurrentSlide(newSlideNumber);
+    stt.setCurrentSlide(newSlideNumber);
+
+    console.log(`슬라이드 전환: ${newSlideNumber}`);
+  }, []);
+
+  // 특정 슬라이드의 음성 인식 결과 가져오기
+  const getTranscriptForSlide = useCallback(
+    (slideNumber) => {
+      return voiceMap[slideNumber] || "";
+    },
+    [voiceMap]
+  );
+
+  // 현재 슬라이드의 음성 인식 결과 가져오기
+  const getCurrentTranscript = useCallback(() => {
+    return voiceMap[currentSlide] || "";
+  }, [voiceMap, currentSlide]);
+
+  // 모든 슬라이드의 음성 인식 결과 초기화
+  const clearAllTranscripts = useCallback(() => {
+    setVoiceMap({});
+  }, []);
+
+  // 컴포넌트 언마운트 시 정리
+  const cleanup = useCallback(() => {
+    const stt = streamingSTTRef.current;
+    if (stt) {
+      stt.cleanup();
+    }
+  }, []);
 
   return {
     // 상태
     isRealTimeActive,
     isRecording,
-    isUploading,
-    jobId,
+    isConnected,
     showGuidanceModal,
     realTimePdfData,
+    currentSlide,
+    voiceMap,
+
+    // 타이머 관련
     recordingTime,
-    currentSegmentTime,
+    isPaused,
+
+    // 로딩 모달 관련
+    showLoadingModal,
+    loadingMessage,
 
     // 액션
     handleStartRealTime,
     startRecording,
     handlePauseRecording,
+    handleStopRecording,
     handleSlideTransition,
     setShowGuidanceModal,
 
-    // 큐 정보
-    queueLength: apiQueue.getQueueLength(),
-    isProcessingQueue: apiQueue.isCurrentlyProcessing(),
+    // 음성 인식 관련 액션
+    getTranscriptForSlide,
+    getCurrentTranscript,
+    clearAllTranscripts,
+    cleanup,
   };
 };
