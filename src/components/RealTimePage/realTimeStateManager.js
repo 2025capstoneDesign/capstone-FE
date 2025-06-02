@@ -227,7 +227,7 @@ export const useRealTimeState = (initialData, initialJobId) => {
   }, [isPaused, resumeTimer, pauseTimer]);
 
   // 녹음 완전 종료 및 홈으로 이동
-  const handleStopRecording = useCallback(async (navigate = null) => {
+  const handleStopRecording = useCallback(async (navigate = null, jobId = null) => {
     try {
       const stt = streamingSTTRef.current;
       if (!stt) return;
@@ -247,8 +247,45 @@ export const useRealTimeState = (initialData, initialJobId) => {
         autoClose: 1500,
       });
 
-      // 홈으로 이동
-      if (navigate) {
+      // jobId가 있으면 stop API 호출하고 RealTimeEditor로 이동
+      if (navigate && jobId) {
+        setTimeout(async () => {
+          try {
+            // Import axios dynamically
+            const axios = (await import('axios')).default;
+            const API_URL = process.env.REACT_APP_API_URL;
+            
+            const headers = {};
+            const token = localStorage.getItem("accessToken");
+            if (token) {
+              headers["Authorization"] = `Bearer ${token}`;
+            }
+
+            const response = await axios.post(
+              `${API_URL}/api/realTime/stop-realtime?jobId=${jobId}`,
+              {},
+              { headers }
+            );
+
+            // RealTimeEditor 페이지로 이동하면서 이미지 URL들을 전달
+            navigate("/real-time-editor", {
+              state: {
+                imageUrls: response.data.image_urls || [],
+                jobId: jobId
+              }
+            });
+          } catch (error) {
+            console.error("Stop API 호출 실패:", error);
+            toast.error("실시간 변환 종료 중 오류가 발생했습니다.", {
+              position: "top-center",
+              autoClose: 3000,
+            });
+            // 에러 발생시 홈으로 이동
+            navigate("/");
+          }
+        }, 1500);
+      } else if (navigate) {
+        // jobId가 없으면 홈으로 이동
         setTimeout(() => {
           navigate("/");
         }, 1500);

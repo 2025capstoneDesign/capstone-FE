@@ -125,7 +125,7 @@ export default function RealTimePage() {
           ) : (
             <button
               className="convert-btn"
-              onClick={() => handleStopRecording(navigate)}
+              onClick={() => handleStopRecording(navigate, initialJobId)}
               style={{ backgroundColor: "#dc3545" }}
             >
               실시간 변환 종료
