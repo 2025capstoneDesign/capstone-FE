@@ -9,6 +9,7 @@ import word_icon from "../../assets/images/docx.png";
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
 import { PiDownloadSimpleBold } from "react-icons/pi";
 import { TbSettings } from "react-icons/tb";
+import { IoWarningOutline } from "react-icons/io5";
 
 export default function PdfList({
   sortedHistory,
@@ -24,6 +25,7 @@ export default function PdfList({
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const itemsPerPage = 5; // 한 페이지당 표시할 항목 수
 
   // 정렬된 데이터 계산
@@ -178,11 +180,13 @@ export default function PdfList({
     setSelectedItems([]);
   };
 
-  const handleDeleteClick = async () => {
+  const handleDeleteClick = () => {
     if (selectedItems.length === 0) return;
-    
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      // 선택된 항목들을 삭제
       const deletePromises = selectedItems.map(itemId => {
         const item = sortedData.find(data => data.id === itemId);
         return item ? handleDelete(item) : Promise.resolve();
@@ -192,9 +196,14 @@ export default function PdfList({
       
       setIsEditMode(false);
       setSelectedItems([]);
+      setShowDeleteModal(false);
     } catch (error) {
       console.error('Error deleting items:', error);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
   };
 
   return (
@@ -343,6 +352,36 @@ export default function PdfList({
           </div>
         )}
       </div>
+
+      {/* 삭제 확인 모달 */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="flex flex-col items-center mb-4">
+              <IoWarningOutline className="text-4xl text-[#5B7F7C] mb-2" />
+              <h3 className="text-xl font-semibold text-center">파일 삭제</h3>
+            </div>
+            <p className="text-gray-600 mb-6 text-center">
+              선택한 {selectedItems.length}개의 파일을 삭제하시겠습니까?<br />
+              이 작업은 되돌릴 수 없습니다.
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                onClick={handleCancelDelete}
+              >
+                취소
+              </button>
+              <button
+                className="px-6 py-2 bg-[#5B7F7C] text-white rounded-lg hover:bg-[#455E5C] transition-colors"
+                onClick={handleConfirmDelete}
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
