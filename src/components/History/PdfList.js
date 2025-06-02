@@ -13,6 +13,7 @@ export default function PdfList({
   setSortOrder,
   handleViewPdf,
   handleDownload,
+  handleDelete,
   loading,
   progress,
   uploadedFiles,
@@ -162,11 +163,23 @@ export default function PdfList({
     setSelectedItems([]);
   };
 
-  const handleDeleteClick = () => {
-    // TODO: 삭제 로직 구현
-    console.log('Selected items to delete:', selectedItems);
-    setIsEditMode(false);
-    setSelectedItems([]);
+  const handleDeleteClick = async () => {
+    if (selectedItems.length === 0) return;
+    
+    try {
+      // 선택된 항목들을 삭제
+      const deletePromises = selectedItems.map(itemId => {
+        const item = sortedData.find(data => data.id === itemId);
+        return item ? handleDelete(item) : Promise.resolve();
+      });
+      
+      await Promise.all(deletePromises);
+      
+      setIsEditMode(false);
+      setSelectedItems([]);
+    } catch (error) {
+      console.error('Error deleting items:', error);
+    }
   };
 
   return (

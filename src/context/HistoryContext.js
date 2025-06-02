@@ -18,7 +18,7 @@ export function HistoryProvider({ children }) {
   // Initialize with sample data (this will still be available even without API response)
   const initialHistoryData = [
     {
-      id: 1,
+      id: -1, // Use negative ID to avoid conflicts with API data
       filename: "sample3.pdf",
       created_at: "2024-03-20T00:00:00Z",
       result: parseData(dummyData), // Already parsed dummy data
@@ -63,7 +63,7 @@ export function HistoryProvider({ children }) {
       // Add the sample PDF to ensure it's always available
       const combinedHistory = [
         ...mappedHistory,
-        initialHistoryData[0], // Sample PDF
+        initialHistoryData[0], // Sample PDF with unique negative ID
       ];
 
       setHistoryData(combinedHistory);
@@ -139,6 +139,51 @@ export function HistoryProvider({ children }) {
     [getAuthHeader]
   );
 
+  // Delete a history item
+  const deleteHistoryItem = useCallback(
+    async (historyItem) => {
+      if (!historyItem || !historyItem.filename) {
+        console.error("Cannot delete PDF: Invalid history item");
+        return false;
+      }
+
+      // Cannot delete sample PDF
+      if (historyItem.filename === "sample3.pdf") {
+        console.error("Cannot delete sample PDF");
+        return false;
+      }
+
+      try {
+        setLoading(true);
+
+        // Delete endpoint: /api/history/my/filename or /api/history/my/jobId
+        const deleteUrl = historyItem.job_id 
+          ? `${process.env.REACT_APP_API_URL}/api/history/my/${historyItem.job_id}`
+          : `${process.env.REACT_APP_API_URL}/api/history/my/${historyItem.filename}`;
+
+        await axios.delete(deleteUrl, {
+          headers: { ...getAuthHeader() }
+        });
+
+        // Remove item from local state
+        setHistoryData((prev) => 
+          prev.filter((item) => item.id !== historyItem.id)
+        );
+
+        return true;
+      } catch (err) {
+        console.error(`Error deleting file ${historyItem.filename}:`, err);
+        setError(
+          `Failed to delete ${historyItem.filename}. Please try again.`
+        );
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [getAuthHeader]
+  );
+
   // Add newly converted item to history, or load from API
   const refreshHistory = useCallback(async () => {
     await fetchHistory();
@@ -151,6 +196,7 @@ export function HistoryProvider({ children }) {
         loading,
         error,
         downloadPdf,
+        deleteHistoryItem,
         refreshHistory,
         setHistoryData,
       }}

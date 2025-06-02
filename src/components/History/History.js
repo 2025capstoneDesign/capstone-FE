@@ -15,7 +15,7 @@ export default function History() {
   const navigate = useNavigate();
   const [sortOrder, setSortOrder] = useState("date"); // "date" or "title"
   const [selectedPdf, setSelectedPdf] = useState(null);
-  const { historyData, downloadPdf, loading: historyLoading, error: historyError } = useHistory();
+  const { historyData, downloadPdf, deleteHistoryItem, loading: historyLoading, error: historyError } = useHistory();
   const { loading: processingLoading, progress, uploadedFiles } = useLoading();
   const { isAuthenticated } = useAuth();
   
@@ -147,6 +147,25 @@ export default function History() {
     }
   }, [downloadPdf]);
 
+  const handleDelete = useCallback(async (item) => {
+    try {
+      setShowLoadingModal(true);
+      setLoadingMessage("파일을 삭제하는 중...");
+      
+      const success = await deleteHistoryItem(item);
+      if (!success) {
+        showError("파일을 삭제하는데 실패했습니다.");
+      }
+      
+      setShowLoadingModal(false);
+      
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      showError("파일 삭제 중 오류가 발생했습니다.");
+      setShowLoadingModal(false);
+    }
+  }, [deleteHistoryItem]);
+
   const sortedHistory = [...historyData].sort((a, b) => {
     if (sortOrder === "date") {
       return new Date(b.created_at) - new Date(a.created_at);
@@ -186,6 +205,7 @@ export default function History() {
           setSortOrder={setSortOrder}
           handleViewPdf={handleViewPdf}
           handleDownload={handleDownload}
+          handleDelete={handleDelete}
           loading={loading}
           progress={progress}
           uploadedFiles={uploadedFiles}
