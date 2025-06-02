@@ -103,7 +103,6 @@ export default function RealTimePage() {
     goToPage(1);
   };
 
-
   const handleDownload = () => {
     if (pdfUrl && typeof pdfUrl === "string") {
       const link = document.createElement("a");
@@ -121,12 +120,14 @@ export default function RealTimePage() {
       {showLoadingModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg flex flex-col items-center">
-            <img 
-              src="/loading_listen.gif" 
-              alt="로딩 중" 
+            <img
+              src="/loading_listen.gif"
+              alt="로딩 중"
               className="w-[200px] h-[200px] object-contain mb-4"
             />
-            <p className="text-gray-700 text-lg font-medium">{loadingMessage}</p>
+            <p className="text-gray-700 text-lg font-medium">
+              {loadingMessage}
+            </p>
           </div>
         </div>
       )}
@@ -142,7 +143,7 @@ export default function RealTimePage() {
             <button
               className="convert-btn"
               onClick={() => handleStopRecording(navigate, initialJobId)}
-              style={{ backgroundColor: "#dc3545" }}
+              style={{ backgroundColor: "#0F0F0F" }}
             >
               실시간 변환 종료
             </button>
