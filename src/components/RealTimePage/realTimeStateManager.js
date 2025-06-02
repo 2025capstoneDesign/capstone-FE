@@ -15,6 +15,10 @@ export const useRealTimeState = (initialData, initialJobId) => {
   const [isConnected, setIsConnected] = useState(false);
   const [recordingTime, setRecordingTime] = useState("00:00");
 
+  // 로딩 모달 상태
+  const [showLoadingModal, setShowLoadingModal] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
+
   // 슬라이드별 음성 인식 결과 저장
   const [voiceMap, setVoiceMap] = useState({});
   const [currentSlide, setCurrentSlide] = useState(1);
@@ -229,6 +233,12 @@ export const useRealTimeState = (initialData, initialJobId) => {
   // 녹음 완전 종료 및 홈으로 이동
   const handleStopRecording = useCallback(async (navigate = null, jobId = null) => {
     try {
+      // jobId가 있으면 즉시 로딩 모달 표시
+      if (navigate && jobId) {
+        setShowLoadingModal(true);
+        setLoadingMessage("음성 인식을 종료하는 중...");
+      }
+
       const stt = streamingSTTRef.current;
       if (!stt) return;
 
@@ -261,27 +271,77 @@ export const useRealTimeState = (initialData, initialJobId) => {
               headers["Authorization"] = `Bearer ${token}`;
             }
 
+            // Step 1: Stop API 호출
+            setShowLoadingModal(true);
+            setLoadingMessage("실시간 변환을 종료하는 중...");
+
             const response = await axios.post(
               `${API_URL}/api/realTime/stop-realtime?jobId=${jobId}`,
               {},
               { headers }
             );
 
-            // RealTimeEditor 페이지로 이동하면서 이미지 URL들을 전달
-            navigate("/real-time-editor", {
-              state: {
-                imageUrls: response.data.image_urls || [],
-                jobId: jobId
-              }
-            });
+            const imageUrls = response.data.image_urls || [];
+            
+            // Step 2: 이미지 프리로딩
+            if (imageUrls.length > 0) {
+              setLoadingMessage("슬라이드 이미지를 불러오는 중...");
+
+              // 이미지 프리로딩 함수
+              const preloadImages = (urls) => {
+                return Promise.all(
+                  urls.map((url) => {
+                    return new Promise((resolve) => {
+                      const img = new Image();
+                      const fullUrl = url.startsWith('http') ? url : `${API_URL}${url}`;
+                      
+                      img.onload = () => resolve(url);
+                      img.onerror = () => {
+                        console.warn(`Failed to load image: ${fullUrl}`);
+                        resolve(url); // 실패해도 계속 진행
+                      };
+                      
+                      // 타임아웃 설정 (10초)
+                      setTimeout(() => {
+                        console.warn(`Image loading timeout: ${fullUrl}`);
+                        resolve(url);
+                      }, 10000);
+                      
+                      img.src = fullUrl;
+                    });
+                  })
+                );
+              };
+
+              // 모든 이미지 로딩 완료 대기
+              await preloadImages(imageUrls);
+              
+              setLoadingMessage("이미지 로딩이 완료되었습니다!");
+              
+              // 잠깐 대기 후 페이지 이동
+              setTimeout(() => {
+                setShowLoadingModal(false);
+                navigate("/real-time-editor", {
+                  state: {
+                    imageUrls: imageUrls,
+                    jobId: jobId
+                  }
+                });
+              }, 1000);
+            } else {
+              setLoadingMessage("생성된 이미지가 없습니다.");
+              setTimeout(() => {
+                setShowLoadingModal(false);
+                navigate("/");
+              }, 2000);
+            }
           } catch (error) {
             console.error("Stop API 호출 실패:", error);
-            toast.error("실시간 변환 종료 중 오류가 발생했습니다.", {
-              position: "top-center",
-              autoClose: 3000,
-            });
-            // 에러 발생시 홈으로 이동
-            navigate("/");
+            setLoadingMessage("실시간 변환 종료 중 오류가 발생했습니다.");
+            setTimeout(() => {
+              setShowLoadingModal(false);
+              navigate("/");
+            }, 3000);
           }
         }, 1500);
       } else if (navigate) {
@@ -350,6 +410,10 @@ export const useRealTimeState = (initialData, initialJobId) => {
     // 타이머 관련
     recordingTime,
     isPaused,
+
+    // 로딩 모달 관련
+    showLoadingModal,
+    loadingMessage,
 
     // 액션
     handleStartRealTime,

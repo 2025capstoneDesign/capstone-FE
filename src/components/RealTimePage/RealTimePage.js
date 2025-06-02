@@ -53,6 +53,8 @@ export default function RealTimePage() {
     voiceMap, // 음성 인식 결과 맵
     isConnected, // 웹소켓 연결 상태
     getCurrentTranscript, // 현재 세그먼트 음성 인식 결과 가져오기
+    showLoadingModal, // 로딩 모달 표시 여부
+    loadingMessage, // 로딩 메시지
   } = useRealTimeState(pdfData, initialJobId);
 
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
@@ -115,6 +117,20 @@ export default function RealTimePage() {
 
   return (
     <div className="app-wrapper">
+      {/* Loading Modal */}
+      {showLoadingModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
+            <img 
+              src="/loading_listen.gif" 
+              alt="로딩 중" 
+              className="w-[200px] h-[200px] object-contain mb-4"
+            />
+            <p className="text-gray-700 text-lg font-medium">{loadingMessage}</p>
+          </div>
+        </div>
+      )}
+
       <div className="sub-header">
         <h1 className="page-title">실시간 강의</h1>
         <div className="action-buttons">
