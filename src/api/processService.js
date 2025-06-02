@@ -10,14 +10,14 @@ export const processService = {
   startRealTime: async (pdfFile = null) => {
     try {
       const formData = new FormData();
-      
+
       // Add PDF file if provided
       if (pdfFile) {
         formData.append("doc_file", pdfFile);
       }
 
       const headers = { "Content-Type": "multipart/form-data" };
-      
+
       // Get auth token from localStorage if it exists
       const token = localStorage.getItem("accessToken");
       if (token) {
@@ -45,7 +45,7 @@ export const processService = {
       formData.append("meta_json", JSON.stringify(metaJson));
 
       const headers = { "Content-Type": "multipart/form-data" };
-      
+
       // Get auth token from localStorage if it exists
       const token = localStorage.getItem("accessToken");
       if (token) {
@@ -105,8 +105,13 @@ export const processService = {
   // Check the status of a process
   checkProcessStatus: async (jobId, retryCount = 0) => {
     try {
+      // Get auth token from localStorage if it exists
+      const token = localStorage.getItem("accessToken");
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
       const response = await axios.get(
-        `${API_URL}/api/process2/process-status-v2/${jobId}`
+        `${API_URL}/api/process2/process-status-v2/${jobId}`,
+        { headers }
       );
       return response.data;
     } catch (error) {
