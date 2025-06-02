@@ -7,7 +7,7 @@ import DescriptionPanel from "./DescriptionPanel";
 export default function RealTimeEditorPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+  const [selectedImageIndices, setSelectedImageIndices] = useState([]);
 
   // Get image URLs from navigation state
   const { imageUrls = [], jobId } = location.state || {};
@@ -25,7 +25,17 @@ export default function RealTimeEditorPage() {
   }, []);
 
   const handleImageClick = (index) => {
-    setSelectedImageIndex(index);
+    setSelectedImageIndices(prev => {
+      if (prev.includes(index)) {
+        return prev.filter(i => i !== index);
+      } else {
+        return [...prev, index];
+      }
+    });
+  };
+
+  const handleCompleteSelection = () => {
+    navigate("/");
   };
 
   return (
@@ -41,12 +51,13 @@ export default function RealTimeEditorPage() {
       <div className="main-content">
         <ImageGridPanel
           imageUrls={imageUrls}
-          selectedImageIndex={selectedImageIndex}
+          selectedImageIndices={selectedImageIndices}
           onImageClick={handleImageClick}
         />
         <DescriptionPanel 
-          selectedImageIndex={selectedImageIndex}
+          selectedImageIndices={selectedImageIndices}
           totalImages={imageUrls.length}
+          onCompleteSelection={handleCompleteSelection}
         />
       </div>
     </div>

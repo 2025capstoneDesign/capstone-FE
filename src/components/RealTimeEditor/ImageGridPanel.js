@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ImageGridPanel({ imageUrls, selectedImageIndex, onImageClick }) {
+export default function ImageGridPanel({ imageUrls, selectedImageIndices, onImageClick }) {
   const API_URL = process.env.REACT_APP_API_URL;
 
   return (
@@ -32,23 +32,23 @@ export default function ImageGridPanel({ imageUrls, selectedImageIndex, onImageC
                 overflow: "hidden",
                 cursor: "pointer",
                 transition: "all 0.3s ease",
-                border: selectedImageIndex === index ? "3px solid #5CBFBC" : "2px solid transparent",
-                boxShadow: selectedImageIndex === index 
+                border: selectedImageIndices.includes(index) ? "3px solid #5CBFBC" : "2px solid transparent",
+                boxShadow: selectedImageIndices.includes(index) 
                   ? "0 8px 25px rgba(92, 191, 188, 0.3)" 
                   : "0 4px 12px rgba(0, 0, 0, 0.1)",
-                transform: selectedImageIndex === index ? "scale(1.02)" : "scale(1)",
-                opacity: selectedImageIndex === index ? 1 : 0.8,
+                transform: selectedImageIndices.includes(index) ? "scale(1.02)" : "scale(1)",
+                opacity: selectedImageIndices.includes(index) ? 1 : 0.8,
                 backgroundColor: "#fff"
               }}
               onClick={() => onImageClick(index)}
               onMouseEnter={(e) => {
-                if (selectedImageIndex !== index) {
+                if (!selectedImageIndices.includes(index)) {
                   e.target.style.transform = "scale(1.05)";
                   e.target.style.opacity = "0.9";
                 }
               }}
               onMouseLeave={(e) => {
-                if (selectedImageIndex !== index) {
+                if (!selectedImageIndices.includes(index)) {
                   e.target.style.transform = "scale(1)";
                   e.target.style.opacity = "0.8";
                 }
@@ -104,7 +104,7 @@ export default function ImageGridPanel({ imageUrls, selectedImageIndex, onImageC
                 {index + 1}
               </div>
               {/* 선택 상태 표시 */}
-              {selectedImageIndex === index && (
+              {selectedImageIndices.includes(index) && (
                 <div
                   style={{
                     position: "absolute",
