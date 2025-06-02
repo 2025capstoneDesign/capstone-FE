@@ -9,7 +9,6 @@ import word_icon from "../../assets/images/docx.png";
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
 import { PiDownloadSimpleBold } from "react-icons/pi";
 import { TbSettings } from "react-icons/tb";
-import { useHistory } from "../../context/HistoryContext";
 
 export default function PdfList({
   sortedHistory,
@@ -25,7 +24,6 @@ export default function PdfList({
   const [selectedItems, setSelectedItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5; // 한 페이지당 표시할 항목 수
-  const { deleteHistoryItem } = useHistory();
 
   // 정렬된 데이터 계산
   const sortedData = useMemo(() => {
@@ -179,16 +177,7 @@ export default function PdfList({
     setSelectedItems([]);
   };
 
-  const handleDeleteClick = async () => {
-    // 선택된 모든 파일 삭제
-    for (const id of selectedItems) {
-      const item = sortedData.find((i) => i.id === id);
-      if (item && item.filename) {
-        await deleteHistoryItem(item.filename);
-      }
-    }
-    setIsEditMode(false);
-    setSelectedItems([]);
+  const handleDeleteClick = () => {
   };
 
   return (

@@ -6,7 +6,7 @@ import RealTimeSummarySection from "./RealTimeSummarySection";
 import { useLoading } from "../../../context/LoadingContext";
 import { useHistory } from "../../../context/HistoryContext";
 import { showError } from "../../../utils/errorHandler";
-import PdfViewer from "../../TestPage/PdfViewer";
+import PdfViewer from "../../RealTimePage/PdfViewer";
 import axios from "axios";
 
 function RealTimeConvert() {
@@ -21,13 +21,25 @@ function RealTimeConvert() {
 
   const API_URL = process.env.REACT_APP_API_URL;
 
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      navigate("/login");
-    }
-  }, [navigate]);
+  // Modal state
+  const [showProcessingModal, setShowProcessingModal] = useState(false);
+  const [processingMessage, setProcessingMessage] = useState("");
 
+  // Modal messages
+  const PROCESSING_MESSAGES = {
+    STOPPING: "실시간 변환을 종료하는 중...",
+    GENERATING: "슬라이드 이미지를 생성하는 중...",
+  };
+
+  // 실시간 변환은 로그인 없이 사용 가능 (백엔드 완성 전 테스트용)
+  // useEffect(() => {
+  //   const token = localStorage.getItem("accessToken");
+  //   if (!token) {
+  //     navigate("/login");
+  //   }
+  // }, [navigate]);
+
+  // 실시간 변환 요청
   const startRealTime = async (pdfFile = null) => {
     try {
       const formData = new FormData();
@@ -56,6 +68,30 @@ function RealTimeConvert() {
     }
   };
 
+  // 실시간 변환 종료 요청
+  const stopRealTime = async (jobId) => {
+    try {
+      const headers = {};
+
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await axios.post(
+        `${API_URL}/api/realTime/stop-realtime?jobId=${jobId}`,
+        {},
+        { headers }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error stopping real-time process:", error);
+      throw error;
+    }
+  };
+
+  // 실시간 변환 결과 처리
   const { loading, pdfFile, convertedData, processingError, setConvertedData } =
     useLoading();
 
@@ -186,6 +222,20 @@ function RealTimeConvert() {
 
   return (
     <div className="app-wrapper convert-page">
+      {/* Processing Modal */}
+      {showProcessingModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
+            <img 
+              src="/loading_listen.gif" 
+              alt="처리 중" 
+              className="w-[200px] h-[200px] object-contain mb-4"
+            />
+            <p className="text-gray-700 text-lg font-medium">{processingMessage}</p>
+          </div>
+        </div>
+      )}
+
       <div className="sub-header">
         <h2 className="page-title">실시간 변환</h2>
         <div className="action-buttons">
