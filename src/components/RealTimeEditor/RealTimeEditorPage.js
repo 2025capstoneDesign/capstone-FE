@@ -28,6 +28,7 @@ export default function RealTimeEditorPage() {
 
   // Voice data states
   const [voiceData, setVoiceData] = useState({});
+  const [resultData, setResultData] = useState(null);
 
   // 각 페이지 섹션에 대한 ref를 저장할 객체 (스크롤용)
   const pageSectionRefs = useRef({});
@@ -60,8 +61,19 @@ export default function RealTimeEditorPage() {
         voiceData: {},
       });
       setVoiceData(parsedData.voiceData);
+      setResultData(resultJson);
     }
   }, [resultJson]);
+
+  // Handle data updates from AudioPanel
+  const handleDataUpdate = (newResultData) => {
+    const parsedData = parseRealTimeResponse(newResultData, {
+      summaryData: {},
+      voiceData: {},
+    });
+    setVoiceData(parsedData.voiceData);
+    setResultData(newResultData);
+  };
 
   // Set PDF URL - use received PDF URL if available, otherwise generate from jobId
   useEffect(() => {
@@ -276,6 +288,7 @@ export default function RealTimeEditorPage() {
                 numPages={numPages}
                 pageSectionRefs={pageSectionRefs}
                 setHighlightColor={setHighlightColor}
+                onDataUpdate={handleDataUpdate}
               />
             </div>
           </>

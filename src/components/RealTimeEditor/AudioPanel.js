@@ -1,4 +1,9 @@
-import React, { useRef, useCallback, useEffect } from "react";
+import React, { useRef, useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import PageMoveModal from "../common/PageMoveModal";
+import { useAuth } from "../../context/AuthContext";
+import { showError } from "../../utils/errorHandler";
+import { useLocation } from "react-router-dom";
 
 export default function AudioPanel({
   pageNumber,
@@ -6,10 +11,20 @@ export default function AudioPanel({
   highlightColor = "blue",
   numPages,
   pageSectionRefs,
-  setHighlightColor
+  onDataUpdate,
 }) {
   const contentContainerRef = useRef(null);
   const prevPageRef = useRef(pageNumber);
+  const location = useLocation();
+  const { getAuthHeader } = useAuth();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedText, setSelectedText] = useState("");
+  const [selectedPage, setSelectedPage] = useState(null);
+  const [showMoveButton, setShowMoveButton] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Get jobId from navigation state
+  const { jobId } = location.state || {};
 
   // 특정 페이지 섹션으로 스크롤하는 함수 - 부드러운 스크롤 적용
   const scrollToPageSection = useCallback(
@@ -21,7 +36,8 @@ export default function AudioPanel({
           const offsetCorrection = 5;
 
           // 컨테이너의 현재 스크롤 위치를 기준으로 섹션의 상대적 위치 계산
-          const containerRect = contentContainerRef.current.getBoundingClientRect();
+          const containerRect =
+            contentContainerRef.current.getBoundingClientRect();
           const sectionRect = sectionRef.getBoundingClientRect();
 
           // 섹션이 컨테이너 상단에 딱 맞도록 스크롤 계산
@@ -152,9 +168,124 @@ export default function AudioPanel({
     tooltip.style.top = `${segmentRect.top + 5}px`;
   };
 
+  // 텍스트가 속한 페이지 번호 찾기
+  const findTextPageNumber = (text) => {
+    if (!voiceData) return null;
+
+    // 모든 페이지를 순회하면서 텍스트가 포함된 페이지 찾기
+    for (const [pageNum, segments] of Object.entries(voiceData)) {
+      const pageText = segments.map((segment) => segment.text).join(" ");
+      if (pageText.includes(text)) {
+        return parseInt(pageNum);
+      }
+    }
+    return null;
+  };
+
+  // 텍스트 선택 이벤트 처리
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
+
+    if (selectedText) {
+      setSelectedText(selectedText);
+      const textPage = findTextPageNumber(selectedText);
+      setSelectedPage(textPage);
+      setShowMoveButton(true);
+    } else {
+      setShowMoveButton(false);
+      setSelectedPage(null);
+    }
+  };
+
+  // 세그먼트 이동/삭제 API 호출
+  const handleModalConfirm = async (targetPage, text) => {
+    if (!jobId) {
+      showError("작업 ID가 없습니다.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const API_URL = process.env.REACT_APP_API_URL;
+      const response = await fetch(`${API_URL}/api/realTime/move-segment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeader(),
+        },
+        body: JSON.stringify({
+          jobId,
+          startSlide: selectedPage,
+          targetSlide: targetPage,
+          text: text,
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        // result.json으로 voiceData 업데이트
+        if (result.result && onDataUpdate) {
+          onDataUpdate(result.result);
+        }
+
+        const action = targetPage === 0 ? "삭제" : "이동";
+        toast.success(`텍스트가 성공적으로 ${action}되었습니다.`, {
+          position: "top-center",
+          autoClose: 1500,
+        });
+      } else {
+        throw new Error("요청 실패");
+      }
+    } catch (error) {
+      console.error("Move/delete error:", error);
+      showError("텍스트 이동/삭제 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+      setIsModalOpen(false);
+      setShowMoveButton(false);
+    }
+  };
+
   return (
-    <div className="content-container" ref={contentContainerRef}>
-      <div className="voice-content">{renderAllVoiceContent()}</div>
-    </div>
+    <>
+      <div
+        className="content-container"
+        ref={contentContainerRef}
+        onMouseUp={handleTextSelection}
+      >
+        <div className="voice-content">{renderAllVoiceContent()}</div>
+      </div>
+
+      {showMoveButton && !isModalOpen && (
+        <div className="fixed bottom-8 right-8 z-50 flex gap-2">
+          <button
+            className="flex items-center gap-2 px-6 py-3 bg-[#80cbc4] text-white rounded-lg shadow-lg hover:bg-[#4db6ac] hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:shadow-md transition-all duration-300 text-[15px] font-medium"
+            onClick={() => setIsModalOpen(true)}
+            disabled={isLoading}
+          >
+            이동
+          </button>
+          <button
+            className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-lg shadow-lg hover:bg-red-600 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:shadow-md transition-all duration-300 text-[15px] font-medium"
+            onClick={() => handleModalConfirm(0, selectedText)}
+            disabled={isLoading}
+          >
+            삭제
+          </button>
+        </div>
+      )}
+
+      <PageMoveModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setShowMoveButton(false);
+        }}
+        onConfirm={handleModalConfirm}
+        maxPage={numPages}
+        selectedText={selectedText}
+      />
+    </>
   );
 }
