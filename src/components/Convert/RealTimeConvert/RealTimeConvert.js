@@ -18,6 +18,8 @@ function RealTimeConvert() {
   const [highlightColor, setHighlightColor] = useState("red");
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
+  const [showLoading, setShowLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("실시간 변환을 시작하는 중...");
 
   const API_URL = process.env.REACT_APP_API_URL;
 
@@ -166,10 +168,14 @@ function RealTimeConvert() {
       }
 
       try {
+        setShowLoading(true);
+        setLoadingMessage("실시간 변환을 시작하는 중...");
+
         // pdf 파일 업로드 후 실시간 변환 시작
         const response = await startRealTime(docFile);
 
         if (response.jobId) {
+          setShowLoading(false);
           // 실시간 페이지로 이동
           navigate("/real-time-page", {
             state: {
@@ -189,10 +195,12 @@ function RealTimeConvert() {
         console.error("API 요청 실패:", apiError);
         showError("실시간 변환 시작에 실패했습니다. 다시 시도해주세요.");
         setError("실시간 변환 시작에 실패했습니다.");
+        setShowLoading(false);
       }
     } catch (error) {
       console.error("변환 실패:", error);
       showError("파일 변환에 실패했습니다. 다시 시도해주세요.");
+      setShowLoading(false);
     }
   };
 
@@ -222,6 +230,22 @@ function RealTimeConvert() {
 
   return (
     <div className="app-wrapper convert-page">
+      {/* Loading Modal */}
+      {showLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
+            <img
+              src="/loading_listen.gif"
+              alt="로딩 중"
+              className="w-[200px] h-[200px] object-contain mb-4"
+            />
+            <p className="text-gray-700 text-lg font-medium">
+              {loadingMessage}
+            </p>
+          </div>
+        </div>
+      )}
+      
       {/* Processing Modal */}
       {showProcessingModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
