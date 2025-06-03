@@ -37,7 +37,7 @@ export const processService = {
     }
   },
 
-  // Process real-time audio segment
+  // Process real-time audio segment  (지금 안씀)
   processRealTimeSegment: async (jobId, audioBlob, metaJson) => {
     try {
       const formData = new FormData();

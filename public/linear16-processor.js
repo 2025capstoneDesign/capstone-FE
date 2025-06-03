@@ -4,7 +4,7 @@ class Linear16Processor extends AudioWorkletProcessor {
     super();
     this.isActive = false;
     this.buffer = [];
-    this.bufferSize = 2048; // 16kHz 기준 128ms 분량
+    this.bufferSize = 100000; // 16kHz 기준 128ms 분량
 
     // Listen for messages from main thread
     this.port.onmessage = (event) => {
