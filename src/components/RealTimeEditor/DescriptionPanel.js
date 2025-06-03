@@ -8,16 +8,7 @@ export default function DescriptionPanel({
   onCompleteSelection,
 }) {
   return (
-    <div className="summary-container">
-      <div className="content-tabs">
-        <div className="tab-container">
-          <div className="tabs">
-            <button className="tab active">변환 결과</button>
-          </div>
-        </div>
-      </div>
-
-      <div className="content-container">
+    <div className="content-container">
         <div
           style={{
             display: "flex",
@@ -217,7 +208,6 @@ export default function DescriptionPanel({
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }

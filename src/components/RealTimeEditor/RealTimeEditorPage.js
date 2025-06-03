@@ -1,16 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../css/TestPage.css";
 import ImageGridPanel from "./ImageGridPanel";
 import DescriptionPanel from "./DescriptionPanel";
+import EditorPdfViewer from "./EditorPdfViewer";
+import AudioPanel from "./AudioPanel";
+import { parseRealTimeResponse } from "../RealTimePage/realTimeDataParser";
 
 export default function RealTimeEditorPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedImageIndices, setSelectedImageIndices] = useState([]);
+  const [activeTab, setActiveTab] = useState("overview"); // "overview" 또는 "pageview"
+  
+  // PDF viewer states
+  const [pageNumber, setPageNumber] = useState(1);
+  const [numPages, setNumPages] = useState(0);
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [highlightColor, setHighlightColor] = useState("blue");
+  
+  // Voice data states
+  const [voiceData, setVoiceData] = useState({});
+  
+  // 각 페이지 섹션에 대한 ref를 저장할 객체 (스크롤용)
+  const pageSectionRefs = useRef({});
 
-  // Get image URLs from navigation state
-  const { imageUrls = [], jobId } = location.state || {};
+  // Get image URLs and result data from navigation state
+  const { imageUrls = [], jobId, resultJson = null, pdfUrl: receivedPdfUrl = null } = location.state || {};
 
   // Redirect to home if no image URLs
   useEffect(() => {
@@ -23,6 +39,24 @@ export default function RealTimeEditorPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Parse result_json when component mounts
+  useEffect(() => {
+    if (resultJson) {
+      const parsedData = parseRealTimeResponse(resultJson, { summaryData: {}, voiceData: {} });
+      setVoiceData(parsedData.voiceData);
+    }
+  }, [resultJson]);
+
+  // Set PDF URL - use received PDF URL if available, otherwise generate from jobId
+  useEffect(() => {
+    if (receivedPdfUrl) {
+      setPdfUrl(receivedPdfUrl);
+    } else if (jobId) {
+      const API_URL = process.env.REACT_APP_API_URL;
+      setPdfUrl(`${API_URL}/file/${jobId}/original.pdf`);
+    }
+  }, [receivedPdfUrl, jobId]);
 
   const handleImageClick = (index) => {
     setSelectedImageIndices(prev => {
@@ -38,6 +72,34 @@ export default function RealTimeEditorPage() {
     navigate("/");
   };
 
+  // PDF navigation functions
+  const goPrevPage = () => {
+    setPageNumber(prev => Math.max(prev - 1, 1));
+  };
+
+  const goNextPage = () => {
+    setPageNumber(prev => Math.min(prev + 1, numPages));
+  };
+
+  const onDocumentLoadSuccess = (pdf) => {
+    setNumPages(pdf.numPages);
+  };
+
+  const onDocumentLoadError = (error) => {
+    console.error("PDF load error:", error);
+  };
+
+  // 졸음 토글 함수 (PDF 페이지 기준, 0-based index로 변환)
+  const handleSleepToggle = (imageIndex) => {
+    setSelectedImageIndices(prev => {
+      if (prev.includes(imageIndex)) {
+        return prev.filter(i => i !== imageIndex);
+      } else {
+        return [...prev, imageIndex];
+      }
+    });
+  };
+
   return (
     <div className="app-wrapper">
       <div className="sub-header">
@@ -49,16 +111,105 @@ export default function RealTimeEditorPage() {
         </div>
       </div>
       <div className="main-content">
-        <ImageGridPanel
-          imageUrls={imageUrls}
-          selectedImageIndices={selectedImageIndices}
-          onImageClick={handleImageClick}
-        />
-        <DescriptionPanel 
-          selectedImageIndices={selectedImageIndices}
-          totalImages={imageUrls.length}
-          onCompleteSelection={handleCompleteSelection}
-        />
+        {activeTab === "overview" ? (
+          <>
+            <ImageGridPanel
+              imageUrls={imageUrls}
+              selectedImageIndices={selectedImageIndices}
+              onImageClick={handleImageClick}
+            />
+            <div className="summary-container">
+              <div className="tab-container content-tabs">
+                <div className="tabs">
+                  <button
+                    className={`tab ${activeTab === "overview" ? "active" : ""}`}
+                    onClick={() => setActiveTab("overview")}
+                  >
+                    전체보기
+                  </button>
+                  <button
+                    className={`tab ${activeTab === "pageview" ? "active" : ""}`}
+                    onClick={() => setActiveTab("pageview")}
+                  >
+                    페이지 보기
+                  </button>
+                </div>
+              </div>
+              <DescriptionPanel 
+                selectedImageIndices={selectedImageIndices}
+                totalImages={imageUrls.length}
+                onCompleteSelection={handleCompleteSelection}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            {pdfUrl && (
+              <EditorPdfViewer
+                pdfUrl={pdfUrl}
+                pageNumber={pageNumber}
+                numPages={numPages}
+                onDocumentLoadSuccess={onDocumentLoadSuccess}
+                onDocumentLoadError={onDocumentLoadError}
+                goPrevPage={goPrevPage}
+                goNextPage={goNextPage}
+                selectedImageIndices={selectedImageIndices}
+                onSleepToggle={handleSleepToggle}
+              />
+            )}
+            <div className="summary-container">
+              <div className="tab-container content-tabs">
+                <div className="tabs">
+                  <button
+                    className={`tab ${activeTab === "overview" ? "active" : ""}`}
+                    onClick={() => setActiveTab("overview")}
+                  >
+                    전체보기
+                  </button>
+                  <button
+                    className={`tab ${activeTab === "pageview" ? "active" : ""}`}
+                    onClick={() => setActiveTab("pageview")}
+                  >
+                    페이지 보기
+                  </button>
+                </div>
+
+                <div className="color-selector visible">
+                  <button
+                    className={`color-btn red ${
+                      highlightColor === "red" ? "selected" : ""
+                    }`}
+                    onClick={() => setHighlightColor("red")}
+                    aria-label="빨강색 강조"
+                  />
+                  <button
+                    className={`color-btn blue ${
+                      highlightColor === "blue" ? "selected" : ""
+                    }`}
+                    onClick={() => setHighlightColor("blue")}
+                    aria-label="파랑색 강조"
+                  />
+                  <button
+                    className={`color-btn green ${
+                      highlightColor === "green" ? "selected" : ""
+                    }`}
+                    onClick={() => setHighlightColor("green")}
+                    aria-label="초록색 강조"
+                  />
+                </div>
+              </div>
+              
+              <AudioPanel
+                pageNumber={pageNumber}
+                voiceData={voiceData}
+                highlightColor={highlightColor}
+                numPages={numPages}
+                pageSectionRefs={pageSectionRefs}
+                setHighlightColor={setHighlightColor}
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
