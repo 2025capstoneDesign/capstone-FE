@@ -231,7 +231,7 @@ export const useRealTimeState = (initialData, initialJobId) => {
   }, [isPaused, resumeTimer, pauseTimer]);
 
   // 녹음 완전 종료 및 홈으로 이동
-  const handleStopRecording = useCallback(async (navigate = null, jobId = null) => {
+  const handleStopRecording = useCallback(async (navigate = null, jobId = null, pdfUrl = null) => {
     try {
       // jobId가 있으면 즉시 로딩 모달 표시
       if (navigate && jobId) {
@@ -324,7 +324,9 @@ export const useRealTimeState = (initialData, initialJobId) => {
                 navigate("/real-time-editor", {
                   state: {
                     imageUrls: imageUrls,
-                    jobId: jobId
+                    jobId: jobId,
+                    resultJson: response.data.result_json || null,
+                    pdfUrl: pdfUrl
                   }
                 });
               }, 1000);

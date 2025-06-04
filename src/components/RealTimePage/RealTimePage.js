@@ -142,7 +142,7 @@ export default function RealTimePage() {
           ) : (
             <button
               className="convert-btn"
-              onClick={() => handleStopRecording(navigate, initialJobId)}
+              onClick={() => handleStopRecording(navigate, initialJobId, pdfUrl)}
               style={{ backgroundColor: "#0F0F0F" }}
             >
               실시간 변환 종료
