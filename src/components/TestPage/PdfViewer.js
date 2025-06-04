@@ -1,6 +1,9 @@
 import { Document, Page } from "react-pdf";
 import { toast } from "react-toastify";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { IoSearch } from "react-icons/io5";
+import { IoIosArrowDown } from "react-icons/io";
+import axios from "axios";
 
 export default function PdfViewer({
   pdfUrl,
@@ -10,6 +13,9 @@ export default function PdfViewer({
   onDocumentLoadError,
   goPrevPage,
   goNextPage,
+  goToSpecificPage,
+  pdfData,
+  jobId,
 }) {
   // Document 컴포넌트는 파일 경로와 blob URL을 모두 올바르게 처리하므로,
   // 여기서 특별한 변환 작업이 필요X
@@ -17,11 +23,76 @@ export default function PdfViewer({
 
   // 로딩 상태를 추적하여 필요한 경우 로딩 표시
   const [isLoading, setIsLoading] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [matchingPages, setMatchingPages] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // PDF URL이 변경될 때 로딩 상태를 초기화
   useEffect(() => {
     setIsLoading(true);
+    setSearchKeyword("");
+    setMatchingPages([]);
   }, [pdfUrl]);
+
+  // 키워드 검색 API 호출 함수
+  const searchKeywordLocations = useCallback(async (keyword) => {
+    if (!keyword.trim() || !jobId) {
+      console.log("검색 조건 미충족:", { keyword, jobId });
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      console.log("API 호출 시작:", { keyword, jobId });
+      
+      const response = await axios.post("/api/real-time-transform/search-keyword-locations", {
+        keyword: keyword,
+        job_id: jobId
+      });
+      
+      console.log("API 응답:", response.data);
+
+      // slide_id에서 숫자만 추출해서 중복 없이 오름차순 정렬
+      const slideNumbers = response.data.results
+        .map(match => {
+          const matchNum = match.slide.match(/\d+/);
+          return matchNum ? parseInt(matchNum[0]) : null;
+        })
+        .filter((num, idx, arr) => num !== null && arr.indexOf(num) === idx)
+        .sort((a, b) => a - b);
+
+      console.log("처리된 슬라이드 번호:", slideNumbers);
+      setMatchingPages(slideNumbers);
+    } catch (error) {
+      console.error("키워드 검색 중 오류 발생:", error);
+      console.error("에러 상세:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      toast.error("키워드 검색 중 오류가 발생했습니다.", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+      setMatchingPages([]);
+    } finally {
+      setIsSearching(false);
+    }
+  }, [jobId]);
+
+  // 검색어 변경 시 디바운스 처리
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchKeyword.trim()) {
+        searchKeywordLocations(searchKeyword);
+      } else {
+        setMatchingPages([]);
+      }
+    }, 300); // 300ms 디바운스
+
+    return () => clearTimeout(timer);
+  }, [searchKeyword, searchKeywordLocations]);
 
   // 성공적인 로딩 처리
   const handleLoadSuccess = (pdf) => {
@@ -45,58 +116,201 @@ export default function PdfViewer({
     }
   };
 
+  // 페이지 이동 처리
+  const handlePageSelect = (pageNum) => {
+    if (pageNum >= 1 && pageNum <= numPages) {
+      goToSpecificPage(pageNum);
+    }
+    setShowDropdown(false);
+  };
+
   return (
     <div className="slide-container">
       <div className="slide-header">
-        <div
-          className="audio-icon"
-          onClick={() =>
-            toast.info("음성 기능이 활성화 되었습니다.", {
-              position: "top-center",
-              autoClose: 1500,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-            })
-          }
-        >
-          <svg
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+        <div style={{ display: "flex", alignItems: "center", gap: "15px", width: "100%" }}>
+          <div
+            className="audio-icon"
+            onClick={() =>
+              toast.info("음성 기능이 활성화 되었습니다.", {
+                position: "top-center",
+                autoClose: 1500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+              })
+            }
           >
-            <path
-              d="M12 15.5C14.21 15.5 16 13.71 16 11.5V6C16 3.79 14.21 2 12 2C9.79 2 8 3.79 8 6V11.5C8 13.71 9.79 15.5 12 15.5Z"
-              stroke="#5CBFBC"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M4.35 9.65V11.35C4.35 15.57 7.78 19 12 19C16.22 19 19.65 15.57 19.65 11.35V9.65"
-              stroke="#5CBFBC"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M10.61 6.56C11.519 6.19051 12.5098 6.1885 13.42 6.56C14.18 6.87 14.794 7.44448 15.13 8.17C15.2577 8.45726 15.3312 8.76303 15.348 9.074C15.3648 9.38498 15.3244 9.6964 15.229 9.994C15.1335 10.2916 14.9846 10.5696 14.7891 10.8143C14.5937 11.059 14.3549 11.2667 14.085 11.426C13.816 11.5844 13.5194 11.692 13.212 11.743C12.9046 11.794 12.5917 11.7878 12.287 11.725"
-              stroke="#5CBFBC"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M12 19V22"
-              stroke="#5CBFBC"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 15.5C14.21 15.5 16 13.71 16 11.5V6C16 3.79 14.21 2 12 2C9.79 2 8 3.79 8 6V11.5C8 13.71 9.79 15.5 12 15.5Z"
+                stroke="#5CBFBC"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M4.35 9.65V11.35C4.35 15.57 7.78 19 12 19C16.22 19 19.65 15.57 19.65 11.35V9.65"
+                stroke="#5CBFBC"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M10.61 6.56C11.519 6.19051 12.5098 6.1885 13.42 6.56C14.18 6.87 14.794 7.44448 15.13 8.17C15.2577 8.45726 15.3312 8.76303 15.348 9.074C15.3648 9.38498 15.3244 9.6964 15.229 9.994C15.1335 10.2916 14.9846 10.5696 14.7891 10.8143C14.5937 11.059 14.3549 11.2667 14.085 11.426C13.816 11.5844 13.5194 11.692 13.212 11.743C12.9046 11.794 12.5917 11.7878 12.287 11.725"
+                stroke="#5CBFBC"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M12 19V22"
+                stroke="#5CBFBC"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+
+          {/* 검색 영역 */}
+          <div style={{ position: "relative", marginLeft: "auto", display: "flex", alignItems: "center" }}>
+            <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+              <input
+                type="text"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                placeholder="keyword"
+                style={{
+                  padding: "8px 12px",
+                  paddingRight: "40px",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "8px",
+                  width: "200px",
+                  fontSize: "14px",
+                  outline: "none",
+                }}
+                disabled={isSearching}
+              />
+              <IoSearch
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  color: isSearching ? "#94a3b8" : "#64748b",
+                  fontSize: "18px",
+                }}
+              />
+            </div>
+
+            {/* 드롭다운 버튼 */}
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              style={{
+                marginLeft: "8px",
+                padding: "8px 12px",
+                border: "1px solid #e2e8f0",
+                borderRadius: "8px",
+                backgroundColor: "white",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                cursor: "pointer",
+                opacity: isSearching ? 0.7 : 1,
+              }}
+              disabled={isSearching}
+            >
+              <span style={{ fontSize: "14px", color: "#64748b" }}>
+                {isSearching 
+                  ? "검색 중..." 
+                  : searchKeyword 
+                    ? `${matchingPages.length}개 슬라이드` 
+                    : "전체 슬라이드"}
+              </span>
+              <IoIosArrowDown style={{ color: "#64748b" }} />
+            </button>
+
+            {/* 드롭다운 메뉴 */}
+            {showDropdown && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  right: "0",
+                  marginTop: "4px",
+                  backgroundColor: "white",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                  zIndex: 50,
+                  maxHeight: "300px",
+                  overflowY: "auto",
+                  width: "200px",
+                }}
+              >
+                {isSearching ? (
+                  <div style={{ padding: "12px", textAlign: "center", color: "#64748b" }}>
+                    검색 중...
+                  </div>
+                ) : searchKeyword ? (
+                  matchingPages.length > 0 ? (
+                    matchingPages.map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageSelect(pageNum)}
+                        style={{
+                          width: "100%",
+                          padding: "8px 12px",
+                          textAlign: "left",
+                          border: "none",
+                          backgroundColor: "transparent",
+                          cursor: "pointer",
+                          fontSize: "14px",
+                          color: "#1e293b",
+                          "&:hover": {
+                            backgroundColor: "#f1f5f9",
+                          },
+                        }}
+                      >
+                        슬라이드 {pageNum}
+                      </button>
+                    ))
+                  ) : (
+                    <div style={{ padding: "12px", textAlign: "center", color: "#64748b" }}>
+                      검색 결과가 없습니다
+                    </div>
+                  )
+                ) : (
+                  Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageSelect(pageNum)}
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        textAlign: "left",
+                        border: "none",
+                        backgroundColor: "transparent",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        color: "#1e293b",
+                        "&:hover": {
+                          backgroundColor: "#f1f5f9",
+                        },
+                      }}
+                    >
+                      슬라이드 {pageNum}
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

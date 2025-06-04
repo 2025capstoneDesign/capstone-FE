@@ -21,17 +21,30 @@ export default function TestPage() {
   // Always prioritize location state (from history) if it exists
   // Otherwise use the context data (from conversion)
   // If neither exists, use the first item from history (dummy data)
-  const { pdfFile, pdfData } = location.state
+  const { pdfFile, pdfData, jobId } = location.state
     ? location.state
     : convertedData && contextPdfFile
     ? {
         pdfFile: contextPdfFile,
         pdfData: convertedData,
+        jobId: null,
       }
     : {
         pdfFile: historyData[0].pdfFile || "/sample3.pdf",
         pdfData: historyData[0].result,
+        jobId: historyData[0].id || null,
       };
+
+  console.log("TestPage - 현재 상태:", {
+    locationState: location.state,
+    convertedData: convertedData ? true : false,
+    contextPdfFile: contextPdfFile ? true : false,
+    historyData: historyData[0] ? {
+      id: historyData[0].id,
+      pdfFile: historyData[0].pdfFile
+    } : null,
+    selectedJobId: jobId
+  });
 
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
   useEffect(() => {
@@ -87,6 +100,13 @@ export default function TestPage() {
     goToPage(1);
   }, [goToPage]);
 
+  // 특정 페이지로 이동하는 함수 추가
+  const goToSpecificPage = useCallback((pageNum) => {
+    if (pageNum >= 1 && pageNum <= numPages) {
+      setPageNumber(pageNum);
+    }
+  }, [numPages]);
+
   // Handle navigation away from this component - don't revoke context-managed blob URLs
   const handleConvertClick = useCallback(() => {
     navigate("/convert");
@@ -127,6 +147,9 @@ export default function TestPage() {
           onDocumentLoadError={onDocumentLoadError}
           goPrevPage={goPrevPage}
           goNextPage={goNextPage}
+          goToSpecificPage={goToSpecificPage}
+          pdfData={{ summaryData, voiceData }}
+          jobId={jobId}
         />
         <SummaryPanel
           activeTab={activeTab}
