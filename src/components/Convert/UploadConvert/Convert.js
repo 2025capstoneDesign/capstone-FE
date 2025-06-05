@@ -35,10 +35,19 @@ function Convert() {
   // 로딩이 완료되었는지 확인하고 결과 페이지로 이동
   useEffect(() => {
     if (loading === false && convertedData !== null) {
+      // jobId 추출: convertedData.jobId, pdfFile.jobId 등에서 우선적으로 찾기
+      let jobId = null;
+      if (convertedData && convertedData.jobId) jobId = convertedData.jobId;
+      else if (pdfFile && pdfFile.jobId) jobId = pdfFile.jobId;
+      else if (convertedData && convertedData.id) jobId = convertedData.id;
+      else if (pdfFile && pdfFile.id) jobId = pdfFile.id;
+      // 필요시 추가 필드도 확인
+
       navigate("/test", {
         state: {
           pdfFile: pdfFile,
           pdfData: convertedData,
+          jobId: jobId,
         },
       });
 

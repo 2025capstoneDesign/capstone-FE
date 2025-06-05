@@ -18,6 +18,7 @@ export default function SummaryPanel({
   summaryData,
   voiceData,
   pageSectionRefs,
+  searchKeyword,
 }) {
   const contentContainerRef = useRef(null);
   const prevTabRef = useRef(activeTab);
@@ -159,8 +160,27 @@ export default function SummaryPanel({
     console.log('이동할 페이지:', targetPage);
   };
 
+  // 키워드 하이라이트 함수
+  const highlightKeyword = (text, keyword) => {
+    if (!keyword || !text) return text;
+    
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escapedKeyword, 'gi');
+    
+    return text.split(regex).map((part, index) => {
+      if (part.toLowerCase() === keyword.toLowerCase()) {
+        return (
+          <span key={index} className="text-green-600 font-bold">
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
+
   // 전체 voiceData를 렌더링하는 함수
-  const renderAllVoiceContent = () => {
+  const renderAllVoiceContent = (keyword) => {
     // voiceData가 비어있는 경우
     if (!voiceData || Object.keys(voiceData).length === 0) {
       return <p className="no-content">음성 원본이 없습니다.</p>;
@@ -217,7 +237,7 @@ export default function SummaryPanel({
                       hasLink && handleSegmentDoubleClick(segment)
                     }
                   >
-                    {segment.text}{" "}
+                    {highlightKeyword(segment.text, keyword)}{" "}
                     {segment.isImportant && (
                       <span className="reason-tooltip">
                         {segment.reason}
@@ -347,7 +367,7 @@ export default function SummaryPanel({
             </ReactMarkdown>
           </div>
         ) : (
-          <div className="voice-content">{renderAllVoiceContent()}</div>
+          <div className="voice-content">{renderAllVoiceContent(searchKeyword)}</div>
         )}
       </div>
 

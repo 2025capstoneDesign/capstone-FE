@@ -43,6 +43,7 @@ export default function History() {
   const handleViewPdf = useCallback(
     async (item) => {
       try {
+        console.log("열람하기 클릭 item:", item); // 디버깅용 전체 출력
         setSelectedPdf(item);
         setShowLoadingModal(true);
         setLoadingMessage("파일을 불러오는 중...");
@@ -61,13 +62,10 @@ export default function History() {
         // Create URL for blob if needed
         let pdfUrl;
         if (item.pdfFile) {
-          // If item has a static path
           pdfUrl = item.pdfFile;
         } else if (typeof fileData === "string") {
-          // Static path like "/sample3.pdf"
           pdfUrl = fileData;
         } else {
-          // Blob data
           pdfUrl = URL.createObjectURL(fileData);
         }
         
@@ -78,11 +76,18 @@ export default function History() {
         
         setShowLoadingModal(false);
         
-        // Navigate to the test page with the PDF and data
+        // jobId 추출 로직 보강
+        let jobId = item.id;
+        if (!jobId || jobId === -1) {
+          jobId = item.jobId || item.job_id || item.historyId || item._id || null;
+        }
+        console.log("넘길 jobId:", jobId);
+        
         navigate("/test", {
           state: {
             pdfFile: pdfUrl,
             pdfData: parsedData,
+            jobId: jobId,
           },
         });
       } catch (error) {
