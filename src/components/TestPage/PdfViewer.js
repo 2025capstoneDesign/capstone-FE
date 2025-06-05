@@ -3,7 +3,8 @@ import { toast } from "react-toastify";
 import { useEffect, useState, useCallback } from "react";
 import { IoSearch } from "react-icons/io5";
 import { IoIosArrowDown } from "react-icons/io";
-import axios from "axios";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function PdfViewer({
   pdfUrl,
@@ -16,6 +17,14 @@ export default function PdfViewer({
   goToSpecificPage,
   pdfData,
   jobId,
+  activeTab,
+  setActiveTab,
+  highlightColor,
+  setHighlightColor,
+  setPageNumber,
+  summaryData,
+  voiceData,
+  pageSectionRefs,
 }) {
   // Document 컴포넌트는 파일 경로와 blob URL을 모두 올바르게 처리하므로,
   // 여기서 특별한 변환 작업이 필요X
@@ -35,51 +44,27 @@ export default function PdfViewer({
     setMatchingPages([]);
   }, [pdfUrl]);
 
-  // 키워드 검색 API 호출 함수
-  const searchKeywordLocations = useCallback(async (keyword) => {
-    if (!keyword.trim() || !jobId) {
-      console.log("검색 조건 미충족:", { keyword, jobId });
+  // 키워드 검색 함수 (API 호출 없이 voiceData 사용)
+  const searchKeywordLocations = useCallback((keyword) => {
+    if (!keyword.trim() || !pdfData || !pdfData.voiceData) {
+      setMatchingPages([]);
       return;
     }
-
-    try {
-      setIsSearching(true);
-      console.log("API 호출 시작:", { keyword, jobId });
-      
-      const response = await axios.post("/api/real-time-transform/search-keyword-locations", {
-        keyword: keyword,
-        job_id: jobId
-      });
-      
-      console.log("API 응답:", response.data);
-
-      // slide_id에서 숫자만 추출해서 중복 없이 오름차순 정렬
-      const slideNumbers = response.data.results
-        .map(match => {
-          const matchNum = match.slide.match(/\d+/);
-          return matchNum ? parseInt(matchNum[0]) : null;
-        })
-        .filter((num, idx, arr) => num !== null && arr.indexOf(num) === idx)
-        .sort((a, b) => a - b);
-
-      console.log("처리된 슬라이드 번호:", slideNumbers);
-      setMatchingPages(slideNumbers);
-    } catch (error) {
-      console.error("키워드 검색 중 오류 발생:", error);
-      console.error("에러 상세:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      toast.error("키워드 검색 중 오류가 발생했습니다.", {
-        position: "top-center",
-        autoClose: 3000,
-      });
-      setMatchingPages([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [jobId]);
+    setIsSearching(true);
+    const { voiceData } = pdfData;
+    const matched = [];
+    console.log('voiceData:', voiceData);
+    Object.entries(voiceData).forEach(([pageNum, segments]) => {
+      const hasKeyword = segments.some(seg => seg.text && seg.text.toLowerCase().includes(keyword.toLowerCase()));
+      console.log(`슬라이드 ${pageNum}에 키워드 "${keyword}" 포함 여부:`, hasKeyword);
+      if (hasKeyword) {
+        matched.push(Number(pageNum));
+      }
+    });
+    setMatchingPages(matched);
+    setIsSearching(false);
+    console.log('matchingPages:', matched);
+  }, [pdfData]);
 
   // 검색어 변경 시 디바운스 처리
   useEffect(() => {
@@ -93,6 +78,11 @@ export default function PdfViewer({
 
     return () => clearTimeout(timer);
   }, [searchKeyword, searchKeywordLocations]);
+
+  useEffect(() => {
+    console.log('matchingPages:', matchingPages);
+    console.log('voiceData:', pdfData?.voiceData);
+  }, [matchingPages, pdfData]);
 
   // 성공적인 로딩 처리
   const handleLoadSuccess = (pdf) => {
@@ -124,6 +114,127 @@ export default function PdfViewer({
     setShowDropdown(false);
   };
 
+  // 툴팁 위치 계산 함수
+  const positionTooltip = (event) => {
+    const tooltip = event.currentTarget.querySelector(".reason-tooltip");
+    if (!tooltip) return;
+    const segmentRect = event.currentTarget.getBoundingClientRect();
+    tooltip.style.left = `${segmentRect.left - 270}px`;
+    tooltip.style.top = `${segmentRect.top + 5}px`;
+  };
+
+  // 세그먼트 더블클릭 시 해당 페이지로 이동
+  const handleSegmentDoubleClick = (segment) => {
+    if (segment.isImportant && segment.linkedConcept && segment.pageNumber) {
+      toast.info(`'${segment.linkedConcept}' 개념으로 이동하였습니다`, {
+        position: "top-center",
+        autoClose: 1500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      setPageNumber(segment.pageNumber);
+      // 스크롤 이동 등 추가 동작 필요시 여기에 작성
+    }
+  };
+
+  // 키워드 하이라이트 함수 (음성 원본에서만 사용)
+  const highlightKeyword = (text, keyword) => {
+    if (!keyword || !text) return text;
+  
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedKeyword})`, 'gi');
+  
+    const parts = text.split(regex);
+    return parts.map((part, index) =>
+      regex.test(part) ? (
+        <span key={index} className="text-green-600 font-bold">
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
+  
+
+  // 음성 원본 전체 렌더링 함수
+  const renderAllVoiceContent = (keyword) => {
+    if (!voiceData || Object.keys(voiceData).length === 0) {
+      return <p className="no-content">음성 원본이 없습니다.</p>;
+    }
+    // 페이지 번호 순서대로 정렬
+    const sortedPages = Object.keys(voiceData)
+      .map(Number)
+      .sort((a, b) => a - b);
+    const allPages = numPages
+      ? Array.from({ length: numPages }, (_, i) => i + 1)
+      : sortedPages;
+    return allPages.map((pageNum) => {
+      const pageSegments = voiceData[pageNum] || [];
+      return (
+        <div
+          key={`page-section-${pageNum}`}
+          className={`voice-page-section ${
+            pageNumber === pageNum
+              ? `active-page-section ${highlightColor}`
+              : ""
+          }`}
+          ref={(el) => (pageSectionRefs.current[pageNum] = el)}
+        >
+          <div className="page-section-header">
+            <h3>페이지 {pageNum}</h3>
+          </div>
+          <div className="segment-container">
+            {pageSegments.length > 0 ? (
+              pageSegments.map((segment) => {
+                const hasLink =
+                  segment.isImportant &&
+                  segment.linkedConcept &&
+                  segment.pageNumber;
+                return (
+                  <span
+                    key={segment.id}
+                    className={`segment-text ${
+                      segment.isImportant
+                        ? `important ${highlightColor} ${
+                            hasLink ? "linkable" : ""
+                          }`
+                        : ""
+                    }`}
+                    onMouseEnter={
+                      segment.isImportant ? positionTooltip : undefined
+                    }
+                    onDoubleClick={() =>
+                      hasLink && handleSegmentDoubleClick(segment)
+                    }
+                  >
+                    {highlightKeyword(segment.text, keyword)}{" "}
+                    {segment.isImportant && (
+                      <span className="reason-tooltip">
+                        {segment.reason}
+                        {hasLink && (
+                          <span className="link-notice">
+                            더블클릭 시 "{segment.linkedConcept}" 개념으로 이동
+                          </span>
+                        )}
+                      </span>
+                    )}
+                  </span>
+                );
+              })
+            ) : (
+              <p className="no-page-content">
+                이 페이지에 대한 음성 원본이 없습니다.
+              </p>
+            )}
+          </div>
+        </div>
+      );
+    });
+  };
+
   return (
     <div className="slide-container">
       <div className="slide-header">
@@ -141,14 +252,14 @@ export default function PdfViewer({
               })
             }
           >
-            <svg
+            {/* <svg
               width="28"
               height="28"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
+            > */}
+              {/* <path
                 d="M12 15.5C14.21 15.5 16 13.71 16 11.5V6C16 3.79 14.21 2 12 2C9.79 2 8 3.79 8 6V11.5C8 13.71 9.79 15.5 12 15.5Z"
                 stroke="#5CBFBC"
                 strokeWidth="2"
@@ -176,7 +287,7 @@ export default function PdfViewer({
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-            </svg>
+            </svg> */}
           </div>
 
           {/* 검색 영역 */}
@@ -186,7 +297,7 @@ export default function PdfViewer({
                 type="text"
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
-                placeholder="keyword"
+                placeholder="키워드로 슬라이드 검색..."
                 style={{
                   padding: "8px 12px",
                   paddingRight: "40px",
@@ -229,7 +340,9 @@ export default function PdfViewer({
                 {isSearching 
                   ? "검색 중..." 
                   : searchKeyword 
-                    ? `${matchingPages.length}개 슬라이드` 
+                    ? matchingPages.length > 0
+                      ? `${matchingPages.length}개 슬라이드`
+                      : "검색 결과 없음"
                     : "전체 슬라이드"}
               </span>
               <IoIosArrowDown style={{ color: "#64748b" }} />
