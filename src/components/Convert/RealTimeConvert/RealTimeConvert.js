@@ -8,6 +8,7 @@ import { useHistory } from "../../../context/HistoryContext";
 import { showError } from "../../../utils/errorHandler";
 import PdfViewer from "../../RealTimePage/PdfViewer";
 import axios from "axios";
+import progress1 from "../../../assets/images/progress_1.png";
 
 function RealTimeConvert() {
   const navigate = useNavigate();
@@ -261,11 +262,22 @@ function RealTimeConvert() {
       )}
 
       <div className="sub-header">
-        <h2 className="page-title">실시간 변환</h2>
-        <div className="action-buttons">
-          <button className="convert-btn" onClick={() => navigate("/")}>
-            홈으로
-          </button>
+        <div className="flex items-center w-full">
+          <div className="w-[200px] flex items-center">
+            <h1 className="text-2xl font-semibold">실시간 변환</h1>
+          </div>
+          <div className="flex-1 flex justify-center">
+            <img 
+              src={progress1}
+              alt="진행 상태" 
+              className="w-[800px] object-contain"
+            />
+          </div>
+          <div className="w-[300px] flex justify-end">
+            <button className="convert-btn whitespace-nowrap" onClick={() => navigate("/")}>
+              홈으로
+            </button>
+          </div>
         </div>
       </div>
 

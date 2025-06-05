@@ -9,6 +9,7 @@ import { parseRealTimeResponse } from "../RealTimePage/realTimeDataParser";
 import { useHistory } from "../../context/HistoryContext";
 import { useAuth } from "../../context/AuthContext";
 import { showError } from "../../utils/errorHandler";
+import progress3 from "../../assets/images/progress_3.png";
 
 export default function RealTimeEditorPage() {
   const location = useLocation();
@@ -177,11 +178,22 @@ export default function RealTimeEditorPage() {
         </div>
       )}
       <div className="sub-header">
-        <h1 className="page-title">실시간 변환 결과</h1>
-        <div className="action-buttons">
-          <button className="convert-btn" onClick={() => navigate("/")}>
-            홈으로
-          </button>
+        <div className="flex items-center w-full">
+          <div className="w-[200px] flex items-center">
+            <h1 className="text-2xl font-semibold">실시간 변환 결과</h1>
+          </div>
+          <div className="flex-1 flex justify-center">
+            <img 
+              src={progress3}
+              alt="진행 상태" 
+              className="w-[800px] object-contain"
+            />
+          </div>
+          <div className="w-[300px] flex justify-end">
+            <button className="convert-btn whitespace-nowrap" onClick={() => navigate("/")}>
+              홈으로
+            </button>
+          </div>
         </div>
       </div>
       <div className="main-content">

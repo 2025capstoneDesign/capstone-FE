@@ -7,6 +7,7 @@ import SummaryPanel from "../TestPage/SummaryPanel";
 import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
 import { useRealTimeState } from "./realTimeStateManager";
+import progress2 from "../../assets/images/progress_2.png";
 
 export default function RealTimePage() {
   const location = useLocation();
@@ -133,24 +134,35 @@ export default function RealTimePage() {
       )}
 
       <div className="sub-header">
-        <h1 className="page-title">실시간 강의</h1>
-        <div className="action-buttons">
-          {!isRealTimeActive ? (
-            <button className="convert-btn" onClick={handleStartRealTime}>
-              실시간 변환 시작
+        <div className="flex items-center w-full">
+          <div className="w-[200px] flex items-center">
+            <h1 className="text-2xl font-semibold">실시간 강의</h1>
+          </div>
+          <div className="flex-1 flex justify-center">
+            <img 
+              src={progress2}
+              alt="진행 상태" 
+              className="w-[800px] object-contain"
+            />
+          </div>
+          <div className="w-[300px] flex justify-end gap-2">
+            {!isRealTimeActive ? (
+              <button className="convert-btn whitespace-nowrap" onClick={handleStartRealTime}>
+                실시간 변환 시작
+              </button>
+            ) : (
+              <button
+                className="convert-btn whitespace-nowrap"
+                onClick={() => handleStopRecording(navigate, initialJobId, pdfUrl)}
+                style={{ backgroundColor: "#0F0F0F" }}
+              >
+                실시간 변환 종료
+              </button>
+            )}
+            <button className="download-btn whitespace-nowrap" onClick={handleDownload}>
+              다운로드
             </button>
-          ) : (
-            <button
-              className="convert-btn"
-              onClick={() => handleStopRecording(navigate, initialJobId, pdfUrl)}
-              style={{ backgroundColor: "#0F0F0F" }}
-            >
-              실시간 변환 종료
-            </button>
-          )}
-          <button className="download-btn" onClick={handleDownload}>
-            다운로드
-          </button>
+          </div>
         </div>
       </div>
       <div className="main-content">
