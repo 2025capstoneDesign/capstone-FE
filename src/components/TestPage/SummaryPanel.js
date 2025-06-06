@@ -29,6 +29,8 @@ export default function SummaryPanel({
   const [selectedPage, setSelectedPage] = useState(null);
   const [showMoveButton, setShowMoveButton] = useState(false);
 
+  console.log('SummaryPanel searchKeyword:', searchKeyword);
+
   // 특정 페이지 섹션으로 스크롤하는 함수 - 부드러운 스크롤 적용
   const scrollToPageSection = useCallback(
     (pageNum) => {
@@ -161,27 +163,16 @@ export default function SummaryPanel({
     console.log('이동할 페이지:', targetPage);
   };
 
-  // 키워드 하이라이트 함수
-  const highlightKeyword = (text, keyword) => {
+  // 키워드 하이라이트 함수 (ReactMarkdown용)
+  const highlightKeywordMarkdown = (text, keyword) => {
     if (!keyword || !text) return text;
-    
     const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escapedKeyword, 'gi');
-    
-    return text.split(regex).map((part, index) => {
-      if (part.toLowerCase() === keyword.toLowerCase()) {
-        return (
-          <span key={index} className="text-green-600 font-bold">
-            {part}
-          </span>
-        );
-      }
-      return part;
-    });
+    return text.replace(regex, (match) => `**${match}**`);
   };
 
   // 전체 voiceData를 렌더링하는 함수
-  const renderAllVoiceContent = (keyword) => {
+  const renderAllVoiceContent = () => {
     // voiceData가 비어있는 경우
     if (!voiceData || Object.keys(voiceData).length === 0) {
       return <p className="no-content">음성 원본이 없습니다.</p>;
@@ -222,23 +213,27 @@ export default function SummaryPanel({
                   segment.linkedConcept &&
                   segment.pageNumber;
                 return (
-                  <span
+                  <div
                     key={segment.id}
                     className={`segment-text ${
                       segment.isImportant
-                        ? `important ${highlightColor} ${
-                            hasLink ? "linkable" : ""
-                          }`
+                        ? `important ${highlightColor} ${hasLink ? "linkable" : ""}`
                         : ""
                     }`}
-                    onMouseEnter={
-                      segment.isImportant ? positionTooltip : undefined
-                    }
-                    onDoubleClick={() =>
-                      hasLink && handleSegmentDoubleClick(segment)
-                    }
+                    onMouseEnter={segment.isImportant ? positionTooltip : undefined}
+                    onDoubleClick={() => hasLink && handleSegmentDoubleClick(segment)}
+                    style={{ whiteSpace: 'pre-line' }}
                   >
-                    {highlightKeyword(segment.text, keyword)}{" "}
+                    <ReactMarkdown
+                      components={{
+                        strong: ({ node, ...props }) => (
+                          <strong style={{ color: "red" }} {...props} />
+                        ),
+                        p: ({ node, ...props }) => <div {...props} />,
+                      }}
+                    >
+                      {highlightKeywordMarkdown(segment.text, searchKeyword)}
+                    </ReactMarkdown>
                     {segment.isImportant && (
                       <span className="reason-tooltip">
                         {segment.reason}
@@ -249,7 +244,7 @@ export default function SummaryPanel({
                         )}
                       </span>
                     )}
-                  </span>
+                  </div>
                 );
               })
             ) : (
@@ -369,7 +364,7 @@ export default function SummaryPanel({
             </ReactMarkdown>
           </div>
         ) : (
-          <div className="voice-content">{renderAllVoiceContent(searchKeyword)}</div>
+          <div className="voice-content">{renderAllVoiceContent()}</div>
         )}
       </div>
 

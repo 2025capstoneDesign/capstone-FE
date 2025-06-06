@@ -524,7 +524,7 @@ body {
 
 .segment-text {
   position: relative;
-  display: inline;
+  display: inline-block;
 }
 
 .segment-text.important {

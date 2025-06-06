@@ -77,6 +77,7 @@ export default function TestPage() {
   const [pageNumber, setPageNumber] = useState(1);
   const [activeTab, setActiveTab] = useState("ai"); // "ai" or "voice"
   const [highlightColor, setHighlightColor] = useState("red");
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   // 각 페이지 섹션에 대한 ref를 저장할 객체
   const pageSectionRefs = useRef({});
@@ -167,6 +168,16 @@ export default function TestPage() {
           goToSpecificPage={goToSpecificPage}
           pdfData={{ summaryData, voiceData }}
           jobId={jobId}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          highlightColor={highlightColor}
+          setHighlightColor={setHighlightColor}
+          setPageNumber={setPageNumber}
+          summaryData={summaryData}
+          voiceData={voiceData}
+          pageSectionRefs={pageSectionRefs}
+          searchKeyword={searchKeyword}
+          setSearchKeyword={setSearchKeyword}
         />
         <SummaryPanel
           activeTab={activeTab}
@@ -179,6 +190,8 @@ export default function TestPage() {
           summaryData={summaryData}
           voiceData={voiceData}
           pageSectionRefs={pageSectionRefs}
+          searchKeyword={searchKeyword}
+          isRealTime={false}
         />
       </div>
     </div>
