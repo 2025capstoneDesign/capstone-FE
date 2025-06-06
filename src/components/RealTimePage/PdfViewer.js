@@ -60,7 +60,7 @@ export default function PdfViewer({
   return (
     <div className="slide-container">
       <div className="slide-header">
-        <div className="recording-controls" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <div className="recording-controls" style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
           <div
             className={`audio-icon ${
               isRealTimeActive && showGuidanceModal ? 'pulsate' : ''

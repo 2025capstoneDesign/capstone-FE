@@ -187,6 +187,7 @@ function RealTimeConvert() {
               },
               jobId: response.jobId,
               isRealTimeMode: true,
+              showTutorial: true,
             },
           });
         } else {

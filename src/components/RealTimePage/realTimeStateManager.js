@@ -141,7 +141,6 @@ export const useRealTimeState = (initialData, initialJobId) => {
   const handleStartRealTime = useCallback(async () => {
     try {
       setIsRealTimeActive(true);
-      setShowGuidanceModal(true);
 
       toast.success("실시간 변환이 시작되었습니다!", {
         position: "top-center",
