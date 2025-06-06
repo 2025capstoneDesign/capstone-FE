@@ -1,6 +1,7 @@
 import { Document, Page } from "react-pdf";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
+import sleep from "../../assets/images/sleep 7.png"
 
 export default function PdfViewer({
   pdfUrl,
@@ -144,10 +145,10 @@ export default function PdfViewer({
           <button
             onClick={() => onSleepToggle && onSleepToggle(pageNumber - 1)}
             style={{
-              backgroundColor: isCurrentPageSelected ? "#ff6b6b" : "#f1f3f4",
-              border: "none",
+              backgroundColor: isCurrentPageSelected ? "#ff6b6b" : "white",
+              border: isCurrentPageSelected ? "2px solid #ff4444" : "2px solid #5CBFBC",
               borderRadius: "8px",
-              padding: "8px 12px",
+              padding: "4px 8px",
               cursor: "pointer",
               fontSize: "16px",
               transition: "all 0.3s ease",
@@ -157,22 +158,49 @@ export default function PdfViewer({
             }}
             onMouseEnter={(e) => {
               if (!isCurrentPageSelected) {
-                e.target.style.backgroundColor = "#e8eaed";
+                const button = e.currentTarget;
+                const span = button.querySelector('span');
+                const img = button.querySelector('img');
+                
+                button.style.backgroundColor = "#f1f3f4";
+                if (span) span.style.backgroundColor = "#f1f3f4";
+                if (img) img.style.backgroundColor = "#f1f3f4";
               }
             }}
             onMouseLeave={(e) => {
               if (!isCurrentPageSelected) {
-                e.target.style.backgroundColor = "#f1f3f4";
+                const button = e.currentTarget;
+                const span = button.querySelector('span');
+                const img = button.querySelector('img');
+                
+                button.style.backgroundColor = "white";
+                if (span) span.style.backgroundColor = "white";
+                if (img) img.style.backgroundColor = "white";
               }
             }}
             title={isCurrentPageSelected ? "졸음 표시 취소" : "졸음 표시"}
           >
-            😴
+            <img
+              src={sleep}
+              alt="졸음버튼"
+              className="object-contain w-7 h-7"
+              style={{
+                backgroundColor: isCurrentPageSelected ? "#ff6b6b" : "white",
+                transition: "all 0.3s ease",
+                // padding: "2px",
+                borderRadius: "4px",
+                objectFit: "cover"
+              }}
+            />
             <span
               style={{
-                fontSize: "12px",
+                fontSize: "14px",
                 color: isCurrentPageSelected ? "white" : "#666",
-                fontWeight: isCurrentPageSelected ? "600" : "normal",
+                fontWeight: isCurrentPageSelected ? "600" : "500",
+                backgroundColor: isCurrentPageSelected ? "#ff6b6b" : "white",
+                transition: "all 0.3s ease",
+                padding: "2px 4px",
+                borderRadius: "4px",
               }}
             >
               {isCurrentPageSelected ? "선택됨" : "졸음"}
