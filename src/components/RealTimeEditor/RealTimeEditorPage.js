@@ -40,6 +40,7 @@ export default function RealTimeEditorPage() {
     jobId,
     resultJson = null,
     pdfUrl: receivedPdfUrl = null,
+    sleepPages = [],
   } = location.state || {};
 
   // Redirect to home if no image URLs
@@ -53,6 +54,13 @@ export default function RealTimeEditorPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Initialize selectedImageIndices with sleepPages from previous page
+  useEffect(() => {
+    if (sleepPages && sleepPages.length > 0) {
+      setSelectedImageIndices(sleepPages);
+    }
+  }, [sleepPages]);
 
   // Parse result_json when component mounts
   useEffect(() => {
@@ -99,7 +107,7 @@ export default function RealTimeEditorPage() {
   const handleCompleteSelection = async () => {
     try {
       setShowLoading(true);
-      setLoadingMessage("후처리 중...");
+      setLoadingMessage("필기 생성 중...");
 
       const API_URL = process.env.REACT_APP_API_URL;
       const response = await fetch(`${API_URL}/api/realTime/post-process`, {
@@ -183,14 +191,24 @@ export default function RealTimeEditorPage() {
             <h1 className="text-2xl font-semibold">실시간 변환 결과</h1>
           </div>
           <div className="flex-1 flex justify-center">
-            <img 
+            <img
               src={progress3}
-              alt="진행 상태" 
+              alt="진행 상태"
               className="w-[800px] object-contain"
             />
           </div>
-          <div className="w-[300px] flex justify-end">
-            <button className="convert-btn whitespace-nowrap" onClick={() => navigate("/")}>
+          <div className="w-[300px] flex justify-end gap-5">
+            <button
+              className="convert-btn whitespace-nowrap"
+              onClick={handleCompleteSelection}
+              style={{ backgroundColor: "black", color: "white" }}
+            >
+              저장하기
+            </button>
+            <button
+              className="convert-btn whitespace-nowrap"
+              onClick={() => navigate("/")}
+            >
               홈으로
             </button>
           </div>
@@ -227,7 +245,6 @@ export default function RealTimeEditorPage() {
               </div>
               <DescriptionPanel
                 selectedImageIndices={selectedImageIndices}
-                totalImages={imageUrls.length}
                 onCompleteSelection={handleCompleteSelection}
               />
             </div>
