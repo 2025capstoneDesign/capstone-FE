@@ -3,7 +3,7 @@ class Linear16Processor extends AudioWorkletProcessor {
     super();
     this.isActive = false;
     this.buffer = [];
-    this.bufferSize = 100000; // 예: 3초
+    this.bufferSize = 50000; // 예: 3초
     this.overlapSize = 8000; // 예: 0.5초 (16kHz 기준)
     this.previousTail = []; // 오버랩용 이전 tail 저장
 
@@ -25,9 +25,9 @@ class Linear16Processor extends AudioWorkletProcessor {
           const chunk = new Int16Array([...this.previousTail, ...this.buffer]);
           this.port.postMessage({
             buffer: chunk.buffer,
-            targetSlide: event.data.targetSlide
+            targetSlide: event.data.targetSlide,
           });
-          
+
           // 오버랩용 tail 저장
           this.previousTail = this.buffer.slice(-this.overlapSize);
           this.buffer = [];

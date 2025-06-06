@@ -9,49 +9,63 @@ import PdfViewer from "./PdfViewer";
 import SummaryPanel from "./SummaryPanel";
 import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
-import { useAuth } from "../../context/AuthContext";
 
 export default function TestPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { convertedData, pdfFile: contextPdfFile } = useLoading();
   const { historyData } = useHistory();
-  const { isAuthenticated } = useAuth();
 
-  // Always prioritize location state (from history) if it exists
+  // Always prioritize location state (from history or real-time) if it exists
   // Otherwise use the context data (from conversion)
   // If neither exists, use the first item from history (dummy data)
-  const { pdfFile, pdfData, jobId } = location.state
-    ? location.state
+  const {
+    pdfFile,
+    pdfData,
+    jobId,
+    isFromRealTime = false,
+    message = null,
+  } = location.state
+    ? {
+        pdfFile: location.state.pdfFile,
+        pdfData: location.state.result || location.state.pdfData,
+        jobId: location.state.jobId || null,
+        isFromRealTime: location.state.isFromRealTime || false,
+        message: location.state.message || null,
+      }
     : convertedData && contextPdfFile
     ? {
         pdfFile: contextPdfFile,
         pdfData: convertedData,
         jobId: null,
+        isFromRealTime: false,
+        message: null,
       }
     : {
-        pdfFile: historyData[0].pdfFile || "/sample3.pdf",
-        pdfData: historyData[0].result,
-        jobId: historyData[0].id || null,
+        pdfFile: historyData[0]?.pdfFile || "/sample3.pdf",
+        pdfData: historyData[0]?.result,
+        jobId: historyData[0]?.id || null,
+        isFromRealTime: false,
+        message: null,
       };
 
   console.log("TestPage - 현재 상태:", {
     locationState: location.state,
     convertedData: convertedData ? true : false,
     contextPdfFile: contextPdfFile ? true : false,
-    historyData: historyData[0] ? {
-      id: historyData[0].id,
-      pdfFile: historyData[0].pdfFile
-    } : null,
-    selectedJobId: jobId
+    historyData: historyData[0]
+      ? {
+          id: historyData[0].id,
+          pdfFile: historyData[0].pdfFile,
+        }
+      : null,
+    selectedJobId: jobId,
   });
 
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  // Blob URL cleanup code removed
 
   // 전달받은 pdfData가 이미 파싱된 데이터인지 확인하고, 아니면 파싱
   const { summaryData, voiceData } =
@@ -101,11 +115,14 @@ export default function TestPage() {
   }, [goToPage]);
 
   // 특정 페이지로 이동하는 함수 추가
-  const goToSpecificPage = useCallback((pageNum) => {
-    if (pageNum >= 1 && pageNum <= numPages) {
-      setPageNumber(pageNum);
-    }
-  }, [numPages]);
+  const goToSpecificPage = useCallback(
+    (pageNum) => {
+      if (pageNum >= 1 && pageNum <= numPages) {
+        setPageNumber(pageNum);
+      }
+    },
+    [numPages]
+  );
 
   // Handle navigation away from this component - don't revoke context-managed blob URLs
   const handleConvertClick = useCallback(() => {
