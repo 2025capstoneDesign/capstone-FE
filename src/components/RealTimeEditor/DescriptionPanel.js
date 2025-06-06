@@ -1,7 +1,5 @@
 import React from "react";
 
-const SUCCESS_MESSAGE = "실시간 변환 완료!";
-
 export default function DescriptionPanel({
   selectedImageIndices,
   onCompleteSelection,
@@ -19,7 +17,7 @@ export default function DescriptionPanel({
           padding: "40px 20px",
         }}
       >
-        {/* 성공 아이콘 */}
+        {/* 메인 아이콘 */}
         <div
           style={{
             width: "80px",
@@ -44,18 +42,29 @@ export default function DescriptionPanel({
           </span>
         </div>
 
-        {/* 성공 메시지 */}
+        {/* 메인 메시지 */}
         <h2
           style={{
             color: "#333",
             fontSize: "24px",
             fontWeight: "600",
-            marginBottom: "16px",
+            marginBottom: "8px",
             lineHeight: "1.4",
           }}
         >
-          {SUCCESS_MESSAGE}
+          슬라이드 선택
         </h2>
+
+        <p
+          style={{
+            color: "#666",
+            fontSize: "16px",
+            marginBottom: "24px",
+            lineHeight: "1.5",
+          }}
+        >
+          수업을 놓쳤던 슬라이드를 선택해주세요
+        </p>
 
         {/* 결과 정보 - 선택된 슬라이드 표시 */}
         <div
@@ -95,70 +104,62 @@ export default function DescriptionPanel({
           </div>
         </div>
 
-        {/* 설명 텍스트 */}
-        <p
-          style={{
-            color: "#666",
-            fontSize: "16px",
-            lineHeight: "1.6",
-            marginBottom: "20px",
-          }}
-        >
-          졸았던 슬라이드를 필기요정에 맡겨보세요!
-        </p>
-
-        {/* 저장 버튼 */}
-        <button
-          onClick={onCompleteSelection}
-          style={{
-            backgroundColor: "#5CBFBC",
-            color: "white",
-            border: "none",
-            borderRadius: "12px",
-            padding: "16px 32px",
-            fontSize: "16px",
-            fontWeight: "600",
-            cursor: "pointer",
-            marginBottom: "16px",
-            transition: "all 0.3s ease",
-            boxShadow: "0 4px 16px rgba(92, 191, 188, 0.3)",
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.backgroundColor = "#4a9c99";
-            e.target.style.transform = "translateY(-2px)";
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.backgroundColor = "#5CBFBC";
-            e.target.style.transform = "translateY(0)";
-          }}
-        >
-          저장하기
-        </button>
-
-        {/* 설명 박스 */}
+        {/* 추가 안내 */}
         <div
           style={{
-            backgroundColor: "#f0f9ff",
-            border: "1px solid #93c5fd",
-            borderRadius: "8px",
+            backgroundColor: "#fff3cd",
+            border: "1px solid #ffeaa7",
+            borderRadius: "12px",
             padding: "16px",
             width: "100%",
-            maxWidth: "300px",
-            marginTop: "16px",
+            maxWidth: "350px",
+            marginBottom: "20px",
           }}
         >
           <p
             style={{
-              color: "#1e40af",
+              color: "#856404",
               fontSize: "14px",
               margin: 0,
               fontWeight: "500",
               textAlign: "center",
             }}
           >
-            필기요정이 음성을 재배치해줍니다!
+            💡 수업을 놓친 슬라이드가 있나요?
+            <br />
+            필기요정이 도와드릴게요!
           </p>
         </div>
+
+        {/* 저장 버튼 */}
+        <button
+          onClick={onCompleteSelection}
+          style={{
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            border: "none",
+            borderRadius: "16px",
+            padding: "18px 40px",
+            fontSize: "18px",
+            fontWeight: "700",
+            cursor: "pointer",
+            marginBottom: "40px",
+            marginTop: "10px",
+            transition: "all 0.3s ease",
+            boxShadow: "0 8px 24px rgba(102, 126, 234, 0.3)",
+            textShadow: "0 1px 2px rgba(0,0,0,0.1)",
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = "translateY(-3px)";
+            e.target.style.boxShadow = "0 12px 32px rgba(102, 126, 234, 0.4)";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = "translateY(0)";
+            e.target.style.boxShadow = "0 8px 24px rgba(102, 126, 234, 0.3)";
+          }}
+        >
+          필기 요정에게 맡기기 🧚‍♀️
+        </button>
       </div>
     </div>
   );
