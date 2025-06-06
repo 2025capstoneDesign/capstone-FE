@@ -123,13 +123,22 @@ export default function RealTimeEditorPage() {
       });
 
       if (response.ok) {
-        setLoadingMessage("저장 완료되었습니다!");
+        const result = await response.json();
+        setLoadingMessage("후처리 완료되었습니다!");
         await refreshHistory();
 
         setTimeout(() => {
           setShowLoading(false);
-          navigate("/");
-        }, 3000);
+          navigate("/test", {
+            state: {
+              pdfFile: pdfUrl,
+              result: result.result || resultData,
+              isFromRealTime: true,
+              processedSlides: result.processed_slides || selectedImageIndices,
+              message: result.message || "Post-processing completed successfully"
+            }
+          });
+        }, 2000);
       } else {
         throw new Error("후처리 요청 실패");
       }

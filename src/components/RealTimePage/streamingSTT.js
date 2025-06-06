@@ -125,12 +125,24 @@ export class StreamingSTT {
       // 오디오 데이터 처리
       this.processor.port.onmessage = (event) => {
         if (this.webSocket && this.webSocket.readyState === WebSocket.OPEN && !this.isPaused) {
+          let audioBuffer, targetSlide;
+          
+          // flush 명령어에서 온 데이터인지 확인
+          if (event.data.buffer && event.data.targetSlide !== undefined) {
+            audioBuffer = event.data.buffer;
+            targetSlide = event.data.targetSlide;
+          } else {
+            // 일반적인 버퍼 전송
+            audioBuffer = event.data;
+            targetSlide = this.currentSlide;
+          }
+          
           // Int16Array를 base64로 인코딩
-          const base64Audio = btoa(String.fromCharCode(...new Uint8Array(event.data)));
+          const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)));
           
           // 슬라이드 번호와 함께 전송
           this.webSocket.send(JSON.stringify({
-            slide: this.currentSlide,
+            slide: targetSlide,
             audio: base64Audio
           }));
         }
@@ -210,6 +222,17 @@ export class StreamingSTT {
   // 일시정지 상태 확인
   isPausedState() {
     return this.isPaused;
+  }
+
+  // 현재 버퍼 강제 전송 (페이지 변경 시 사용)
+  forceFlushBuffer(targetSlide = null) {
+    if (this.processor && this.isActive) {
+      this.processor.port.postMessage({ 
+        command: 'flush',
+        targetSlide: targetSlide || this.currentSlide
+      });
+      console.log(`버퍼 강제 전송 요청됨, 대상 슬라이드: ${targetSlide || this.currentSlide}`);
+    }
   }
 
   // 스트리밍 STT 중지

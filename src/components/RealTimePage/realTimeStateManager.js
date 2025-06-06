@@ -189,7 +189,7 @@ export const useRealTimeState = (initialData, initialJobId) => {
       });
       return false;
     }
-  }, []);
+  }, [startTimer]);
 
   // 녹음 일시정지/재개 토글
   const handlePauseRecording = useCallback(async () => {
@@ -366,12 +366,17 @@ export const useRealTimeState = (initialData, initialJobId) => {
     const stt = streamingSTTRef.current;
     if (!stt || !stt.isStreamingActive()) return;
 
-    // 새 슬라이드 번호로 업데이트
+    console.log(`슬라이드 전환: ${currentSlide} -> ${newSlideNumber}`);
+    
+    // 1. 먼저 현재 슬라이드의 버퍼를 현재 슬라이드 번호로 전송
+    stt.forceFlushBuffer(currentSlide);
+    
+    // 2. 그 다음 새 슬라이드 번호로 업데이트
     setCurrentSlide(newSlideNumber);
     stt.setCurrentSlide(newSlideNumber);
 
-    console.log(`슬라이드 전환: ${newSlideNumber}`);
-  }, []);
+    console.log(`슬라이드 ${currentSlide}의 버퍼 전송 완료, 현재 슬라이드: ${newSlideNumber}`);
+  }, [currentSlide]);
 
   // 특정 슬라이드의 음성 인식 결과 가져오기
   const getTranscriptForSlide = useCallback(

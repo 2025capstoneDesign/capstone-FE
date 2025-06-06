@@ -15,7 +15,10 @@ export default function SummaryPanel({
   numPages,
   summaryData,
   voiceData,
+  voiceMap,
   pageSectionRefs,
+  isStreaming = false,
+  isRealTime = false,
 }) {
   const contentContainerRef = useRef(null);
   const prevTabRef = useRef(activeTab);
@@ -103,7 +106,7 @@ export default function SummaryPanel({
   // 세그먼트 더블클릭 시 해당 페이지로 이동
   const handleSegmentDoubleClick = (segment) => {
     // segment.isImportant가 true이고 linkedConcept와 pageNumber가 존재할 때만 실행
-    if (segment.isImportant && segment.linkedConcept && segment.pageNumber) {
+    if (segment.isImportant && segment.linkedConcept && segment.pageNumber && setPageNumber) {
       toast.info(`'${segment.linkedConcept}' 개념으로 이동하였습니다`, {
         position: "top-center",
         autoClose: 1500,
@@ -119,13 +122,16 @@ export default function SummaryPanel({
 
   // 전체 voiceData를 렌더링하는 함수
   const renderAllVoiceContent = () => {
-    // voiceData가 비어있는 경우
-    if (!voiceData || Object.keys(voiceData).length === 0) {
+    // 실시간 모드인 경우 voiceMap 사용, 아니면 기존 voiceData 사용
+    const dataToRender = isRealTime ? voiceMap : voiceData;
+    
+    // 데이터가 비어있는 경우
+    if (!dataToRender || Object.keys(dataToRender).length === 0) {
       return <p className="no-content">음성 원본이 없습니다.</p>;
     }
 
     // 페이지 번호 순서대로 정렬
-    const sortedPages = Object.keys(voiceData)
+    const sortedPages = Object.keys(dataToRender)
       .map(Number)
       .sort((a, b) => a - b);
 
@@ -135,7 +141,18 @@ export default function SummaryPanel({
       : sortedPages;
 
     return allPages.map((pageNum) => {
-      const pageSegments = voiceData[pageNum] || [];
+      // 실시간 모드인 경우 voiceMap에서 텍스트를 가져와서 segment 형태로 변환
+      let pageSegments;
+      if (isRealTime) {
+        const pageText = dataToRender[pageNum];
+        pageSegments = pageText ? [{ 
+          id: `realtime-${pageNum}`, 
+          text: pageText,
+          isImportant: false 
+        }] : [];
+      } else {
+        pageSegments = dataToRender[pageNum] || [];
+      }
 
       return (
         <div

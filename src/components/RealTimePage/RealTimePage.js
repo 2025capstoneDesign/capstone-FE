@@ -540,9 +540,17 @@ export default function RealTimePage() {
           onSleepToggle={handleSleepToggle}
         />
         <SummaryPanel
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          highlightColor={highlightColor}
+          setHighlightColor={setHighlightColor}
+          pageNumber={pageNumber}
+          setPageNumber={setPageNumber}
+          numPages={numPages}
+          summaryData={realTimePdfData?.summaryData || {}}
           voiceData={realTimePdfData?.voiceData || {}}
-          pageSectionRefs={pageSectionRefs}
           voiceMap={voiceMap}
+          pageSectionRefs={pageSectionRefs}
           isStreaming={isRecording}
           isRealTime={true}
         />
