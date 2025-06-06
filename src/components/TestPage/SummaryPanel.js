@@ -19,6 +19,7 @@ export default function SummaryPanel({
   voiceData,
   pageSectionRefs,
   searchKeyword,
+  isRealTime,
 }) {
   const contentContainerRef = useRef(null);
   const prevTabRef = useRef(activeTab);
@@ -285,53 +286,54 @@ export default function SummaryPanel({
     <div className="summary-container">
       <div className="tab-container content-tabs">
         <div className="tabs">
-          <button
-            className={`tab ${activeTab === "ai" ? "active" : ""}`}
-            onClick={() => setActiveTab("ai")}
-          >
-            AI 필기
-          </button>
-          <button
-            className={`tab ${activeTab === "voice" ? "active" : ""}`}
-            onClick={() => setActiveTab("voice")}
-          >
-            음성 원본
-          </button>
+          {isRealTime ? (
+            <span style={{ fontSize: "16px", fontWeight: 600, color: "#333" }}>실시간 강의 내용</span>
+          ) : (
+            <>
+              <button
+                className={`tab ${activeTab === "ai" ? "active" : ""}`}
+                onClick={() => setActiveTab("ai")}
+              >
+                AI 필기
+              </button>
+              <button
+                className={`tab ${activeTab === "voice" ? "active" : ""}`}
+                onClick={() => setActiveTab("voice")}
+              >
+                음성 원본
+              </button>
+            </>
+          )}
         </div>
-
-        {/* 탭에 따라 다른 컨트롤 표시 */}
-        {activeTab === "voice" ? (
-          <div className="color-selector visible">
-            <button
-              className={`color-btn red ${
-                highlightColor === "red" ? "selected" : ""
-              }`}
-              onClick={() => setHighlightColor("red")}
-              aria-label="빨강색 강조"
-            />
-            <button
-              className={`color-btn blue ${
-                highlightColor === "blue" ? "selected" : ""
-              }`}
-              onClick={() => setHighlightColor("blue")}
-              aria-label="파랑색 강조"
-            />
-            <button
-              className={`color-btn green ${
-                highlightColor === "green" ? "selected" : ""
-              }`}
-              onClick={() => setHighlightColor("green")}
-              aria-label="초록색 강조"
-            />
-          </div>
-        ) : (
-          <div className="note-type-selector visible">
-            <DropdownMenu
-              options={noteTypeOptions}
-              selectedOption={getSelectedNoteTypeLabel()}
-              onOptionChange={setNoteType}
-            />
-          </div>
+        {/* 드롭다운도 isRealTime이 아닐 때만 노출 */}
+        {!isRealTime && (
+          activeTab === "ai" ? (
+            <div className="note-type-selector visible">
+              <DropdownMenu
+                options={noteTypeOptions}
+                selectedOption={getSelectedNoteTypeLabel()}
+                onOptionChange={setNoteType}
+              />
+            </div>
+          ) : (
+            <div className="color-selector visible">
+              <button
+                className={`color-btn red ${highlightColor === "red" ? "selected" : ""}`}
+                onClick={() => setHighlightColor("red")}
+                aria-label="빨강색 강조"
+              />
+              <button
+                className={`color-btn blue ${highlightColor === "blue" ? "selected" : ""}`}
+                onClick={() => setHighlightColor("blue")}
+                aria-label="파랑색 강조"
+              />
+              <button
+                className={`color-btn green ${highlightColor === "green" ? "selected" : ""}`}
+                onClick={() => setHighlightColor("green")}
+                aria-label="초록색 강조"
+              />
+            </div>
+          )
         )}
       </div>
 

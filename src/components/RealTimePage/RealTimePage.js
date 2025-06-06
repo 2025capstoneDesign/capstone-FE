@@ -383,7 +383,7 @@ export default function RealTimePage() {
               <>
                 {/* 실제 졸음 버튼을 모달 위에 복제 */}
                 <button
-                   style={{
+                  style={{
                     position: "absolute",
                     top: "227px",
                     left: "70px",
@@ -406,17 +406,18 @@ export default function RealTimePage() {
                     alt="졸음버튼"
                     className="object-contain"
                     style={{
-                      width: "28px",
-                      height: "28px",
+                      width: "32px",
+                      height: "32px",
                       backgroundColor: "#f1f3f4",
                       transition: "all 0.3s ease",
+                      padding: "2px",
                       borderRadius: "4px",
-                      objectFit: "cover"
+                      objectFit: "contain"
                     }}
                   />
                   <span
                     style={{
-                      fontSize: "14px",
+                      fontSize: "12px",
                       color: "#666",
                       fontWeight: "500",
                       backgroundColor: "#f1f3f4",
@@ -539,18 +540,11 @@ export default function RealTimePage() {
           onSleepToggle={handleSleepToggle}
         />
         <SummaryPanel
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          highlightColor={highlightColor}
-          setHighlightColor={setHighlightColor}
-          pageNumber={pageNumber}
-          setPageNumber={setPageNumber}
-          numPages={numPages}
-          summaryData={realTimePdfData?.summaryData || {}}
           voiceData={realTimePdfData?.voiceData || {}}
           pageSectionRefs={pageSectionRefs}
           voiceMap={voiceMap}
           isStreaming={isRecording}
+          isRealTime={true}
         />
       </div>
     </div>
