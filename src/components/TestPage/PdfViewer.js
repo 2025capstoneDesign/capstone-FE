@@ -25,6 +25,8 @@ export default function PdfViewer({
   summaryData,
   voiceData,
   pageSectionRefs,
+  searchKeyword,
+  setSearchKeyword,
 }) {
   // Document 컴포넌트는 파일 경로와 blob URL을 모두 올바르게 처리하므로,
   // 여기서 특별한 변환 작업이 필요X
@@ -32,7 +34,6 @@ export default function PdfViewer({
 
   // 로딩 상태를 추적하여 필요한 경우 로딩 표시
   const [isLoading, setIsLoading] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [matchingPages, setMatchingPages] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -40,7 +41,6 @@ export default function PdfViewer({
   // PDF URL이 변경될 때 로딩 상태를 초기화
   useEffect(() => {
     setIsLoading(true);
-    setSearchKeyword("");
     setMatchingPages([]);
   }, [pdfUrl]);
 
