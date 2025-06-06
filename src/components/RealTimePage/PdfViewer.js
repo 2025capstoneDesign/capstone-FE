@@ -17,6 +17,8 @@ export default function PdfViewer({
   showGuidanceModal = false,
   recordingTime = "00:00",
   isPaused = false,
+  sleepPages = [],
+  onSleepToggle = null,
 }) {
   // Document 컴포넌트는 파일 경로와 blob URL을 모두 올바르게 처리하므로,
   // 여기서 특별한 변환 작업이 필요X
@@ -24,6 +26,9 @@ export default function PdfViewer({
 
   // 로딩 상태를 추적하여 필요한 경우 로딩 표시
   const [isLoading, setIsLoading] = useState(false);
+
+  // 현재 페이지가 졸음 표시되었는지 확인
+  const isCurrentPageSelected = sleepPages.includes(pageNumber - 1);
 
   // PDF URL이 변경될 때 로딩 상태를 초기화
   useEffect(() => {
@@ -134,6 +139,45 @@ export default function PdfViewer({
               </div>
             </div>
           )}
+
+          {/* 졸음 이모티콘 버튼 */}
+          <button
+            onClick={() => onSleepToggle && onSleepToggle(pageNumber - 1)}
+            style={{
+              backgroundColor: isCurrentPageSelected ? "#ff6b6b" : "#f1f3f4",
+              border: "none",
+              borderRadius: "8px",
+              padding: "8px 12px",
+              cursor: "pointer",
+              fontSize: "16px",
+              transition: "all 0.3s ease",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+            onMouseEnter={(e) => {
+              if (!isCurrentPageSelected) {
+                e.target.style.backgroundColor = "#e8eaed";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isCurrentPageSelected) {
+                e.target.style.backgroundColor = "#f1f3f4";
+              }
+            }}
+            title={isCurrentPageSelected ? "졸음 표시 취소" : "졸음 표시"}
+          >
+            😴
+            <span
+              style={{
+                fontSize: "12px",
+                color: isCurrentPageSelected ? "white" : "#666",
+                fontWeight: isCurrentPageSelected ? "600" : "normal",
+              }}
+            >
+              {isCurrentPageSelected ? "선택됨" : "졸음"}
+            </span>
+          </button>
         </div>
       </div>
 

@@ -67,6 +67,7 @@ export default function RealTimePage() {
   const [pageNumber, setPageNumber] = useState(1);
   const [activeTab, setActiveTab] = useState("ai"); // "ai" or "voice"
   const [highlightColor, setHighlightColor] = useState("red");
+  const [sleepPages, setSleepPages] = useState([]); // 졸음 표시된 페이지들
 
   // 각 페이지 섹션에 대한 ref를 저장할 객체
   const pageSectionRefs = useRef({});
@@ -115,6 +116,17 @@ export default function RealTimePage() {
     }
   };
 
+  // 졸음 버튼 토글 핸들러
+  const handleSleepToggle = (pageIndex) => {
+    setSleepPages(prev => {
+      if (prev.includes(pageIndex)) {
+        return prev.filter(p => p !== pageIndex);
+      } else {
+        return [...prev, pageIndex];
+      }
+    });
+  };
+
   return (
     <div className="app-wrapper">
       {/* Loading Modal */}
@@ -153,7 +165,7 @@ export default function RealTimePage() {
             ) : (
               <button
                 className="convert-btn whitespace-nowrap"
-                onClick={() => handleStopRecording(navigate, initialJobId, pdfUrl)}
+                onClick={() => handleStopRecording(navigate, initialJobId, pdfUrl, sleepPages)}
                 style={{ backgroundColor: "#0F0F0F" }}
               >
                 실시간 변환 종료
@@ -263,6 +275,8 @@ export default function RealTimePage() {
           showGuidanceModal={showGuidanceModal}
           recordingTime={recordingTime}
           isPaused={isPaused}
+          sleepPages={sleepPages}
+          onSleepToggle={handleSleepToggle}
         />
         <SummaryPanel
           activeTab={activeTab}
