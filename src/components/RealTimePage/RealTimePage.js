@@ -74,7 +74,7 @@ export default function RealTimePage() {
 
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [activeTab, setActiveTab] = useState("ai"); // "ai" or "voice"
+  const [activeTab, setActiveTab] = useState("voice"); // "ai" or "voice"
   const [highlightColor, setHighlightColor] = useState("red");
   const [sleepPages, setSleepPages] = useState([]); // 졸음 표시된 페이지들
   const [tutorialStep, setTutorialStep] = useState(0); // 0: 비활성, 1: 음성버튼, 2: 졸음버튼
