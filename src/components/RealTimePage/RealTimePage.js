@@ -237,21 +237,63 @@ export default function RealTimePage() {
             {/* 음성 버튼 가이드 */}
             {tutorialStep === 1 && (
               <>
-                {/* 음성 버튼 하이라이트 */}
+                {/* 실제 음성 아이콘을 모달 위에 복제 */}
                 <div
                   style={{
                     position: "absolute",
-                    top: "217px", // slide-header 높이 고려
-                    left: "5px", // 정확한 버튼 위치
+                    top: "217px",
+                    left: "5px",
                     width: "60px",
                     height: "60px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     borderRadius: "50%",
                     backgroundColor: "rgba(255, 255, 255, 0.1)",
                     border: "3px solid #ff6b6b",
                     zIndex: 1001,
                     animation: "pulse 2s infinite",
+                    cursor: "pointer",
                   }}
-                />
+                >
+                  <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 15.5C14.21 15.5 16 13.71 16 11.5V6C16 3.79 14.21 2 12 2C9.79 2 8 3.79 8 6V11.5C8 13.71 9.79 15.5 12 15.5Z"
+                      stroke="#5CBFBC"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      fill="none"
+                    />
+                    <path
+                      d="M4.35 9.65V11.35C4.35 15.57 7.78 19 12 19C16.22 19 19.65 15.57 19.65 11.35V9.65"
+                      stroke="#5CBFBC"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M10.61 6.56C11.519 6.19051 12.5098 6.1885 13.42 6.56C14.18 6.87 14.794 7.44448 15.13 8.17C15.2577 8.45726 15.3312 8.76303 15.348 9.074C15.3648 9.38498 15.3244 9.6964 15.229 9.994C15.1335 10.2916 14.9846 10.5696 14.7891 10.8143C14.5937 11.059 14.3549 11.2667 14.085 11.426C13.816 11.5844 13.5194 11.692 13.212 11.743C12.9046 11.794 12.5917 11.7878 12.287 11.725"
+                      stroke="#5CBFBC"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M12 19V22"
+                      stroke="#5CBFBC"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
 
                 {/* 화살표 */}
                 <div
@@ -344,21 +386,36 @@ export default function RealTimePage() {
             {/* 졸음 버튼 가이드 */}
             {tutorialStep === 2 && (
               <>
-                {/* 졸음 버튼 하이라이트 */}
-                <div
+                {/* 실제 졸음 버튼을 모달 위에 복제 */}
+                <button
                   style={{
                     position: "absolute",
-                    top: "227px", // slide-header 높이 고려
+                    top: "227px",
                     left: "70px",
-                    width: "80px",
-                    height: "40px",
-                    borderRadius: "8px",
-                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    backgroundColor: "#f1f3f4",
                     border: "3px solid #ff6b6b",
+                    borderRadius: "8px",
+                    padding: "8px 12px",
+                    cursor: "pointer",
+                    fontSize: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
                     zIndex: 1001,
                     animation: "pulse 2s infinite",
                   }}
-                />
+                >
+                  😴
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      color: "#666",
+                      fontWeight: "normal",
+                    }}
+                  >
+                    졸음
+                  </span>
+                </button>
 
                 {/* 화살표 */}
                 <div
