@@ -197,11 +197,10 @@ export default function RealTimeEditorPage() {
               className="w-[800px] object-contain"
             />
           </div>
-          <div className="w-[300px] flex justify-end gap-5">
+          <div className="w-[300px] flex justify-end gap-2">
             <button
-              className="convert-btn whitespace-nowrap"
+              className="download-btn whitespace-nowrap"
               onClick={handleCompleteSelection}
-              style={{ backgroundColor: "black", color: "white" }}
             >
               저장하기
             </button>

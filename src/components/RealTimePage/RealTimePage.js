@@ -8,6 +8,7 @@ import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
 import { useRealTimeState } from "./realTimeStateManager";
 import progress2 from "../../assets/images/progress_2.png";
+import sleep from "../../assets/images/sleep 7.png"
 
 export default function RealTimePage() {
   const location = useLocation();
@@ -205,12 +206,6 @@ export default function RealTimePage() {
                 실시간 변환 종료
               </button>
             )}
-            <button
-              className="download-btn whitespace-nowrap"
-              onClick={handleDownload}
-            >
-              다운로드
-            </button>
           </div>
         </div>
       </div>
@@ -395,9 +390,10 @@ export default function RealTimePage() {
                     backgroundColor: "#f1f3f4",
                     border: "3px solid #ff6b6b",
                     borderRadius: "8px",
-                    padding: "8px 12px",
+                    padding: "4px 8px",
                     cursor: "pointer",
                     fontSize: "16px",
+                    transition: "all 0.3s ease",
                     display: "flex",
                     alignItems: "center",
                     gap: "6px",
@@ -405,12 +401,29 @@ export default function RealTimePage() {
                     animation: "pulse 2s infinite",
                   }}
                 >
-                  😴
+                  <img
+                    src={sleep}
+                    alt="졸음버튼"
+                    className="object-contain"
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      backgroundColor: "#f1f3f4",
+                      transition: "all 0.3s ease",
+                      padding: "2px",
+                      borderRadius: "4px",
+                      objectFit: "contain"
+                    }}
+                  />
                   <span
                     style={{
                       fontSize: "12px",
                       color: "#666",
-                      fontWeight: "normal",
+                      fontWeight: "500",
+                      backgroundColor: "#f1f3f4",
+                      transition: "all 0.3s ease",
+                      padding: "2px 4px",
+                      borderRadius: "4px",
                     }}
                   >
                     졸음
@@ -527,18 +540,11 @@ export default function RealTimePage() {
           onSleepToggle={handleSleepToggle}
         />
         <SummaryPanel
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          highlightColor={highlightColor}
-          setHighlightColor={setHighlightColor}
-          pageNumber={pageNumber}
-          setPageNumber={setPageNumber}
-          numPages={numPages}
-          summaryData={realTimePdfData?.summaryData || {}}
           voiceData={realTimePdfData?.voiceData || {}}
           pageSectionRefs={pageSectionRefs}
           voiceMap={voiceMap}
           isStreaming={isRecording}
+          isRealTime={true}
         />
       </div>
     </div>
