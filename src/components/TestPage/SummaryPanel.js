@@ -32,39 +32,43 @@ export default function SummaryPanel({
   const [animatingSegments, setAnimatingSegments] = useState(new Set()); // 애니메이션 중인 세그먼트들
   const [newTextParts, setNewTextParts] = useState(new Map()); // 새로 추가된 텍스트 부분들
 
-  console.log('SummaryPanel searchKeyword:', searchKeyword);
-  console.log('SummaryPanel newSegments:', newSegments);
-  console.log('SummaryPanel animatingSegments:', animatingSegments);
-  console.log('SummaryPanel newTextParts:', newTextParts);
+  console.log("SummaryPanel searchKeyword:", searchKeyword);
+  console.log("SummaryPanel newSegments:", newSegments);
+  console.log("SummaryPanel animatingSegments:", animatingSegments);
+  console.log("SummaryPanel newTextParts:", newTextParts);
 
   // 새로운 세그먼트들에 애니메이션 적용
   useEffect(() => {
-    console.log('SummaryPanel useEffect newSegments:', newSegments);
+    console.log("SummaryPanel useEffect newSegments:", newSegments);
     if (newSegments && newSegments.length > 0) {
       // 새로운 텍스트 부분들을 저장
       const newTextMap = new Map();
-      newSegments.forEach(seg => {
-        if (seg.id.includes('_new_')) {
+      newSegments.forEach((seg) => {
+        if (seg.id.includes("_new_")) {
           // 원본 세그먼트 ID 추출 (예: segment1_new_1234567890 -> segment1)
-          const originalId = seg.id.split('_new_')[0];
+          const originalId = seg.id.split("_new_")[0];
           newTextMap.set(originalId, seg.text);
         } else {
           // 완전히 새로운 세그먼트
           newTextMap.set(seg.id, seg.text);
         }
       });
-      
+
       setNewTextParts(newTextMap);
-      const newIds = new Set(newSegments.map(seg => seg.id.includes('_new_') ? seg.id.split('_new_')[0] : seg.id));
-      console.log('SummaryPanel animating segment IDs:', newIds);
+      const newIds = new Set(
+        newSegments.map((seg) =>
+          seg.id.includes("_new_") ? seg.id.split("_new_")[0] : seg.id
+        )
+      );
+      console.log("SummaryPanel animating segment IDs:", newIds);
       setAnimatingSegments(newIds);
-      
+
       // 1.5초 후 애니메이션 클래스 제거
       const timer = setTimeout(() => {
         setAnimatingSegments(new Set());
         setNewTextParts(new Map());
-      }, 1500);
-      
+      }, 700);
+
       return () => clearTimeout(timer);
     }
   }, [newSegments]);
@@ -168,10 +172,10 @@ export default function SummaryPanel({
   // 텍스트가 속한 페이지 번호 찾기
   const findTextPageNumber = (text) => {
     if (!voiceData) return null;
-    
+
     // 모든 페이지를 순회하면서 텍스트가 포함된 페이지 찾기
     for (const [pageNum, segments] of Object.entries(voiceData)) {
-      const pageText = segments.map(segment => segment.text).join(' ');
+      const pageText = segments.map((segment) => segment.text).join(" ");
       if (pageText.includes(text)) {
         return parseInt(pageNum);
       }
@@ -183,7 +187,7 @@ export default function SummaryPanel({
   const handleTextSelection = (e) => {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
-    
+
     if (selectedText) {
       setSelectedText(selectedText);
       const textPage = findTextPageNumber(selectedText);
@@ -196,16 +200,16 @@ export default function SummaryPanel({
   };
 
   const handleModalConfirm = (targetPage, text) => {
-    console.log('선택된 텍스트:', text);
-    console.log('원래 페이지:', selectedPage);
-    console.log('이동할 페이지:', targetPage);
+    console.log("선택된 텍스트:", text);
+    console.log("원래 페이지:", selectedPage);
+    console.log("이동할 페이지:", targetPage);
   };
 
   // 키워드 하이라이트 함수 (ReactMarkdown용)
   const highlightKeywordMarkdown = (text, keyword) => {
     if (!keyword || !text) return text;
-    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(escapedKeyword, 'gi');
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(escapedKeyword, "gi");
     return text.replace(regex, (match) => `**${match}**`);
   };
 
@@ -254,32 +258,45 @@ export default function SummaryPanel({
                   hasAnimation: animatingSegments.has(segment.id),
                   hasNewText: newTextParts.has(segment.id),
                   isRealTime,
-                  text: segment.text
+                  text: segment.text,
                 });
-                
+
                 return (
                   <div
                     key={segment.id}
                     className={`segment-text ${
                       segment.isImportant
-                        ? `important ${highlightColor} ${hasLink ? "linkable" : ""}`
+                        ? `important ${highlightColor} ${
+                            hasLink ? "linkable" : ""
+                          }`
                         : ""
                     }`}
-                    onMouseEnter={segment.isImportant ? positionTooltip : undefined}
-                    onDoubleClick={() => hasLink && handleSegmentDoubleClick(segment)}
-                    style={{ whiteSpace: 'pre-line' }}
+                    onMouseEnter={
+                      segment.isImportant ? positionTooltip : undefined
+                    }
+                    onDoubleClick={() =>
+                      hasLink && handleSegmentDoubleClick(segment)
+                    }
+                    style={{ whiteSpace: "pre-line" }}
                   >
                     {isRealTime ? (
                       // realTime 페이지에서는 ReactMarkdown 사용하지 않음
-                      animatingSegments.has(segment.id) && newTextParts.has(segment.id) ? (
+                      animatingSegments.has(segment.id) &&
+                      newTextParts.has(segment.id) ? (
                         // 새로 추가된 부분이 있는 경우 부분적 하이라이트
-                        <span style={{ display: 'inline' }}>
-                          <span>{segment.text.slice(0, segment.text.length - newTextParts.get(segment.id).length)}</span>
-                          <span 
+                        <span style={{ display: "inline" }}>
+                          <span>
+                            {segment.text.slice(
+                              0,
+                              segment.text.length -
+                                newTextParts.get(segment.id).length
+                            )}
+                          </span>
+                          <span
                             className="new-segment-animation"
                             style={{
-                              backgroundColor: 'rgba(255, 180, 51, 0.15)',
-                              color: 'rgba(255, 165, 0, 0.8)'
+                              backgroundColor: "rgba(255, 180, 51, 0.15)",
+                              color: "rgba(255, 165, 0, 0.8)",
                             }}
                           >
                             {newTextParts.get(segment.id)}
@@ -287,21 +304,47 @@ export default function SummaryPanel({
                         </span>
                       ) : (
                         // 기본 렌더링 - 전체 세그먼트 애니메이션
-                        <span 
-                          className={animatingSegments.has(segment.id) ? "new-segment-animation" : ""}
-                          style={animatingSegments.has(segment.id) ? {
-                            backgroundColor: 'rgba(255, 180, 51, 0.15)',
-                            color: 'rgba(255, 165, 0, 0.8)'
-                          } : {}}
+                        <span
+                          className={
+                            animatingSegments.has(segment.id)
+                              ? "new-segment-animation"
+                              : ""
+                          }
+                          style={
+                            animatingSegments.has(segment.id)
+                              ? {
+                                  backgroundColor: "rgba(255, 180, 51, 0.15)",
+                                  color: "rgba(255, 165, 0, 0.8)",
+                                }
+                              : {}
+                          }
                         >
                           {segment.text}
                         </span>
                       )
-                    ) : (
-                      // 다른 페이지에서는 ReactMarkdown 사용
-                      animatingSegments.has(segment.id) && newTextParts.has(segment.id) ? (
-                        // 새로 추가된 부분이 있는 경우 부분적 하이라이트
-                        <span style={{ display: 'inline' }}>
+                    ) : // 다른 페이지에서는 ReactMarkdown 사용
+                    animatingSegments.has(segment.id) &&
+                      newTextParts.has(segment.id) ? (
+                      // 새로 추가된 부분이 있는 경우 부분적 하이라이트
+                      <span style={{ display: "inline" }}>
+                        <ReactMarkdown
+                          components={{
+                            strong: ({ node, ...props }) => (
+                              <strong style={{ color: "red" }} {...props} />
+                            ),
+                            p: ({ node, ...props }) => <span {...props} />,
+                          }}
+                        >
+                          {highlightKeywordMarkdown(
+                            segment.text.slice(
+                              0,
+                              segment.text.length -
+                                newTextParts.get(segment.id).length
+                            ),
+                            searchKeyword
+                          )}
+                        </ReactMarkdown>
+                        <span className="new-segment-animation">
                           <ReactMarkdown
                             components={{
                               strong: ({ node, ...props }) => (
@@ -311,38 +354,35 @@ export default function SummaryPanel({
                             }}
                           >
                             {highlightKeywordMarkdown(
-                              segment.text.slice(0, segment.text.length - newTextParts.get(segment.id).length), 
+                              newTextParts.get(segment.id),
                               searchKeyword
                             )}
                           </ReactMarkdown>
-                          <span className="new-segment-animation">
-                            <ReactMarkdown
-                              components={{
-                                strong: ({ node, ...props }) => (
-                                  <strong style={{ color: "red" }} {...props} />
-                                ),
-                                p: ({ node, ...props }) => <span {...props} />,
-                              }}
-                            >
-                              {highlightKeywordMarkdown(newTextParts.get(segment.id), searchKeyword)}
-                            </ReactMarkdown>
-                          </span>
                         </span>
-                      ) : (
-                        // 기본 렌더링
-                        <span className={animatingSegments.has(segment.id) ? "new-segment-animation" : ""}>
-                          <ReactMarkdown
-                            components={{
-                              strong: ({ node, ...props }) => (
-                                <strong style={{ color: "red" }} {...props} />
-                              ),
-                              p: ({ node, ...props }) => <span {...props} />,
-                            }}
-                          >
-                            {highlightKeywordMarkdown(segment.text, searchKeyword)}
-                          </ReactMarkdown>
-                        </span>
-                      )
+                      </span>
+                    ) : (
+                      // 기본 렌더링
+                      <span
+                        className={
+                          animatingSegments.has(segment.id)
+                            ? "new-segment-animation"
+                            : ""
+                        }
+                      >
+                        <ReactMarkdown
+                          components={{
+                            strong: ({ node, ...props }) => (
+                              <strong style={{ color: "red" }} {...props} />
+                            ),
+                            p: ({ node, ...props }) => <span {...props} />,
+                          }}
+                        >
+                          {highlightKeywordMarkdown(
+                            segment.text,
+                            searchKeyword
+                          )}
+                        </ReactMarkdown>
+                      </span>
                     )}
                     {segment.isImportant && (
                       <span className="reason-tooltip">
@@ -392,7 +432,9 @@ export default function SummaryPanel({
       <div className="tab-container content-tabs">
         <div className="tabs">
           {isRealTime ? (
-            <span style={{ fontSize: "16px", fontWeight: 600, color: "#333" }}>실시간 강의 내용</span>
+            <span style={{ fontSize: "16px", fontWeight: 600, color: "#333" }}>
+              실시간 강의 내용
+            </span>
           ) : (
             <>
               <button
@@ -411,8 +453,8 @@ export default function SummaryPanel({
           )}
         </div>
         {/* 드롭다운도 isRealTime이 아닐 때만 노출 */}
-        {!isRealTime && (
-          activeTab === "ai" ? (
+        {!isRealTime &&
+          (activeTab === "ai" ? (
             <div className="note-type-selector visible">
               <DropdownMenu
                 options={noteTypeOptions}
@@ -423,27 +465,32 @@ export default function SummaryPanel({
           ) : (
             <div className="color-selector visible">
               <button
-                className={`color-btn red ${highlightColor === "red" ? "selected" : ""}`}
+                className={`color-btn red ${
+                  highlightColor === "red" ? "selected" : ""
+                }`}
                 onClick={() => setHighlightColor("red")}
                 aria-label="빨강색 강조"
               />
               <button
-                className={`color-btn blue ${highlightColor === "blue" ? "selected" : ""}`}
+                className={`color-btn blue ${
+                  highlightColor === "blue" ? "selected" : ""
+                }`}
                 onClick={() => setHighlightColor("blue")}
                 aria-label="파랑색 강조"
               />
               <button
-                className={`color-btn green ${highlightColor === "green" ? "selected" : ""}`}
+                className={`color-btn green ${
+                  highlightColor === "green" ? "selected" : ""
+                }`}
                 onClick={() => setHighlightColor("green")}
                 aria-label="초록색 강조"
               />
             </div>
-          )
-        )}
+          ))}
       </div>
 
-      <div 
-        className="content-container" 
+      <div
+        className="content-container"
         ref={contentContainerRef}
         onMouseUp={handleTextSelection}
       >
@@ -488,13 +535,12 @@ export default function SummaryPanel({
           </button>
           <button
             className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-lg shadow-lg hover:bg-red-600 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:shadow-md transition-all duration-300 text-[15px] font-medium"
-            onClick={() => handleModalConfirm(0, selectedText)}//삭제 버튼 누를 때는 targetpage 0으로 설정
+            onClick={() => handleModalConfirm(0, selectedText)} //삭제 버튼 누를 때는 targetpage 0으로 설정
           >
             삭제
           </button>
         </div>
       )}
-
 
       <PageMoveModal
         isOpen={isModalOpen}

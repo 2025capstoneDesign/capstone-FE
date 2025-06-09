@@ -19,7 +19,7 @@ export default function RealTimeEditorPage() {
   const [selectedImageIndices, setSelectedImageIndices] = useState([]);
   const [activeTab, setActiveTab] = useState("overview"); // "overview" 또는 "pageview"
   const [showLoading, setShowLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState("후처리 중...");
+  const [loadingMessage, setLoadingMessage] = useState("필기 생성 중...");
 
   // PDF viewer states
   const [pageNumber, setPageNumber] = useState(1);
@@ -124,7 +124,7 @@ export default function RealTimeEditorPage() {
 
       if (response.ok) {
         const result = await response.json();
-        setLoadingMessage("후처리 완료되었습니다!");
+        setLoadingMessage("필기 생성이 완료되었습니다!");
         await refreshHistory();
 
         setTimeout(() => {
@@ -135,10 +135,11 @@ export default function RealTimeEditorPage() {
               result: result.result || resultData,
               isFromRealTime: true,
               processedSlides: result.processed_slides || selectedImageIndices,
-              message: result.message || "Post-processing completed successfully"
-            }
+              message:
+                result.message || "Post-processing completed successfully",
+            },
           });
-        }, 2000);
+        }, 1500);
       } else {
         throw new Error("후처리 요청 실패");
       }

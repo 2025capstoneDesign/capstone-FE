@@ -20,7 +20,8 @@ function RealTimeConvert() {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [showLoading, setShowLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState("실시간 변환을 시작하는 중...");
+  const [loadingMessage, setLoadingMessage] =
+    useState("실시간 변환을 시작하는 중...");
 
   const API_URL = process.env.REACT_APP_API_URL;
 
@@ -247,17 +248,19 @@ function RealTimeConvert() {
           </div>
         </div>
       )}
-      
+
       {/* Processing Modal */}
       {showProcessingModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg flex flex-col items-center">
-            <img 
-              src="/loading_listen.gif" 
-              alt="처리 중" 
+            <img
+              src="/loading_listen.gif"
+              alt="처리 중"
               className="w-[200px] h-[200px] object-contain mb-4"
             />
-            <p className="text-gray-700 text-lg font-medium">{processingMessage}</p>
+            <p className="text-gray-700 text-lg font-medium">
+              {processingMessage}
+            </p>
           </div>
         </div>
       )}
@@ -268,14 +271,17 @@ function RealTimeConvert() {
             <h1 className="text-2xl font-semibold">실시간 변환</h1>
           </div>
           <div className="flex-1 flex justify-center">
-            <img 
+            <img
               src={progress1}
-              alt="진행 상태" 
+              alt="진행 상태"
               className="w-[800px] object-contain"
             />
           </div>
           <div className="w-[300px] flex justify-end">
-            <button className="convert-btn whitespace-nowrap" onClick={() => navigate("/")}>
+            <button
+              className="convert-btn whitespace-nowrap"
+              onClick={() => navigate("/")}
+            >
               홈으로
             </button>
           </div>
