@@ -110,7 +110,8 @@ body {
   padding: 0 0 25px;
   gap: 25px;
   min-height: 0;
-  max-height: calc(100vh - 130px);
+
+  max-height: calc(100vh - 150px);
   overflow: hidden;
 }
 
@@ -632,7 +633,7 @@ body {
 
 .view-btn {
   padding: 8px 16px;
-  background-color: #5B7F7C;
+  background-color: #5b7f7c;
   color: #fff;
   border: none;
   border-radius: 20px;
@@ -641,7 +642,7 @@ body {
 }
 
 .view-btn:hover {
-  background-color: #455E5C;
+  background-color: #455e5c;
 }
 
 .manual-title {
