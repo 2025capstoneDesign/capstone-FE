@@ -20,6 +20,7 @@ export default function SummaryPanel({
   pageSectionRefs,
   searchKeyword,
   isRealTime,
+  newSegments = [], // 새로 추가된 세그먼트들
 }) {
   const contentContainerRef = useRef(null);
   const prevTabRef = useRef(activeTab);
@@ -28,8 +29,45 @@ export default function SummaryPanel({
   const [selectedText, setSelectedText] = useState("");
   const [selectedPage, setSelectedPage] = useState(null);
   const [showMoveButton, setShowMoveButton] = useState(false);
+  const [animatingSegments, setAnimatingSegments] = useState(new Set()); // 애니메이션 중인 세그먼트들
+  const [newTextParts, setNewTextParts] = useState(new Map()); // 새로 추가된 텍스트 부분들
 
   console.log('SummaryPanel searchKeyword:', searchKeyword);
+  console.log('SummaryPanel newSegments:', newSegments);
+  console.log('SummaryPanel animatingSegments:', animatingSegments);
+  console.log('SummaryPanel newTextParts:', newTextParts);
+
+  // 새로운 세그먼트들에 애니메이션 적용
+  useEffect(() => {
+    console.log('SummaryPanel useEffect newSegments:', newSegments);
+    if (newSegments && newSegments.length > 0) {
+      // 새로운 텍스트 부분들을 저장
+      const newTextMap = new Map();
+      newSegments.forEach(seg => {
+        if (seg.id.includes('_new_')) {
+          // 원본 세그먼트 ID 추출 (예: segment1_new_1234567890 -> segment1)
+          const originalId = seg.id.split('_new_')[0];
+          newTextMap.set(originalId, seg.text);
+        } else {
+          // 완전히 새로운 세그먼트
+          newTextMap.set(seg.id, seg.text);
+        }
+      });
+      
+      setNewTextParts(newTextMap);
+      const newIds = new Set(newSegments.map(seg => seg.id.includes('_new_') ? seg.id.split('_new_')[0] : seg.id));
+      console.log('SummaryPanel animating segment IDs:', newIds);
+      setAnimatingSegments(newIds);
+      
+      // 1.5초 후 애니메이션 클래스 제거
+      const timer = setTimeout(() => {
+        setAnimatingSegments(new Set());
+        setNewTextParts(new Map());
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [newSegments]);
 
   // 특정 페이지 섹션으로 스크롤하는 함수 - 부드러운 스크롤 적용
   const scrollToPageSection = useCallback(
@@ -212,6 +250,13 @@ export default function SummaryPanel({
                   segment.isImportant &&
                   segment.linkedConcept &&
                   segment.pageNumber;
+                console.log(`Rendering segment ${segment.id}:`, {
+                  hasAnimation: animatingSegments.has(segment.id),
+                  hasNewText: newTextParts.has(segment.id),
+                  isRealTime,
+                  text: segment.text
+                });
+                
                 return (
                   <div
                     key={segment.id}
@@ -224,16 +269,81 @@ export default function SummaryPanel({
                     onDoubleClick={() => hasLink && handleSegmentDoubleClick(segment)}
                     style={{ whiteSpace: 'pre-line' }}
                   >
-                    <ReactMarkdown
-                      components={{
-                        strong: ({ node, ...props }) => (
-                          <strong style={{ color: "red" }} {...props} />
-                        ),
-                        p: ({ node, ...props }) => <div {...props} />,
-                      }}
-                    >
-                      {highlightKeywordMarkdown(segment.text, searchKeyword)}
-                    </ReactMarkdown>
+                    {isRealTime ? (
+                      // realTime 페이지에서는 ReactMarkdown 사용하지 않음
+                      animatingSegments.has(segment.id) && newTextParts.has(segment.id) ? (
+                        // 새로 추가된 부분이 있는 경우 부분적 하이라이트
+                        <span style={{ display: 'inline' }}>
+                          <span>{segment.text.slice(0, segment.text.length - newTextParts.get(segment.id).length)}</span>
+                          <span 
+                            className="new-segment-animation"
+                            style={{
+                              backgroundColor: 'rgba(255, 180, 51, 0.15)',
+                              color: 'rgba(255, 165, 0, 0.8)'
+                            }}
+                          >
+                            {newTextParts.get(segment.id)}
+                          </span>
+                        </span>
+                      ) : (
+                        // 기본 렌더링 - 전체 세그먼트 애니메이션
+                        <span 
+                          className={animatingSegments.has(segment.id) ? "new-segment-animation" : ""}
+                          style={animatingSegments.has(segment.id) ? {
+                            backgroundColor: 'rgba(255, 180, 51, 0.15)',
+                            color: 'rgba(255, 165, 0, 0.8)'
+                          } : {}}
+                        >
+                          {segment.text}
+                        </span>
+                      )
+                    ) : (
+                      // 다른 페이지에서는 ReactMarkdown 사용
+                      animatingSegments.has(segment.id) && newTextParts.has(segment.id) ? (
+                        // 새로 추가된 부분이 있는 경우 부분적 하이라이트
+                        <span style={{ display: 'inline' }}>
+                          <ReactMarkdown
+                            components={{
+                              strong: ({ node, ...props }) => (
+                                <strong style={{ color: "red" }} {...props} />
+                              ),
+                              p: ({ node, ...props }) => <span {...props} />,
+                            }}
+                          >
+                            {highlightKeywordMarkdown(
+                              segment.text.slice(0, segment.text.length - newTextParts.get(segment.id).length), 
+                              searchKeyword
+                            )}
+                          </ReactMarkdown>
+                          <span className="new-segment-animation">
+                            <ReactMarkdown
+                              components={{
+                                strong: ({ node, ...props }) => (
+                                  <strong style={{ color: "red" }} {...props} />
+                                ),
+                                p: ({ node, ...props }) => <span {...props} />,
+                              }}
+                            >
+                              {highlightKeywordMarkdown(newTextParts.get(segment.id), searchKeyword)}
+                            </ReactMarkdown>
+                          </span>
+                        </span>
+                      ) : (
+                        // 기본 렌더링
+                        <span className={animatingSegments.has(segment.id) ? "new-segment-animation" : ""}>
+                          <ReactMarkdown
+                            components={{
+                              strong: ({ node, ...props }) => (
+                                <strong style={{ color: "red" }} {...props} />
+                              ),
+                              p: ({ node, ...props }) => <span {...props} />,
+                            }}
+                          >
+                            {highlightKeywordMarkdown(segment.text, searchKeyword)}
+                          </ReactMarkdown>
+                        </span>
+                      )
+                    )}
                     {segment.isImportant && (
                       <span className="reason-tooltip">
                         {segment.reason}

@@ -58,6 +58,7 @@ export default function RealTimePage() {
     voiceMap, // 음성 인식 결과 맵
     showLoadingModal, // 로딩 모달 표시 여부
     loadingMessage, // 로딩 메시지
+    newSegments, // 새로 추가된 세그먼트들
   } = useRealTimeState(pdfData, initialJobId);
 
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
@@ -553,6 +554,7 @@ export default function RealTimePage() {
           pageSectionRefs={pageSectionRefs}
           isStreaming={isRecording}
           isRealTime={true}
+          newSegments={newSegments}
         />
       </div>
     </div>
