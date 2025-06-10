@@ -1,4 +1,3 @@
-
 import React, { useCallback } from "react";
 import word_icon from "../../../assets/images/docx.png";
 import pdf_icon from "../../../assets/images/pdf.png";
@@ -58,7 +57,7 @@ function FileUploadSection({
       case "ppt":
       case "pptx":
         return ppt_icon;
-      case "mp3":
+      case "m4a":
         return mp3_icon;
       case "wav":
         return wav_icon;
@@ -85,7 +84,7 @@ function FileUploadSection({
             multiple
             className="hidden"
             onChange={handleFileUpload}
-            accept=".doc,.docx,.pdf,.ppt,.pptx,.mp3,.wav"
+            accept=".doc,.docx,.pdf,.ppt,.pptx,.mp3,.wav, .m4a"
           />
           <div className="w-full lg:w-[70%] h-[22vh] mx-auto border-4 border-[#DEE5E5] rounded-xl flex flex-col justify-center items-center cursor-pointer hover:border-[#5B7F7C] transition-colors bg-[#F9F7F7]">
             <div className="mb-[0.8rem]">
