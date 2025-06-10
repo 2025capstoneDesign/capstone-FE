@@ -158,7 +158,7 @@ function FileUploadSection({
         </div>
 
         {/* 변환하기 버튼 */}
-        <div className="flex justify-end mt-auto">
+        <div className="flex justify-end mb-4 relative -top-14">
           <button
             className="bg-[#5B7F7C] text-white font-semibold py-2 px-4 rounded-lg my-5"
             onClick={handleConvert}

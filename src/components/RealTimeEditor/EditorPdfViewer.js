@@ -113,7 +113,7 @@ export default function EditorPdfViewer({
             pageNumber={pageNumber}
             renderTextLayer={false}
             renderAnnotationLayer={false}
-            width={window.innerWidth * 0.57}
+            width={window.innerWidth * 0.53}
           />
         </Document>
 

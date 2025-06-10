@@ -8,7 +8,7 @@ import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
 import { useRealTimeState } from "./realTimeStateManager";
 import progress2 from "../../assets/images/progress_2.png";
-import sleep from "../../assets/images/sleep 7.png"
+import sleep from "../../assets/images/sleep 7.png";
 
 export default function RealTimePage() {
   const location = useLocation();
@@ -204,7 +204,7 @@ export default function RealTimePage() {
                 }
                 style={{ backgroundColor: "#0F0F0F" }}
               >
-                실시간 변환 종료
+                음성 녹음 종료
               </button>
             )}
           </div>
@@ -413,7 +413,7 @@ export default function RealTimePage() {
                       transition: "all 0.3s ease",
                       padding: "2px",
                       borderRadius: "4px",
-                      objectFit: "contain"
+                      objectFit: "contain",
                     }}
                   />
                   <span
