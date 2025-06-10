@@ -3,8 +3,8 @@ class Linear16Processor extends AudioWorkletProcessor {
     super();
     this.isActive = false;
     this.buffer = [];
-    this.bufferSize = 50000; // 예: 3초
-    this.overlapSize = 8000; // 예: 0.5초 (16kHz 기준)
+    this.bufferSize = 100000; // 예: 3초
+    this.overlapSize = 5000; // 예: 0.5초 (16kHz 기준)
     this.previousTail = []; // 오버랩용 이전 tail 저장
 
     this.port.onmessage = (event) => {
