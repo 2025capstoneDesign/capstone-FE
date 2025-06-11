@@ -6,6 +6,10 @@ import "../../css/Dropdown.css";
 import remarkGfm from "remark-gfm";
 import DropdownMenu from "../common/DropdownMenu";
 import PageMoveModal from "../common/PageMoveModal";
+import { useAuth } from "../../context/AuthContext";
+import { showError } from "../../utils/errorHandler";
+import { useLocation } from "react-router-dom";
+import { parseData } from "./DataParser";
 
 export default function SummaryPanel({
   activeTab,
@@ -21,6 +25,7 @@ export default function SummaryPanel({
   searchKeyword,
   isRealTime,
   newSegments = [], // 새로 추가된 세그먼트들
+  onDataUpdate, // 데이터 업데이트 콜백 함수
 }) {
   const contentContainerRef = useRef(null);
   const prevTabRef = useRef(activeTab);
@@ -31,6 +36,12 @@ export default function SummaryPanel({
   const [showMoveButton, setShowMoveButton] = useState(false);
   const [animatingSegments, setAnimatingSegments] = useState(new Set()); // 애니메이션 중인 세그먼트들
   const [newTextParts, setNewTextParts] = useState(new Map()); // 새로 추가된 텍스트 부분들
+  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
+  const { getAuthHeader } = useAuth();
+  
+  // Get jobId from navigation state
+  const { jobId } = location.state || {};
 
   console.log("SummaryPanel searchKeyword:", searchKeyword);
   console.log("SummaryPanel newSegments:", newSegments);
@@ -184,7 +195,7 @@ export default function SummaryPanel({
   };
 
   // 텍스트 선택 이벤트 처리
-  const handleTextSelection = (e) => {
+  const handleTextSelection = () => {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
@@ -199,10 +210,62 @@ export default function SummaryPanel({
     }
   };
 
-  const handleModalConfirm = (targetPage, text) => {
-    console.log("선택된 텍스트:", text);
-    console.log("원래 페이지:", selectedPage);
-    console.log("이동할 페이지:", targetPage);
+  // 세그먼트 이동/삭제 API 호출
+  const handleModalConfirm = async (targetPage, text) => {
+    if (!jobId) {
+      showError("작업 ID가 없습니다.");
+      return;
+    }
+
+    console.log("SummaryPanel API 요청 정보:", {
+      jobId,
+      selectedPage,
+      targetPage,
+      text: text.substring(0, 50),
+      textLength: text.length
+    });
+
+    setIsLoading(true);
+    try {
+      const API_URL = process.env.REACT_APP_API_URL;
+      const response = await fetch(`${API_URL}/api/realTime/move-segment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeader(),
+        },
+        body: JSON.stringify({
+          jobId,
+          startSlide: selectedPage,
+          targetSlide: targetPage,
+          text: text,
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        // result.result를 parseData로 파싱하여 데이터 업데이트
+        if (result.result && onDataUpdate) {
+          const parsedData = parseData(result.result);
+          onDataUpdate(parsedData);
+        }
+
+        const action = targetPage === 0 ? "삭제" : "이동";
+        toast.success(`텍스트가 성공적으로 ${action}되었습니다.`, {
+          position: "top-center",
+          autoClose: 1500,
+        });
+      } else {
+        throw new Error("요청 실패");
+      }
+    } catch (error) {
+      console.error("Move/delete error:", error);
+      showError("텍스트 이동/삭제 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+      setIsModalOpen(false);
+      setShowMoveButton(false);
+    }
   };
 
   // 키워드 하이라이트 함수 (ReactMarkdown용)
@@ -540,12 +603,14 @@ export default function SummaryPanel({
           <button
             className="flex items-center gap-2 px-6 py-3 bg-[#80cbc4] text-white rounded-lg shadow-lg hover:bg-[#4db6ac] hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:shadow-md transition-all duration-300 text-[15px] font-medium"
             onClick={() => setIsModalOpen(true)}
+            disabled={isLoading}
           >
             이동
           </button>
           <button
             className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-lg shadow-lg hover:bg-red-600 hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:shadow-md transition-all duration-300 text-[15px] font-medium"
             onClick={() => handleModalConfirm(0, selectedText)} //삭제 버튼 누를 때는 targetpage 0으로 설정
+            disabled={isLoading}
           >
             삭제
           </button>

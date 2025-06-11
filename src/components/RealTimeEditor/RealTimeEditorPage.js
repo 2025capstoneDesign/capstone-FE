@@ -137,6 +137,7 @@ export default function RealTimeEditorPage() {
               processedSlides: result.processed_slides || selectedImageIndices,
               message:
                 result.message || "Post-processing completed successfully",
+              jobId: jobId,
             },
           });
         }, 1500);
