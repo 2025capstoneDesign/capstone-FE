@@ -277,7 +277,13 @@ export default function SummaryPanel({
                     onDoubleClick={() =>
                       hasLink && handleSegmentDoubleClick(segment)
                     }
-                    style={{ whiteSpace: "pre-line" }}
+                    style={{
+                      whiteSpace: "pre-line",
+                      userSelect: "text",
+                      WebkitUserSelect: "text",
+                      MozUserSelect: "text",
+                      msUserSelect: "text",
+                    }}
                   >
                     {isRealTime ? (
                       // realTime 페이지에서는 ReactMarkdown 사용하지 않음
@@ -327,12 +333,13 @@ export default function SummaryPanel({
                       newTextParts.has(segment.id) ? (
                       // 새로 추가된 부분이 있는 경우 부분적 하이라이트
                       <span style={{ display: "inline" }}>
-                        <ReactMarkdown
-                          components={{
-                            strong: ({ node, ...props }) => (
-                              <strong style={{ color: "red" }} {...props} />
-                            ),
-                            p: ({ node, ...props }) => <span {...props} />,
+                        <div
+                          style={{
+                            userSelect: "text",
+                            WebkitUserSelect: "text",
+                            MozUserSelect: "text",
+                            msUserSelect: "text",
+                            display: "inline",
                           }}
                         >
                           {highlightKeywordMarkdown(
@@ -342,23 +349,18 @@ export default function SummaryPanel({
                                 newTextParts.get(segment.id).length
                             ),
                             searchKeyword
-                          )}
-                        </ReactMarkdown>
-                        <span className="new-segment-animation">
-                          <ReactMarkdown
-                            components={{
-                              strong: ({ node, ...props }) => (
-                                <strong style={{ color: "red" }} {...props} />
-                              ),
-                              p: ({ node, ...props }) => <span {...props} />,
-                            }}
-                          >
-                            {highlightKeywordMarkdown(
-                              newTextParts.get(segment.id),
-                              searchKeyword
+                          )
+                            .split("**")
+                            .map((part, index) =>
+                              index % 2 === 0 ? (
+                                part
+                              ) : (
+                                <strong key={index} style={{ color: "red" }}>
+                                  {part}
+                                </strong>
+                              )
                             )}
-                          </ReactMarkdown>
-                        </span>
+                        </div>
                       </span>
                     ) : (
                       // 기본 렌더링
@@ -369,19 +371,27 @@ export default function SummaryPanel({
                             : ""
                         }
                       >
-                        <ReactMarkdown
-                          components={{
-                            strong: ({ node, ...props }) => (
-                              <strong style={{ color: "red" }} {...props} />
-                            ),
-                            p: ({ node, ...props }) => <span {...props} />,
+                        <div
+                          style={{
+                            userSelect: "text",
+                            WebkitUserSelect: "text",
+                            MozUserSelect: "text",
+                            msUserSelect: "text",
+                            display: "inline",
                           }}
                         >
-                          {highlightKeywordMarkdown(
-                            segment.text,
-                            searchKeyword
-                          )}
-                        </ReactMarkdown>
+                          {highlightKeywordMarkdown(segment.text, searchKeyword)
+                            .split("**")
+                            .map((part, index) =>
+                              index % 2 === 0 ? (
+                                part
+                              ) : (
+                                <strong key={index} style={{ color: "red" }}>
+                                  {part}
+                                </strong>
+                              )
+                            )}
+                        </div>
                       </span>
                     )}
                     {segment.isImportant && (
