@@ -67,7 +67,7 @@ export default function SummaryPanel({
       const timer = setTimeout(() => {
         setAnimatingSegments(new Set());
         setNewTextParts(new Map());
-      }, 700);
+      }, 500);
 
       return () => clearTimeout(timer);
     }
