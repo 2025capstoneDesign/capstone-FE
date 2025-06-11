@@ -48,17 +48,20 @@ export function HistoryProvider({ children }) {
       console.log("History API response:", response.data);
 
       // Map the response data to our format
-      const mappedHistory = response.data.map((item) => ({
-        id: item.id,
-        job_id: item.job_id || null, // job_id가 없는 경우 null로 설정
-        filename: item.filename,
-        created_at: item.created_at,
-        result:
-          typeof item.notes_json === "string"
-            ? JSON.parse(item.notes_json)
-            : item.notes_json,
-        file: null, // Will be downloaded on demand
-      }));
+      const mappedHistory = response.data.map((item) => {
+        console.log("HistoryContext - API 응답 아이템:", item);
+        return {
+          id: item.id,
+          job_id: item.job_id || item.jobId || null, // job_id가 없는 경우 jobId 필드도 확인
+          filename: item.filename,
+          created_at: item.created_at,
+          result:
+            typeof item.notes_json === "string"
+              ? JSON.parse(item.notes_json)
+              : item.notes_json,
+          file: null, // Will be downloaded on demand
+        };
+      });
 
       // Add the sample PDF to ensure it's always available
       const combinedHistory = [
