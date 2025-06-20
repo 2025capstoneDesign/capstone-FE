@@ -22,6 +22,7 @@ export const useRealTimeState = (initialData, initialJobId) => {
   // 슬라이드별 음성 인식 결과 저장
   const [voiceMap, setVoiceMap] = useState({});
   const [currentSlide, setCurrentSlide] = useState(1);
+  const [newSegments, setNewSegments] = useState([]); // 새로 추가된 세그먼트들
 
   // 스트리밍 STT 인스턴스 및 타이머 관련
   const streamingSTTRef = useRef(null);
@@ -91,7 +92,10 @@ export const useRealTimeState = (initialData, initialJobId) => {
           // realTimeDataParser를 사용해서 기존 데이터와 병합
           setRealTimePdfData((prevData) => {
             const { parseRealTimeResponse } = require("./realTimeDataParser");
-            return parseRealTimeResponse(data, prevData);
+            const result = parseRealTimeResponse(data, prevData);
+            // 새로 추가된 세그먼트들을 상태에 저장
+            setNewSegments(result.newSegments || []);
+            return result;
           });
 
           // 슬라이드별 음성 인식 결과만 별도로 추출 (UI 표시용)
@@ -413,6 +417,7 @@ export const useRealTimeState = (initialData, initialJobId) => {
     realTimePdfData,
     currentSlide,
     voiceMap,
+    newSegments, // 새로 추가된 세그먼트들
 
     // 타이머 관련
     recordingTime,

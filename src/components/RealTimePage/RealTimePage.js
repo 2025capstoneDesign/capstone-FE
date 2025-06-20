@@ -8,7 +8,7 @@ import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
 import { useRealTimeState } from "./realTimeStateManager";
 import progress2 from "../../assets/images/progress_2.png";
-import sleep from "../../assets/images/sleep 7.png"
+import sleep from "../../assets/images/sleep 7.png";
 
 export default function RealTimePage() {
   const location = useLocation();
@@ -58,6 +58,7 @@ export default function RealTimePage() {
     voiceMap, // 음성 인식 결과 맵
     showLoadingModal, // 로딩 모달 표시 여부
     loadingMessage, // 로딩 메시지
+    newSegments, // 새로 추가된 세그먼트들
   } = useRealTimeState(pdfData, initialJobId);
 
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
@@ -203,7 +204,7 @@ export default function RealTimePage() {
                 }
                 style={{ backgroundColor: "#0F0F0F" }}
               >
-                실시간 변환 종료
+                음성 녹음 종료
               </button>
             )}
           </div>
@@ -412,7 +413,7 @@ export default function RealTimePage() {
                       transition: "all 0.3s ease",
                       padding: "2px",
                       borderRadius: "4px",
-                      objectFit: "contain"
+                      objectFit: "contain",
                     }}
                   />
                   <span
@@ -553,6 +554,7 @@ export default function RealTimePage() {
           pageSectionRefs={pageSectionRefs}
           isStreaming={isRecording}
           isRealTime={true}
+          newSegments={newSegments}
         />
       </div>
     </div>

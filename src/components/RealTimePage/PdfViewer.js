@@ -1,7 +1,7 @@
 import { Document, Page } from "react-pdf";
 import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
-import sleep from "../../assets/images/sleep 7.png"
+import sleep from "../../assets/images/sleep 7.png";
 
 export default function PdfViewer({
   pdfUrl,
@@ -61,13 +61,14 @@ export default function PdfViewer({
   return (
     <div className="slide-container">
       <div className="slide-header">
-        <div className="recording-controls" style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+        <div
+          className="recording-controls"
+          style={{ display: "flex", alignItems: "center", gap: "25px" }}
+        >
           <div
             className={`audio-icon ${
-              isRealTimeActive && showGuidanceModal ? 'pulsate' : ''
-            } ${
-              isRecording ? 'recording' : ''
-            }`}
+              isRealTimeActive && showGuidanceModal ? "pulsate" : ""
+            } ${isRecording ? "recording" : ""}`}
             onClick={() => {
               if (isRealTimeActive && !isRecording && startRecording) {
                 startRecording();
@@ -81,8 +82,8 @@ export default function PdfViewer({
               }
             }}
             style={{
-              cursor: isRealTimeActive ? 'pointer' : 'default',
-              opacity: isRealTimeActive ? 1 : 0.6
+              cursor: isRealTimeActive ? "pointer" : "default",
+              opacity: isRealTimeActive ? 1 : 0.6,
             }}
           >
             <svg
@@ -123,21 +124,28 @@ export default function PdfViewer({
               />
             </svg>
           </div>
-          
+
           {isRecording && (
-            <div className="recording-info" style={{ 
-              display: 'flex', 
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              fontSize: '12px',
-              color: '#333'
-            }}>
-              <div style={{ color: isPaused ? '#ff8c00' : '#ff4444', fontWeight: 'bold', marginBottom: '2px' }}>
-                {isPaused ? '⏸️ 일시정지' : '🔴 녹음 중..'}
+            <div
+              className="recording-info"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                fontSize: "12px",
+                color: "#333",
+              }}
+            >
+              <div
+                style={{
+                  color: isPaused ? "#ff8c00" : "#ff4444",
+                  fontWeight: "bold",
+                  marginBottom: "2px",
+                }}
+              >
+                {isPaused ? "⏸️ 일시정지" : "🔴 녹음 중.."}
               </div>
-              <div style={{ color: '#666' }}>
-                전체: {recordingTime}
-              </div>
+              <div style={{ color: "#666" }}>전체: {recordingTime}</div>
             </div>
           )}
 
@@ -146,7 +154,9 @@ export default function PdfViewer({
             onClick={() => onSleepToggle && onSleepToggle(pageNumber - 1)}
             style={{
               backgroundColor: isCurrentPageSelected ? "#ff6b6b" : "white",
-              border: isCurrentPageSelected ? "2px solid #ff4444" : "2px solid #5CBFBC",
+              border: isCurrentPageSelected
+                ? "2px solid #ff4444"
+                : "2px solid #5CBFBC",
               borderRadius: "8px",
               padding: "4px 8px",
               cursor: "pointer",
@@ -159,9 +169,9 @@ export default function PdfViewer({
             onMouseEnter={(e) => {
               if (!isCurrentPageSelected) {
                 const button = e.currentTarget;
-                const span = button.querySelector('span');
-                const img = button.querySelector('img');
-                
+                const span = button.querySelector("span");
+                const img = button.querySelector("img");
+
                 button.style.backgroundColor = "#f1f3f4";
                 if (span) span.style.backgroundColor = "#f1f3f4";
                 if (img) img.style.backgroundColor = "#f1f3f4";
@@ -170,9 +180,9 @@ export default function PdfViewer({
             onMouseLeave={(e) => {
               if (!isCurrentPageSelected) {
                 const button = e.currentTarget;
-                const span = button.querySelector('span');
-                const img = button.querySelector('img');
-                
+                const span = button.querySelector("span");
+                const img = button.querySelector("img");
+
                 button.style.backgroundColor = "white";
                 if (span) span.style.backgroundColor = "white";
                 if (img) img.style.backgroundColor = "white";
@@ -189,7 +199,7 @@ export default function PdfViewer({
                 transition: "all 0.3s ease",
                 // padding: "2px",
                 borderRadius: "4px",
-                objectFit: "cover"
+                objectFit: "cover",
               }}
             />
             <span
@@ -221,7 +231,7 @@ export default function PdfViewer({
             pageNumber={pageNumber}
             renderTextLayer={false}
             renderAnnotationLayer={false}
-            width={window.innerWidth * 0.6}
+            width={window.innerWidth * 0.53}
           />
         </Document>
 

@@ -45,26 +45,35 @@ export default function PdfViewer({
   }, [pdfUrl]);
 
   // 키워드 검색 함수 (API 호출 없이 voiceData 사용)
-  const searchKeywordLocations = useCallback((keyword) => {
-    if (!keyword.trim() || !pdfData || !pdfData.voiceData) {
-      setMatchingPages([]);
-      return;
-    }
-    setIsSearching(true);
-    const { voiceData } = pdfData;
-    const matched = [];
-    console.log('voiceData:', voiceData);
-    Object.entries(voiceData).forEach(([pageNum, segments]) => {
-      const hasKeyword = segments.some(seg => seg.text && seg.text.toLowerCase().includes(keyword.toLowerCase()));
-      console.log(`슬라이드 ${pageNum}에 키워드 "${keyword}" 포함 여부:`, hasKeyword);
-      if (hasKeyword) {
-        matched.push(Number(pageNum));
+  const searchKeywordLocations = useCallback(
+    (keyword) => {
+      if (!keyword.trim() || !pdfData || !pdfData.voiceData) {
+        setMatchingPages([]);
+        return;
       }
-    });
-    setMatchingPages(matched);
-    setIsSearching(false);
-    console.log('matchingPages:', matched);
-  }, [pdfData]);
+      setIsSearching(true);
+      const { voiceData } = pdfData;
+      const matched = [];
+      console.log("voiceData:", voiceData);
+      Object.entries(voiceData).forEach(([pageNum, segments]) => {
+        const hasKeyword = segments.some(
+          (seg) =>
+            seg.text && seg.text.toLowerCase().includes(keyword.toLowerCase())
+        );
+        console.log(
+          `슬라이드 ${pageNum}에 키워드 "${keyword}" 포함 여부:`,
+          hasKeyword
+        );
+        if (hasKeyword) {
+          matched.push(Number(pageNum));
+        }
+      });
+      setMatchingPages(matched);
+      setIsSearching(false);
+      console.log("matchingPages:", matched);
+    },
+    [pdfData]
+  );
 
   // 검색어 변경 시 디바운스 처리
   useEffect(() => {
@@ -80,8 +89,8 @@ export default function PdfViewer({
   }, [searchKeyword, searchKeywordLocations]);
 
   useEffect(() => {
-    console.log('matchingPages:', matchingPages);
-    console.log('voiceData:', pdfData?.voiceData);
+    console.log("matchingPages:", matchingPages);
+    console.log("voiceData:", pdfData?.voiceData);
   }, [matchingPages, pdfData]);
 
   // 성공적인 로딩 처리
@@ -142,10 +151,10 @@ export default function PdfViewer({
   // 키워드 하이라이트 함수 (음성 원본에서만 사용)
   const highlightKeyword = (text, keyword) => {
     if (!keyword || !text) return text;
-  
-    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`(${escapedKeyword})`, 'gi');
-  
+
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`(${escapedKeyword})`, "gi");
+
     const parts = text.split(regex);
     return parts.map((part, index) =>
       regex.test(part) ? (
@@ -157,7 +166,6 @@ export default function PdfViewer({
       )
     );
   };
-  
 
   // 음성 원본 전체 렌더링 함수
   const renderAllVoiceContent = (keyword) => {
@@ -238,7 +246,14 @@ export default function PdfViewer({
   return (
     <div className="slide-container">
       <div className="slide-header">
-        <div style={{ display: "flex", alignItems: "center", gap: "15px", width: "100%" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "15px",
+            width: "100%",
+          }}
+        >
           <div
             className="audio-icon"
             onClick={() =>
@@ -259,7 +274,7 @@ export default function PdfViewer({
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             > */}
-              {/* <path
+            {/* <path
                 d="M12 15.5C14.21 15.5 16 13.71 16 11.5V6C16 3.79 14.21 2 12 2C9.79 2 8 3.79 8 6V11.5C8 13.71 9.79 15.5 12 15.5Z"
                 stroke="#5CBFBC"
                 strokeWidth="2"
@@ -291,8 +306,21 @@ export default function PdfViewer({
           </div>
 
           {/* 검색 영역 */}
-          <div style={{ position: "relative", marginLeft: "auto", display: "flex", alignItems: "center" }}>
-            <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+          <div
+            style={{
+              position: "relative",
+              marginLeft: "auto",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <div
+              style={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
               <input
                 type="text"
                 value={searchKeyword}
@@ -337,13 +365,13 @@ export default function PdfViewer({
               disabled={isSearching}
             >
               <span style={{ fontSize: "14px", color: "#64748b" }}>
-                {isSearching 
-                  ? "검색 중..." 
-                  : searchKeyword 
-                    ? matchingPages.length > 0
-                      ? `${matchingPages.length}개 슬라이드`
-                      : "검색 결과 없음"
-                    : "전체 슬라이드"}
+                {isSearching
+                  ? "검색 중..."
+                  : searchKeyword
+                  ? matchingPages.length > 0
+                    ? `${matchingPages.length}개 슬라이드`
+                    : "검색 결과 없음"
+                  : "전체 슬라이드"}
               </span>
               <IoIosArrowDown style={{ color: "#64748b" }} />
             </button>
@@ -367,7 +395,13 @@ export default function PdfViewer({
                 }}
               >
                 {isSearching ? (
-                  <div style={{ padding: "12px", textAlign: "center", color: "#64748b" }}>
+                  <div
+                    style={{
+                      padding: "12px",
+                      textAlign: "center",
+                      color: "#64748b",
+                    }}
+                  >
                     검색 중...
                   </div>
                 ) : searchKeyword ? (
@@ -394,32 +428,40 @@ export default function PdfViewer({
                       </button>
                     ))
                   ) : (
-                    <div style={{ padding: "12px", textAlign: "center", color: "#64748b" }}>
+                    <div
+                      style={{
+                        padding: "12px",
+                        textAlign: "center",
+                        color: "#64748b",
+                      }}
+                    >
                       검색 결과가 없습니다
                     </div>
                   )
                 ) : (
-                  Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
-                    <button
-                      key={pageNum}
-                      onClick={() => handlePageSelect(pageNum)}
-                      style={{
-                        width: "100%",
-                        padding: "8px 12px",
-                        textAlign: "left",
-                        border: "none",
-                        backgroundColor: "transparent",
-                        cursor: "pointer",
-                        fontSize: "14px",
-                        color: "#1e293b",
-                        "&:hover": {
-                          backgroundColor: "#f1f5f9",
-                        },
-                      }}
-                    >
-                      슬라이드 {pageNum}
-                    </button>
-                  ))
+                  Array.from({ length: numPages }, (_, i) => i + 1).map(
+                    (pageNum) => (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageSelect(pageNum)}
+                        style={{
+                          width: "100%",
+                          padding: "8px 12px",
+                          textAlign: "left",
+                          border: "none",
+                          backgroundColor: "transparent",
+                          cursor: "pointer",
+                          fontSize: "14px",
+                          color: "#1e293b",
+                          "&:hover": {
+                            backgroundColor: "#f1f5f9",
+                          },
+                        }}
+                      >
+                        슬라이드 {pageNum}
+                      </button>
+                    )
+                  )
                 )}
               </div>
             )}
@@ -439,7 +481,7 @@ export default function PdfViewer({
             pageNumber={pageNumber}
             renderTextLayer={false}
             renderAnnotationLayer={false}
-            width={window.innerWidth * 0.6}
+            width={window.innerWidth * 0.53}
           />
         </Document>
 

@@ -62,18 +62,33 @@ export default function TestPage() {
     selectedJobId: jobId,
   });
 
+  console.log("TestPage - SummaryPanel에 전달될 jobId:", jobId);
+
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   // 전달받은 pdfData가 이미 파싱된 데이터인지 확인하고, 아니면 파싱
-  const { summaryData, voiceData } =
-    typeof pdfData === "object" && pdfData?.summaryData && pdfData?.voiceData
-      ? pdfData // 이미 파싱된 데이터
-      : parseData(pdfData || dummyData); // 파싱 필요
+  const initialData = typeof pdfData === "object" && pdfData?.summaryData && pdfData?.voiceData
+    ? pdfData // 이미 파싱된 데이터
+    : parseData(pdfData || dummyData); // 파싱 필요
+  
+  // 상태로 관리하여 업데이트 가능하도록 변경
+  const [summaryData, setSummaryData] = useState(initialData.summaryData);
+  const [voiceData, setVoiceData] = useState(initialData.voiceData);
 
   const [numPages, setNumPages] = useState(null);
+  
+  // 데이터 업데이트 핸들러
+  const handleDataUpdate = useCallback((newData) => {
+    if (newData.summaryData) {
+      setSummaryData(newData.summaryData);
+    }
+    if (newData.voiceData) {
+      setVoiceData(newData.voiceData);
+    }
+  }, []);
   const [pageNumber, setPageNumber] = useState(1);
   const [activeTab, setActiveTab] = useState("ai"); // "ai" or "voice"
   const [highlightColor, setHighlightColor] = useState("red");
@@ -192,6 +207,7 @@ export default function TestPage() {
           pageSectionRefs={pageSectionRefs}
           searchKeyword={searchKeyword}
           isRealTime={false}
+          onDataUpdate={handleDataUpdate}
         />
       </div>
     </div>

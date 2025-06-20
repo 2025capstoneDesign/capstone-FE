@@ -45,7 +45,7 @@ export const createMetaJson = (slideId, startTime, endTime) => {
  * 실시간 API 응답을 파싱하고 기존 데이터를 완전히 대체
  * @param {Object} apiResponse - API 응답 데이터
  * @param {Object} existingData - 현재 PDF 데이터 {summaryData, voiceData}
- * @returns {Object} - 업데이트된 데이터 객체 {summaryData, voiceData}
+ * @returns {Object} - 업데이트된 데이터 객체 {summaryData, voiceData, newSegments}
  */
 export const parseRealTimeResponse = (apiResponse, existingData) => {
   if (!apiResponse || typeof apiResponse !== "object") {
@@ -61,6 +61,7 @@ export const parseRealTimeResponse = (apiResponse, existingData) => {
   // Clone existing data to avoid mutation
   const updatedSummaryData = { ...existingData.summaryData };
   const updatedVoiceData = { ...existingData.voiceData };
+  const newSegments = []; // 새로 추가된 세그먼트들을 추적
 
   // Process each slide in the response
   Object.keys(apiResponse).forEach((slideKey) => {
@@ -96,9 +97,12 @@ export const parseRealTimeResponse = (apiResponse, existingData) => {
 
     // Replace voice data (segments) completely
     if (slideData.Segments && typeof slideData.Segments === "object") {
+      const existingSegments = existingData.voiceData[pageNumber] || [];
+      const existingText = existingSegments.length > 0 ? existingSegments[0].text : "";
+      
       const segments = Object.keys(slideData.Segments).map((segmentKey) => {
         const segment = slideData.Segments[segmentKey] || {};
-        return {
+        const segmentData = {
           id: segmentKey,
           text: segment.text || "",
           reason: segment.reason || "",
@@ -107,6 +111,26 @@ export const parseRealTimeResponse = (apiResponse, existingData) => {
           linkedConcept: segment.linkedConcept || "",
           pageNumber: segment.pageNumber || pageNumber,
         };
+        
+        // 실시간 변환에서는 텍스트가 늘어났을 때만 새로운 부분으로 간주
+        if (segmentData.text.length > existingText.length && segmentData.text.startsWith(existingText)) {
+          // 새로 추가된 텍스트 부분만 추출
+          const newTextPart = segmentData.text.slice(existingText.length).trim();
+          if (newTextPart.length > 0) {
+            // 새로운 부분만을 가진 가상의 세그먼트 생성
+            newSegments.push({ 
+              ...segmentData, 
+              id: `${segmentKey}_new_${Date.now()}`, // 고유한 ID 생성
+              text: newTextPart, // 새로 추가된 부분만
+              pageNumber 
+            });
+          }
+        } else if (segmentData.text !== existingText && segmentData.text.length > 0) {
+          // 완전히 다른 텍스트인 경우 (새로운 슬라이드 등)
+          newSegments.push({ ...segmentData, pageNumber });
+        }
+        
+        return segmentData;
       });
 
       // Replace segments completely for this page instead of merging
@@ -118,10 +142,17 @@ export const parseRealTimeResponse = (apiResponse, existingData) => {
     "RealTimeDataParser - Updated pages:",
     Object.keys(updatedSummaryData)
   );
+  
+  console.log(
+    "RealTimeDataParser - New segments detected:",
+    newSegments.length,
+    newSegments
+  );
 
   return {
     summaryData: updatedSummaryData,
     voiceData: updatedVoiceData,
+    newSegments, // 새로 추가된 세그먼트 정보 포함
   };
 };
 

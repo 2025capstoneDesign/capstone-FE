@@ -31,7 +31,6 @@ function Convert() {
   const { refreshHistory } = useHistory();
   const { isAuthenticated } = useAuth();
 
-
   // 로딩이 완료되었는지 확인하고 결과 페이지로 이동
   useEffect(() => {
     if (loading === false && convertedData !== null) {
@@ -101,11 +100,9 @@ function Convert() {
 
       for (const file of files) {
         const extension = file.name.split(".").pop().toLowerCase();
-        if (["mp3", "wav"].includes(extension)) {
+        if (["mp3", "wav", "m4a"].includes(extension)) {
           audioFile = file;
-        } else if (
-          ["ppt", "pptx", "pdf", "doc", "docx"].includes(extension)
-        ) {
+        } else if (["ppt", "pptx", "pdf", "doc", "docx"].includes(extension)) {
           docFile = file;
         }
       }

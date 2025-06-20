@@ -139,7 +139,7 @@ body {
   padding: 0 0 25px;
   /* gap: 25px; */
   min-height: 0;
-  max-height: calc(100vh - 130px);
+  max-height: calc(100vh - 180px);
   overflow: hidden;
 }
 
@@ -567,6 +567,28 @@ body {
   border-bottom: 2px dashed #bababa;
 }
 
+/* 새로운 세그먼트 애니메이션 */
+.new-segment-animation {
+  background-color: rgba(255, 180, 51, 0.15) !important;
+  color: rgba(255, 165, 0, 0.8) !important;
+  animation: newSegmentFadeIn 1.5s ease-out forwards !important;
+}
+
+@keyframes newSegmentFadeIn {
+  0% {
+    background-color: rgba(255, 180, 51, 0.15) !important;
+    color: rgba(255, 165, 0, 0.8) !important;
+  }
+  30% {
+    background-color: rgba(255, 180, 51, 0.15) !important;
+    color: rgba(255, 165, 0, 0.8) !important;
+  }
+  100% {
+    background-color: transparent !important;
+    color: inherit !important;
+  }
+}
+
 .reason-tooltip {
   position: fixed;
   background-color: #333;
@@ -705,13 +727,13 @@ body {
 
 .sort-btn.active {
   /* background-color: #000; */
-  color:  #455E5C;
-  border-bottom: 3px solid ;
-  border-color: #455E5C;
+  color: #455e5c;
+  border-bottom: 3px solid;
+  border-color: #455e5c;
 }
 
-
-.view-btn, .history-btn {
+.view-btn,
+.history-btn {
   padding: 8px 16px;
   /* background-color: #000; */
   /* color: #fff; */
@@ -722,10 +744,10 @@ body {
   transition: background-color 0.2s;
 }
 
-.view-btn:hover, .history-btn:hover {
+.view-btn:hover,
+.history-btn:hover {
   /* background-color: #333; */
   background-color: #f5f5f5;
-
 }
 
 .manual-title {
@@ -778,7 +800,9 @@ body {
   gap: 10px;
 }
 
-.edit-btn, .cancel-btn, .delete-btn {
+.edit-btn,
+.cancel-btn,
+.delete-btn {
   padding: 8px 16px;
   border-radius: 20px;
   cursor: pointer;
@@ -787,9 +811,9 @@ body {
 }
 
 .edit-btn {
-  background-color: #000; 
-  color: #fff; 
-  border: 1px solid #e0e0e0; 
+  background-color: #000;
+  color: #fff;
+  border: 1px solid #e0e0e0;
 }
 
 .edit-btn:hover {
@@ -855,9 +879,9 @@ body {
 }
 
 .pagination-btn.active {
-  background-color:#455E5C;
+  background-color: #455e5c;
   color: #fff;
-  border-color: #455E5C;
+  border-color: #455e5c;
 }
 
 .pagination-btn.disabled {
