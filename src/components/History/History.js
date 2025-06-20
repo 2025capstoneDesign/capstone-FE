@@ -15,7 +15,7 @@ export default function History() {
   const navigate = useNavigate();
   const [sortOrder, setSortOrder] = useState("date"); // "date" or "title"
   const [selectedPdf, setSelectedPdf] = useState(null);
-  const { historyData, downloadPdf, deleteHistoryItem, loading: historyLoading, error: historyError } = useHistory();
+  const { historyData, downloadPdf, deleteHistoryItem, loading: historyLoading, error: historyError, refreshHistory } = useHistory();
   const { loading: processingLoading, progress, uploadedFiles } = useLoading();
   const { isAuthenticated } = useAuth();
   
@@ -48,6 +48,9 @@ export default function History() {
         setShowLoadingModal(true);
         setLoadingMessage("파일을 불러오는 중...");
         
+        // 항상 히스토리 새로고침
+        await refreshHistory();
+        
         // If file doesn't exist yet, download it
         let fileData = item.file;
         if (!fileData && !item.pdfFile) {
@@ -77,11 +80,28 @@ export default function History() {
         setShowLoadingModal(false);
         
         // jobId 추출 로직 보강
-        let jobId = item.id;
-        if (!jobId || jobId === -1) {
-          jobId = item.jobId || item.job_id || item.historyId || item._id || null;
+        let jobId;
+        
+        // 1순위: job_id 필드 사용 (API에서 받은 실제 jobId)
+        if (item.job_id) {
+          jobId = item.job_id;
         }
-        console.log("넘길 jobId:", jobId);
+        // 2순위: id 필드 사용 (단, sample PDF의 -1은 제외)
+        else if (item.id && item.id !== -1) {
+          jobId = item.id;
+        }
+        // 3순위: 기타 필드들
+        else {
+          jobId = item.jobId || item.historyId || item._id || null;
+        }
+        
+        console.log("히스토리 아이템 정보:", {
+          id: item.id,
+          job_id: item.job_id,
+          jobId: item.jobId,
+          filename: item.filename,
+          selectedJobId: jobId
+        });
         
         navigate("/test", {
           state: {
@@ -96,7 +116,7 @@ export default function History() {
         setShowLoadingModal(false);
       }
     },
-    [navigate, downloadPdf]
+    [navigate, downloadPdf, refreshHistory]
   );
 
   const handleDownload = useCallback(async (item) => {

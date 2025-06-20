@@ -78,7 +78,7 @@ export const processService = {
         formData.append("doc_file", files.document);
       }
 
-      formData.append("skip_transcription", "true");
+      formData.append("skip_transcription", "false");
 
       // Add authorization header for authenticated requests
       const headers = { "Content-Type": "multipart/form-data" };

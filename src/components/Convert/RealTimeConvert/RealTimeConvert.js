@@ -31,8 +31,8 @@ function RealTimeConvert() {
 
   // Modal messages
   const PROCESSING_MESSAGES = {
-    STOPPING: "실시간 변환을 종료하는 중...",
-    GENERATING: "슬라이드 이미지를 생성하는 중...",
+    STOPPING: "녹음을 종료하는 중...",
+    GENERATING: "녹음을 종료하는 중...",
   };
 
   // 실시간 변환은 로그인 없이 사용 가능 (백엔드 완성 전 테스트용)
