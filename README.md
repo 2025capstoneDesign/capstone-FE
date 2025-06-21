@@ -1,4 +1,5 @@
-# ✨ 필기요정 (SmartLectureNote)
+# 필기요정 AI(SmartLectureNote)
+
 
 강의 **음성(STT)** 과 **슬라이드(PDF)** 를 자동으로 매핑해  
 **슬라이드별 복습** 을 가능하게 하는 AI 서비스입니다.
@@ -104,7 +105,7 @@
 > - 강의 시작 전 수업에 사용할 강의록을 업로드하고 **녹음 시작** 버튼을 누르면, WebSocket으로 음성이 스트리밍됩니다.
 
 ##### 2) 실시간 수업 듣기
-<img src="https://github.com/user-attachments/assets/02b113c9-3d48-4d4e-b616-fd65663463b6" width="800" alt="실시간 듣기"/>
+<img width="800" alt="Image" src="https://github.com/user-attachments/assets/f62f2de7-234b-4212-8c14-8c8306c1caf2" />
 
 
 
