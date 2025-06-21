@@ -1,4 +1,5 @@
 # 필기요정 AI(SmartLectureNote)
+<img src="https://github.com/user-attachments/assets/601e5aaa-b38c-46b8-958d-0f5a0cb4c6f4" width="200" alt="Image" />
 
 
 강의 **음성(STT)** 과 **슬라이드(PDF)** 를 자동으로 매핑해  
