@@ -123,7 +123,10 @@ function RealTimeConvert() {
         // pdf 파일 업로드 후 실시간 변환 시작
         const response = await realtimeApi.startRealTime(docFile);
 
-        if (response.jobId) {
+        // v1 응답은 snake_case job_id (구버전 jobId도 호환 처리)
+        const jobId = response.job_id || response.jobId;
+
+        if (jobId) {
           setShowLoading(false);
           // 실시간 페이지로 이동
           navigate("/real-time-page", {
@@ -133,7 +136,7 @@ function RealTimeConvert() {
                 summaryData: {},
                 voiceData: {},
               },
-              jobId: response.jobId,
+              jobId: jobId,
               isRealTimeMode: true,
               showTutorial: true,
             },

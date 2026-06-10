@@ -273,47 +273,23 @@ export const useRealTimeState = (initialData, initialJobId) => {
 
             const imageUrls = stopResult.image_urls || [];
             
-            // Step 2: 이미지 프리로딩
+            // Step 2: 이미지 로딩
+            // v1 파일 API는 인증이 필요하므로 blob으로 받아
+            // object URL로 변환한다 (프리로딩 겸용)
             if (imageUrls.length > 0) {
               setLoadingMessage("슬라이드 이미지를 불러오는 중...");
 
-              // 이미지 프리로딩 함수
-              const preloadImages = (urls) => {
-                return Promise.all(
-                  urls.map((url) => {
-                    return new Promise((resolve) => {
-                      const img = new Image();
-                      const fullUrl = realtimeApi.resolveFileUrl(url);
-                      
-                      img.onload = () => resolve(url);
-                      img.onerror = () => {
-                        console.warn(`Failed to load image: ${fullUrl}`);
-                        resolve(url); // 실패해도 계속 진행
-                      };
-                      
-                      // 타임아웃 설정 (10초)
-                      setTimeout(() => {
-                        console.warn(`Image loading timeout: ${fullUrl}`);
-                        resolve(url);
-                      }, 10000);
-                      
-                      img.src = fullUrl;
-                    });
-                  })
-                );
-              };
+              const imageObjectUrls =
+                await realtimeApi.fetchFilesAsObjectUrls(imageUrls);
 
-              // 모든 이미지 로딩 완료 대기
-              await preloadImages(imageUrls);
-              
               setLoadingMessage("이미지 로딩이 완료되었습니다!");
-              
+
               // 잠깐 대기 후 페이지 이동
               setTimeout(() => {
                 setShowLoadingModal(false);
                 navigate("/real-time-editor", {
                   state: {
-                    imageUrls: imageUrls,
+                    imageUrls: imageObjectUrls,
                     jobId: jobId,
                     resultJson: stopResult.result_json || null,
                     pdfUrl: pdfUrl,

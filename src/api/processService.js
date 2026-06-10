@@ -1,10 +1,13 @@
 // src/api/processService.js
-// 업로드(배치) 변환 관련 API.
-// 실시간 관련 함수는 realtimeApi.js로 이동했고,
-// 미사용이던 processRealTimeSegment는 제거했다.
+// 업로드(배치) 변환 관련 API — FastAPI /api/v1 Jobs 스펙.
+//
+// v1 변경점:
+// - 생성: POST /jobs (multipart: audio_file, doc_file, skip_transcription)
+// - 상태: GET /jobs/{job_id}/status → { job_id, status, progress, message }
+// - 결과: GET /jobs/{job_id}/result
 
 import axios from "axios";
-import { API_URL, getStoredAuthHeader } from "./client";
+import { API_V1_URL, getStoredAuthHeader } from "./client";
 
 // Helper function to sleep
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -30,11 +33,9 @@ export const processService = {
         ...getStoredAuthHeader(),
       };
 
-      const response = await axios.post(
-        `${API_URL}/api/process2/start-process-v2`,
-        formData,
-        { headers }
-      );
+      const response = await axios.post(`${API_V1_URL}/jobs`, formData, {
+        headers,
+      });
 
       return response.data;
     } catch (error) {
@@ -47,7 +48,7 @@ export const processService = {
   checkProcessStatus: async (jobId, retryCount = 0) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/process2/process-status-v2/${jobId}`,
+        `${API_V1_URL}/jobs/${jobId}/status`,
         { headers: getStoredAuthHeader() }
       );
       return response.data;
@@ -66,7 +67,7 @@ export const processService = {
   getProcessResult: async (jobId) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/process2/process-result-v2/${jobId}`,
+        `${API_V1_URL}/jobs/${jobId}/result`,
         { headers: getStoredAuthHeader() }
       );
       return response.data;

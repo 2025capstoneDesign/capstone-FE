@@ -1,27 +1,37 @@
 // src/api/historyApi.js
-// 변환 기록(History) 관련 API. HistoryContext에 흩어져 있던 HTTP 호출을 이동.
-// 엔드포인트는 기존 그대로. authHeader는 호출부(AuthContext.getAuthHeader)에서 주입한다.
+// 변환 기록 관련 API — FastAPI /api/v1 Jobs 스펙.
+//
+// v1 변경점:
+// - 목록: GET /jobs (notes_json 미포함 → 상세는 fetchJobDetail로 별도 조회)
+// - 상세: GET /jobs/{job_id} (notes_json 포함)
+// - 파일: GET /jobs/{job_id}/files/{file_path} (인증 필요, blob)
+// - 삭제: DELETE /jobs/{job_id} (204 No Content)
 
 import axios from "axios";
-import { API_URL } from "./client";
+import { API_V1_URL } from "./client";
 
 export const historyApi = {
-  // 내 변환 기록 목록
+  // 내 변환 기록 목록 — [{ job_id, filename, status, created_at }]
   fetchMyHistory: async (authHeader = {}) => {
-    const response = await axios.get(`${API_URL}/api/history/my`, {
+    const response = await axios.get(`${API_V1_URL}/jobs`, {
       headers: { ...authHeader },
     });
     return response.data;
   },
 
-  // 기록 PDF 다운로드 (blob 반환)
-  downloadFile: async (historyItem, authHeader = {}) => {
+  // job 상세 — { job_id, filename, status, created_at, notes_json }
+  fetchJobDetail: async (jobId, authHeader = {}) => {
+    const response = await axios.get(`${API_V1_URL}/jobs/${jobId}`, {
+      headers: { ...authHeader },
+    });
+    return response.data;
+  },
+
+  // job 디렉터리 내 파일 다운로드 (blob 반환)
+  // filePath 예: "slides.pdf", "image/1.png"
+  downloadFile: async (jobId, filePath, authHeader = {}) => {
     const response = await axios.get(
-      `${API_URL}/api/history/download${
-        historyItem.job_id
-          ? `?job_id=${historyItem.job_id}&filename=${historyItem.filename}`
-          : `/${historyItem.filename}`
-      }`,
+      `${API_V1_URL}/jobs/${jobId}/files/${filePath}`,
       {
         headers: { ...authHeader },
         responseType: "blob",
@@ -30,13 +40,9 @@ export const historyApi = {
     return response.data;
   },
 
-  // 기록 삭제 (job_id 우선, 없으면 filename)
-  deleteItem: async (historyItem, authHeader = {}) => {
-    const deleteUrl = historyItem.job_id
-      ? `${API_URL}/api/history/my/${historyItem.job_id}`
-      : `${API_URL}/api/history/my/${historyItem.filename}`;
-
-    await axios.delete(deleteUrl, {
+  // 기록 삭제 — 204 No Content (body 없음)
+  deleteItem: async (jobId, authHeader = {}) => {
+    await axios.delete(`${API_V1_URL}/jobs/${jobId}`, {
       headers: { ...authHeader },
     });
   },

@@ -91,7 +91,8 @@ export default function RealTimeEditorPage() {
     if (receivedPdfUrl) {
       setPdfUrl(receivedPdfUrl);
     } else if (jobId) {
-      setPdfUrl(realtimeApi.getOriginalPdfUrl(jobId));
+      // v1 파일 API는 인증이 필요 → react-pdf가 지원하는 { url, httpHeaders } 사용
+      setPdfUrl(realtimeApi.getOriginalPdfSource(jobId));
     }
   }, [receivedPdfUrl, jobId]);
 

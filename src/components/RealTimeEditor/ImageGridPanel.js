@@ -1,6 +1,7 @@
 import React from "react";
-import { realtimeApi } from "../../api/realtimeApi";
 
+// imageUrls는 인증된 blob에서 만든 object URL 배열
+// (realTimeStateManager에서 fetchFilesAsObjectUrls로 변환됨)
 export default function ImageGridPanel({ imageUrls, selectedImageIndices, onImageClick }) {
 
   return (
@@ -55,7 +56,7 @@ export default function ImageGridPanel({ imageUrls, selectedImageIndices, onImag
               }}
             >
               <img
-                src={realtimeApi.resolveFileUrl(imageUrl)}
+                src={imageUrl || undefined}
                 alt={`슬라이드 ${index + 1}`}
                 style={{
                   width: "100%",

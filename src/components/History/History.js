@@ -17,7 +17,7 @@ export default function History() {
   const navigate = useNavigate();
   const [sortOrder, setSortOrder] = useState("date"); // "date" or "title"
   const [selectedPdf, setSelectedPdf] = useState(null);
-  const { historyData, downloadPdf, deleteHistoryItem, loading: historyLoading, error: historyError, refreshHistory } = useHistory();
+  const { historyData, downloadPdf, loadJobResult, deleteHistoryItem, loading: historyLoading, error: historyError, refreshHistory } = useHistory();
   const { loading: processingLoading, progress, uploadedFiles } = useLoading();
   const { isAuthenticated } = useAuth();
   
@@ -74,10 +74,16 @@ export default function History() {
           pdfUrl = URL.createObjectURL(fileData);
         }
         
+        // v1 목록에는 notes가 없으므로 필요 시 상세 조회로 채움
+        let resultData = item.result;
+        if (!resultData && item.job_id) {
+          resultData = await loadJobResult(item);
+        }
+
         // Make sure we have parsed result data
-        const parsedData = typeof item.result === "object" && item.result?.summaryData
-          ? item.result
-          : parseData(item.result);
+        const parsedData = typeof resultData === "object" && resultData?.summaryData
+          ? resultData
+          : parseData(resultData);
         
         setShowLoadingModal(false);
         
@@ -118,7 +124,7 @@ export default function History() {
         setShowLoadingModal(false);
       }
     },
-    [navigate, downloadPdf, refreshHistory]
+    [navigate, downloadPdf, loadJobResult, refreshHistory]
   );
 
   const handleDownload = useCallback(async (item) => {
