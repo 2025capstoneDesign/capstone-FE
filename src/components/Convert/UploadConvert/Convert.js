@@ -2,9 +2,9 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../../css/TestPage.css";
-import FileUploadSection from "./FileUploadSection";
+import ConvertFileUploadSection from "../ConvertFileUploadSection";
 import LoadingSection from "./LoadingSection";
-import SummarySection from "./SummarySection";
+import ConvertSummarySection from "../ConvertSummarySection";
 import { useLoading } from "../../../context/LoadingContext";
 import { useHistory } from "../../../context/HistoryContext";
 import { useAuth } from "../../../context/AuthContext";
@@ -139,7 +139,8 @@ function Convert() {
           {loading ? (
             <LoadingSection />
           ) : (
-            <FileUploadSection
+            <ConvertFileUploadSection
+              mode="upload"
               files={files}
               fileInputRef={fileInputRef}
               handleFileUpload={handleFileUpload}
@@ -150,7 +151,8 @@ function Convert() {
           )}
         </div>
 
-        <SummarySection
+        <ConvertSummarySection
+          mode="upload"
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           highlightColor={highlightColor}

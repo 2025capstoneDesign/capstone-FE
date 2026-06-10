@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../../css/TestPage.css";
-import RealTimeFileUploadSection from "./RealTimeFileUploadSection";
-import RealTimeSummarySection from "./RealTimeSummarySection";
+import ConvertFileUploadSection from "../ConvertFileUploadSection";
+import ConvertSummarySection from "../ConvertSummarySection";
 import { useLoading } from "../../../context/LoadingContext";
 import { useHistory } from "../../../context/HistoryContext";
 import { showError } from "../../../utils/errorHandler";
@@ -230,7 +230,8 @@ function RealTimeConvert() {
                 goNextPage={goNextPage}
               />
             )}
-          <RealTimeFileUploadSection
+          <ConvertFileUploadSection
+            mode="realtime"
             files={files}
             fileInputRef={fileInputRef}
             handleFileUpload={handleFileUpload}
@@ -240,7 +241,8 @@ function RealTimeConvert() {
           />
         </div>
 
-        <RealTimeSummarySection
+        <ConvertSummarySection
+          mode="realtime"
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           highlightColor={highlightColor}
