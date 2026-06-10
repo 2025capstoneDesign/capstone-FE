@@ -85,14 +85,6 @@ export const realtimeApi = {
     return response.json();
   },
 
-  // 원본 PDF 소스 — 파일 API가 인증을 요구하므로
-  // react-pdf <Document file={...}> 에 그대로 넣을 수 있는
-  // { url, httpHeaders } 객체를 반환한다.
-  getOriginalPdfSource: (jobId) => ({
-    url: `${API_V1_URL}/jobs/${jobId}/files/original.pdf`,
-    httpHeaders: getStoredAuthHeader(),
-  }),
-
   // 실시간 오디오 스트리밍 WebSocket URL.
   // 브라우저 WebSocket은 임의 헤더를 못 붙이므로 token을 query로 전달한다.
   getStreamUrl: (jobId) => {

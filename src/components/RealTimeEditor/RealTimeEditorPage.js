@@ -86,15 +86,10 @@ export default function RealTimeEditorPage() {
     setResultData(newResultData);
   };
 
-  // Set PDF URL - use received PDF URL if available, otherwise generate from jobId
+  // Set PDF URL only when it is carried from the upload flow.
   useEffect(() => {
-    if (receivedPdfUrl) {
-      setPdfUrl(receivedPdfUrl);
-    } else if (jobId) {
-      // v1 파일 API는 인증이 필요 → react-pdf가 지원하는 { url, httpHeaders } 사용
-      setPdfUrl(realtimeApi.getOriginalPdfSource(jobId));
-    }
-  }, [receivedPdfUrl, jobId]);
+    setPdfUrl(receivedPdfUrl || "");
+  }, [receivedPdfUrl]);
 
   const handleImageClick = (index) => {
     setSelectedImageIndices((prev) => {

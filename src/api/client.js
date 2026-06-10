@@ -4,7 +4,7 @@
 
 export const API_URL = process.env.REACT_APP_API_URL;
 
-// FastAPI 백엔드의 v1 API 베이스 (예: http://localhost:8000/api/v1)
+// FastAPI 백엔드의 v1 API 베이스 (예: http://localhost:18080/api/v1)
 export const API_V1_URL = `${API_URL}/api/v1`;
 
 /**
