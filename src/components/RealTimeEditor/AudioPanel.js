@@ -4,6 +4,7 @@ import PageMoveModal from "../common/PageMoveModal";
 import { useAuth } from "../../context/AuthContext";
 import { showError } from "../../utils/errorHandler";
 import { useLocation } from "react-router-dom";
+import { realtimeApi } from "../../api/realtimeApi";
 
 export default function AudioPanel({
   pageNumber,
@@ -207,36 +208,26 @@ export default function AudioPanel({
 
     setIsLoading(true);
     try {
-      const API_URL = process.env.REACT_APP_API_URL;
-      const response = await fetch(`${API_URL}/api/realTime/move-segment`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...getAuthHeader(),
-        },
-        body: JSON.stringify({
+      const result = await realtimeApi.moveSegment(
+        {
           jobId,
           startSlide: selectedPage,
           targetSlide: targetPage,
           text: text,
-        }),
-      });
+        },
+        getAuthHeader()
+      );
 
-      if (response.ok) {
-        const result = await response.json();
-        // result.json으로 voiceData 업데이트
-        if (result.result && onDataUpdate) {
-          onDataUpdate(result.result);
-        }
-
-        const action = targetPage === 0 ? "삭제" : "이동";
-        toast.success(`텍스트가 성공적으로 ${action}되었습니다.`, {
-          position: "top-center",
-          autoClose: 1500,
-        });
-      } else {
-        throw new Error("요청 실패");
+      // result.json으로 voiceData 업데이트
+      if (result.result && onDataUpdate) {
+        onDataUpdate(result.result);
       }
+
+      const action = targetPage === 0 ? "삭제" : "이동";
+      toast.success(`텍스트가 성공적으로 ${action}되었습니다.`, {
+        position: "top-center",
+        autoClose: 1500,
+      });
     } catch (error) {
       console.error("Move/delete error:", error);
       showError("텍스트 이동/삭제 중 오류가 발생했습니다.");

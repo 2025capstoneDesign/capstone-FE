@@ -8,7 +8,7 @@ import { useHistory } from "../../../context/HistoryContext";
 import { showError } from "../../../utils/errorHandler";
 import LoadingModal from "../../common/LoadingModal";
 import PdfViewer from "../../RealTimePage/PdfViewer";
-import axios from "axios";
+import { realtimeApi } from "../../../api/realtimeApi";
 import progress1 from "../../../assets/images/progress_1.png";
 
 function RealTimeConvert() {
@@ -23,8 +23,6 @@ function RealTimeConvert() {
   const [showLoading, setShowLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] =
     useState("실시간 변환을 시작하는 중...");
-
-  const API_URL = process.env.REACT_APP_API_URL;
 
   // Modal state
   const [showProcessingModal, setShowProcessingModal] = useState(false);
@@ -43,58 +41,6 @@ function RealTimeConvert() {
   //     navigate("/login");
   //   }
   // }, [navigate]);
-
-  // 실시간 변환 요청
-  const startRealTime = async (pdfFile = null) => {
-    try {
-      const formData = new FormData();
-
-      if (pdfFile) {
-        formData.append("doc_file", pdfFile);
-      }
-
-      const headers = { "Content-Type": "multipart/form-data" };
-
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-
-      const response = await axios.post(
-        `${API_URL}/api/realTime/start-realtime`,
-        pdfFile ? formData : {},
-        { headers }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error("Error starting real-time process:", error);
-      throw error;
-    }
-  };
-
-  // 실시간 변환 종료 요청
-  const stopRealTime = async (jobId) => {
-    try {
-      const headers = {};
-
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-
-      const response = await axios.post(
-        `${API_URL}/api/realTime/stop-realtime?jobId=${jobId}`,
-        {},
-        { headers }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error("Error stopping real-time process:", error);
-      throw error;
-    }
-  };
 
   // 실시간 변환 결과 처리
   const { loading, pdfFile, convertedData, processingError, setConvertedData } =
@@ -175,7 +121,7 @@ function RealTimeConvert() {
         setLoadingMessage("실시간 변환을 시작하는 중...");
 
         // pdf 파일 업로드 후 실시간 변환 시작
-        const response = await startRealTime(docFile);
+        const response = await realtimeApi.startRealTime(docFile);
 
         if (response.jobId) {
           setShowLoading(false);

@@ -10,6 +10,7 @@ import { useHistory } from "../../context/HistoryContext";
 import { useAuth } from "../../context/AuthContext";
 import { showError } from "../../utils/errorHandler";
 import LoadingModal from "../common/LoadingModal";
+import { realtimeApi } from "../../api/realtimeApi";
 import progress3 from "../../assets/images/progress_3.png";
 
 export default function RealTimeEditorPage() {
@@ -90,8 +91,7 @@ export default function RealTimeEditorPage() {
     if (receivedPdfUrl) {
       setPdfUrl(receivedPdfUrl);
     } else if (jobId) {
-      const API_URL = process.env.REACT_APP_API_URL;
-      setPdfUrl(`${API_URL}/file/${jobId}/original.pdf`);
+      setPdfUrl(realtimeApi.getOriginalPdfUrl(jobId));
     }
   }, [receivedPdfUrl, jobId]);
 
@@ -110,41 +110,31 @@ export default function RealTimeEditorPage() {
       setShowLoading(true);
       setLoadingMessage("필기 생성 중...");
 
-      const API_URL = process.env.REACT_APP_API_URL;
-      const response = await fetch(`${API_URL}/api/realTime/post-process`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...getAuthHeader(),
-        },
-        body: JSON.stringify({
+      const result = await realtimeApi.postProcess(
+        {
           jobId,
           sleepSlides: selectedImageIndices.map((index) => index + 1),
-        }),
-      });
+        },
+        getAuthHeader()
+      );
 
-      if (response.ok) {
-        const result = await response.json();
-        setLoadingMessage("필기 생성이 완료되었습니다!");
-        await refreshHistory();
+      setLoadingMessage("필기 생성이 완료되었습니다!");
+      await refreshHistory();
 
-        setTimeout(() => {
-          setShowLoading(false);
-          navigate("/test", {
-            state: {
-              pdfFile: pdfUrl,
-              result: result.result || resultData,
-              isFromRealTime: true,
-              processedSlides: result.processed_slides || selectedImageIndices,
-              message:
-                result.message || "Post-processing completed successfully",
-              jobId: jobId,
-            },
-          });
-        }, 1500);
-      } else {
-        throw new Error("후처리 요청 실패");
-      }
+      setTimeout(() => {
+        setShowLoading(false);
+        navigate("/test", {
+          state: {
+            pdfFile: pdfUrl,
+            result: result.result || resultData,
+            isFromRealTime: true,
+            processedSlides: result.processed_slides || selectedImageIndices,
+            message:
+              result.message || "Post-processing completed successfully",
+            jobId: jobId,
+          },
+        });
+      }, 1500);
     } catch (error) {
       console.error("Post-process error:", error);
       showError("후처리 중 오류가 발생했습니다. 다시 시도해주세요.");

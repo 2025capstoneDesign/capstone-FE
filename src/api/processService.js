@@ -1,70 +1,15 @@
-import axios from "axios";
+// src/api/processService.js
+// 업로드(배치) 변환 관련 API.
+// 실시간 관련 함수는 realtimeApi.js로 이동했고,
+// 미사용이던 processRealTimeSegment는 제거했다.
 
-const API_URL = process.env.REACT_APP_API_URL;
+import axios from "axios";
+import { API_URL, getStoredAuthHeader } from "./client";
 
 // Helper function to sleep
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const processService = {
-  // Start real-time conversion process
-  startRealTime: async (pdfFile = null) => {
-    try {
-      const formData = new FormData();
-
-      // Add PDF file if provided
-      if (pdfFile) {
-        formData.append("doc_file", pdfFile);
-      }
-
-      const headers = { "Content-Type": "multipart/form-data" };
-
-      // Get auth token from localStorage if it exists
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-
-      const response = await axios.post(
-        `${API_URL}/api/realTime/start-realtime`,
-        pdfFile ? formData : {},
-        { headers }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error("Error starting real-time process:", error);
-      throw error;
-    }
-  },
-
-  // Process real-time audio segment  (지금 안씀)
-  processRealTimeSegment: async (jobId, audioBlob, metaJson) => {
-    try {
-      const formData = new FormData();
-      formData.append("audio_file", audioBlob);
-      formData.append("meta_json", JSON.stringify(metaJson));
-
-      const headers = { "Content-Type": "multipart/form-data" };
-
-      // Get auth token from localStorage if it exists
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-
-      const response = await axios.post(
-        `${API_URL}/api/realTime/real-time-process/${jobId}`,
-        formData,
-        { headers }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error("Error processing real-time segment:", error);
-      throw error;
-    }
-  },
-
   // Start the conversion process
   startProcess: async (files) => {
     try {
@@ -80,14 +25,10 @@ export const processService = {
 
       formData.append("skip_transcription", "false");
 
-      // Add authorization header for authenticated requests
-      const headers = { "Content-Type": "multipart/form-data" };
-
-      // Get auth token from localStorage if it exists
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
+      const headers = {
+        "Content-Type": "multipart/form-data",
+        ...getStoredAuthHeader(),
+      };
 
       const response = await axios.post(
         `${API_URL}/api/process2/start-process-v2`,
@@ -105,13 +46,9 @@ export const processService = {
   // Check the status of a process
   checkProcessStatus: async (jobId, retryCount = 0) => {
     try {
-      // Get auth token from localStorage if it exists
-      const token = localStorage.getItem("accessToken");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
       const response = await axios.get(
         `${API_URL}/api/process2/process-status-v2/${jobId}`,
-        { headers }
+        { headers: getStoredAuthHeader() }
       );
       return response.data;
     } catch (error) {
@@ -128,13 +65,9 @@ export const processService = {
   // Get the result of a completed process
   getProcessResult: async (jobId) => {
     try {
-      // Get auth token from localStorage if it exists
-      const token = localStorage.getItem("accessToken");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
       const response = await axios.get(
         `${API_URL}/api/process2/process-result-v2/${jobId}`,
-        { headers }
+        { headers: getStoredAuthHeader() }
       );
       return response.data;
     } catch (error) {

@@ -4,6 +4,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 import { StreamingSTT } from "./streamingSTT";
+import { realtimeApi } from "../../api/realtimeApi";
 
 export const useRealTimeState = (initialData, initialJobId) => {
   // 상태 변수들
@@ -264,27 +265,13 @@ export const useRealTimeState = (initialData, initialJobId) => {
       if (navigate && jobId) {
         setTimeout(async () => {
           try {
-            // Import axios dynamically
-            const axios = (await import('axios')).default;
-            const API_URL = process.env.REACT_APP_API_URL;
-            
-            const headers = {};
-            const token = localStorage.getItem("accessToken");
-            if (token) {
-              headers["Authorization"] = `Bearer ${token}`;
-            }
-
             // Step 1: Stop API 호출
             setShowLoadingModal(true);
             setLoadingMessage("실시간 변환을 종료하는 중...");
 
-            const response = await axios.post(
-              `${API_URL}/api/realTime/stop-realtime?jobId=${jobId}`,
-              {},
-              { headers }
-            );
+            const stopResult = await realtimeApi.stopRealTime(jobId);
 
-            const imageUrls = response.data.image_urls || [];
+            const imageUrls = stopResult.image_urls || [];
             
             // Step 2: 이미지 프리로딩
             if (imageUrls.length > 0) {
@@ -296,7 +283,7 @@ export const useRealTimeState = (initialData, initialJobId) => {
                   urls.map((url) => {
                     return new Promise((resolve) => {
                       const img = new Image();
-                      const fullUrl = url.startsWith('http') ? url : `${API_URL}${url}`;
+                      const fullUrl = realtimeApi.resolveFileUrl(url);
                       
                       img.onload = () => resolve(url);
                       img.onerror = () => {
@@ -328,7 +315,7 @@ export const useRealTimeState = (initialData, initialJobId) => {
                   state: {
                     imageUrls: imageUrls,
                     jobId: jobId,
-                    resultJson: response.data.result_json || null,
+                    resultJson: stopResult.result_json || null,
                     pdfUrl: pdfUrl,
                     sleepPages: sleepPages
                   }

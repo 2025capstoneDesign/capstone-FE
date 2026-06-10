@@ -1,7 +1,7 @@
 import React from "react";
+import { realtimeApi } from "../../api/realtimeApi";
 
 export default function ImageGridPanel({ imageUrls, selectedImageIndices, onImageClick }) {
-  const API_URL = process.env.REACT_APP_API_URL;
 
   return (
     <div className="slide-container">
@@ -55,7 +55,7 @@ export default function ImageGridPanel({ imageUrls, selectedImageIndices, onImag
               }}
             >
               <img
-                src={`${API_URL}${imageUrl}`}
+                src={realtimeApi.resolveFileUrl(imageUrl)}
                 alt={`슬라이드 ${index + 1}`}
                 style={{
                   width: "100%",

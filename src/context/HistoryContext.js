@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { dummyData } from "../data/dummyData";
 import { parseData } from "../components/TestPage/DataParser";
-import axios from "axios";
+import { historyApi } from "../api/historyApi";
 import { useAuth } from "./AuthContext";
 
 const HistoryContext = createContext();
@@ -40,15 +40,12 @@ export function HistoryProvider({ children }) {
     setError(null);
 
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/history/my`,
-        { headers: { ...getAuthHeader() } }
-      );
+      const data = await historyApi.fetchMyHistory(getAuthHeader());
 
-      console.log("History API response:", response.data);
+      console.log("History API response:", data);
 
       // Map the response data to our format
-      const mappedHistory = response.data.map((item) => {
+      const mappedHistory = data.map((item) => {
         console.log("HistoryContext - API 응답 아이템:", item);
         return {
           id: item.id,
@@ -106,29 +103,22 @@ export function HistoryProvider({ children }) {
       try {
         setLoading(true);
 
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/history/download${
-            historyItem.job_id
-              ? `?job_id=${historyItem.job_id}&filename=${historyItem.filename}`
-              : `/${historyItem.filename}`
-          }`,
-          {
-            headers: { ...getAuthHeader() },
-            responseType: "blob",
-          }
+        const fileBlob = await historyApi.downloadFile(
+          historyItem,
+          getAuthHeader()
         );
 
         // Update history item with the downloaded file
         setHistoryData((prev) => {
           return prev.map((item) => {
             if (item.id === historyItem.id) {
-              return { ...item, file: response.data };
+              return { ...item, file: fileBlob };
             }
             return item;
           });
         });
 
-        return response.data;
+        return fileBlob;
       } catch (err) {
         console.error(`Error downloading file ${historyItem.filename}:`, err);
         setError(
@@ -159,14 +149,7 @@ export function HistoryProvider({ children }) {
       try {
         setLoading(true);
 
-        // Delete endpoint: /api/history/my/filename or /api/history/my/jobId
-        const deleteUrl = historyItem.job_id 
-          ? `${process.env.REACT_APP_API_URL}/api/history/my/${historyItem.job_id}`
-          : `${process.env.REACT_APP_API_URL}/api/history/my/${historyItem.filename}`;
-
-        await axios.delete(deleteUrl, {
-          headers: { ...getAuthHeader() }
-        });
+        await historyApi.deleteItem(historyItem, getAuthHeader());
 
         // Remove item from local state
         setHistoryData((prev) => 
