@@ -180,15 +180,6 @@ export default function TestPage() {
           goNextPage={goNextPage}
           goToSpecificPage={goToSpecificPage}
           pdfData={{ summaryData, voiceData }}
-          jobId={jobId}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          highlightColor={highlightColor}
-          setHighlightColor={setHighlightColor}
-          setPageNumber={setPageNumber}
-          summaryData={summaryData}
-          voiceData={voiceData}
-          pageSectionRefs={pageSectionRefs}
           searchKeyword={searchKeyword}
           setSearchKeyword={setSearchKeyword}
         />
