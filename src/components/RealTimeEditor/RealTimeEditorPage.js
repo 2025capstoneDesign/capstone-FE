@@ -9,6 +9,7 @@ import { parseRealTimeResponse } from "../RealTimePage/realTimeDataParser";
 import { useHistory } from "../../context/HistoryContext";
 import { useAuth } from "../../context/AuthContext";
 import { showError } from "../../utils/errorHandler";
+import LoadingModal from "../common/LoadingModal";
 import progress3 from "../../assets/images/progress_3.png";
 
 export default function RealTimeEditorPage() {
@@ -182,20 +183,7 @@ export default function RealTimeEditorPage() {
   return (
     <div className="app-wrapper">
       {/* Loading Modal */}
-      {showLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
-            <img
-              src="/loading_listen.gif"
-              alt="로딩 중"
-              className="w-[200px] h-[200px] object-contain mb-4"
-            />
-            <p className="text-gray-700 text-lg font-medium">
-              {loadingMessage}
-            </p>
-          </div>
-        </div>
-      )}
+      {showLoading && <LoadingModal message={loadingMessage} />}
       <div className="sub-header">
         <div className="flex items-center w-full">
           <div className="w-[200px] flex items-center">

@@ -6,6 +6,7 @@ import RealTimeSummarySection from "./RealTimeSummarySection";
 import { useLoading } from "../../../context/LoadingContext";
 import { useHistory } from "../../../context/HistoryContext";
 import { showError } from "../../../utils/errorHandler";
+import LoadingModal from "../../common/LoadingModal";
 import PdfViewer from "../../RealTimePage/PdfViewer";
 import axios from "axios";
 import progress1 from "../../../assets/images/progress_1.png";
@@ -234,35 +235,11 @@ function RealTimeConvert() {
   return (
     <div className="app-wrapper convert-page">
       {/* Loading Modal */}
-      {showLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
-            <img
-              src="/loading_listen.gif"
-              alt="로딩 중"
-              className="w-[200px] h-[200px] object-contain mb-4"
-            />
-            <p className="text-gray-700 text-lg font-medium">
-              {loadingMessage}
-            </p>
-          </div>
-        </div>
-      )}
+      {showLoading && <LoadingModal message={loadingMessage} />}
 
       {/* Processing Modal */}
       {showProcessingModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
-            <img
-              src="/loading_listen.gif"
-              alt="처리 중"
-              className="w-[200px] h-[200px] object-contain mb-4"
-            />
-            <p className="text-gray-700 text-lg font-medium">
-              {processingMessage}
-            </p>
-          </div>
-        </div>
+        <LoadingModal message={processingMessage} alt="처리 중" />
       )}
 
       <div className="sub-header">

@@ -9,6 +9,7 @@ import { useLoading } from "../../../context/LoadingContext";
 import { useHistory } from "../../../context/HistoryContext";
 import { useAuth } from "../../../context/AuthContext";
 import { showError } from "../../../utils/errorHandler";
+import PageHeader from "../../common/PageHeader";
 
 function Convert() {
   const navigate = useNavigate();
@@ -124,14 +125,11 @@ function Convert() {
 
   return (
     <div className="app-wrapper convert-page">
-      <div className="sub-header">
-        <h2 className="page-title">강의록 변환</h2>
-        <div className="action-buttons">
-          <button className="convert-btn" onClick={() => navigate("/")}>
-            홈으로
-          </button>
-        </div>
-      </div>
+      <PageHeader title="강의록 변환" titleTag="h2">
+        <button className="convert-btn" onClick={() => navigate("/")}>
+          홈으로
+        </button>
+      </PageHeader>
 
       {error && <div className="text-red-500 mx-[5%] my-[0.5rem]">{error}</div>}
 

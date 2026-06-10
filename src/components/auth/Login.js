@@ -4,6 +4,7 @@ import loginImage from "../../assets/images/login2.png";
 import { useAuth } from "../../context/AuthContext";
 import { useHistory } from "../../context/HistoryContext";
 import { showError, handleApiError } from "../../utils/errorHandler";
+import LoadingModal from "../common/LoadingModal";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -45,18 +46,7 @@ const Login = () => {
   return (
     <div className="flex min-h-screen w-full relative">
       {/* Loading Modal */}
-      {showLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
-            <img 
-              src="/loading_listen.gif" 
-              alt="로딩 중" 
-              className="w-[200px] h-[200px] object-contain mb-4"
-            />
-            <p className="text-gray-700 text-lg font-medium">{loadingMessage}</p>
-          </div>
-        </div>
-      )}
+      {showLoading && <LoadingModal message={loadingMessage} />}
 
       <div className="hidden lg:block w-[50%] bg-[#FBF8EF] flex items-center justify-center min-h-screen">
         <img 

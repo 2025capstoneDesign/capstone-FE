@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../../css/TestPage.css";
 import SettingsSection from "./SettingsSection";
 import ManualSection from "./ManualSection";
+import PageHeader from "../common/PageHeader";
 
 function Setting() {
     const navigate = useNavigate();
@@ -26,14 +27,11 @@ function Setting() {
     
     return (
         <div className="app-wrapper">
-            <div className="sub-header">
-                <h2 className="page-title">사용자 설정</h2>
-                <div className="action-buttons">
-                    <button className="convert-btn" onClick={() => navigate("/")}>
-                        홈으로
-                    </button>
-                </div>
-            </div>
+            <PageHeader title="사용자 설정" titleTag="h2">
+                <button className="convert-btn" onClick={() => navigate("/")}>
+                    홈으로
+                </button>
+            </PageHeader>
 
             <div className="main-content">
                 <SettingsSection 

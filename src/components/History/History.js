@@ -10,6 +10,8 @@ import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
 import { useAuth } from "../../context/AuthContext";
 import { showError } from "../../utils/errorHandler";
+import LoadingModal from "../common/LoadingModal";
+import PageHeader from "../common/PageHeader";
 
 export default function History() {
   const navigate = useNavigate();
@@ -202,27 +204,13 @@ export default function History() {
   return (
     <div className="app-wrapper history-page">
       {/* Loading Modal */}
-      {showLoadingModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
-            <img 
-              src="/loading_listen.gif" 
-              alt="로딩 중" 
-              className="w-[200px] h-[200px] object-contain mb-4"
-            />
-            <p className="text-gray-700 text-lg font-medium">{loadingMessage}</p>
-          </div>
-        </div>
-      )}
-      
-      <div className="sub-header">
-        <h1 className="page-title">변환 기록</h1>
-        <div className="action-buttons">
-          <button className="convert-btn" onClick={() => navigate("/")}>
-            홈으로
-          </button>
-        </div>
-      </div>
+      {showLoadingModal && <LoadingModal message={loadingMessage} />}
+
+      <PageHeader title="변환 기록">
+        <button className="convert-btn" onClick={() => navigate("/")}>
+          홈으로
+        </button>
+      </PageHeader>
       <div className="main-content">
         <PdfList
           sortedHistory={sortedHistory}

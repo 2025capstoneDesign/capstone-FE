@@ -9,6 +9,7 @@ import PdfViewer from "./PdfViewer";
 import SummaryPanel from "./SummaryPanel";
 import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
+import PageHeader from "../common/PageHeader";
 
 export default function TestPage() {
   const location = useLocation();
@@ -159,17 +160,14 @@ export default function TestPage() {
 
   return (
     <div className="app-wrapper">
-      <div className="sub-header">
-        <h1 className="page-title">PDF 변환 결과</h1>
-        <div className="action-buttons">
-          <button className="convert-btn" onClick={handleConvertClick}>
-            다시 변환하기
-          </button>
-          <button className="download-btn" onClick={handleDownload}>
-            다운로드
-          </button>
-        </div>
-      </div>
+      <PageHeader title="PDF 변환 결과">
+        <button className="convert-btn" onClick={handleConvertClick}>
+          다시 변환하기
+        </button>
+        <button className="download-btn" onClick={handleDownload}>
+          다운로드
+        </button>
+      </PageHeader>
       <div className="main-content">
         <ToastContainer />
         <PdfViewer
