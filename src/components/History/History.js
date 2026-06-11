@@ -10,12 +10,14 @@ import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
 import { useAuth } from "../../context/AuthContext";
 import { showError } from "../../utils/errorHandler";
+import LoadingModal from "../common/LoadingModal";
+import PageHeader from "../common/PageHeader";
 
 export default function History() {
   const navigate = useNavigate();
   const [sortOrder, setSortOrder] = useState("date"); // "date" or "title"
   const [selectedPdf, setSelectedPdf] = useState(null);
-  const { historyData, downloadPdf, deleteHistoryItem, loading: historyLoading, error: historyError, refreshHistory } = useHistory();
+  const { historyData, downloadPdf, loadJobResult, deleteHistoryItem, loading: historyLoading, error: historyError, refreshHistory } = useHistory();
   const { loading: processingLoading, progress, uploadedFiles } = useLoading();
   const { isAuthenticated } = useAuth();
   
@@ -72,10 +74,16 @@ export default function History() {
           pdfUrl = URL.createObjectURL(fileData);
         }
         
+        // v1 목록에는 notes가 없으므로 필요 시 상세 조회로 채움
+        let resultData = item.result;
+        if (!resultData && item.job_id) {
+          resultData = await loadJobResult(item);
+        }
+
         // Make sure we have parsed result data
-        const parsedData = typeof item.result === "object" && item.result?.summaryData
-          ? item.result
-          : parseData(item.result);
+        const parsedData = typeof resultData === "object" && resultData?.summaryData
+          ? resultData
+          : parseData(resultData);
         
         setShowLoadingModal(false);
         
@@ -116,7 +124,7 @@ export default function History() {
         setShowLoadingModal(false);
       }
     },
-    [navigate, downloadPdf, refreshHistory]
+    [navigate, downloadPdf, loadJobResult, refreshHistory]
   );
 
   const handleDownload = useCallback(async (item) => {
@@ -202,27 +210,13 @@ export default function History() {
   return (
     <div className="app-wrapper history-page">
       {/* Loading Modal */}
-      {showLoadingModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
-            <img 
-              src="/loading_listen.gif" 
-              alt="로딩 중" 
-              className="w-[200px] h-[200px] object-contain mb-4"
-            />
-            <p className="text-gray-700 text-lg font-medium">{loadingMessage}</p>
-          </div>
-        </div>
-      )}
-      
-      <div className="sub-header">
-        <h1 className="page-title">변환 기록</h1>
-        <div className="action-buttons">
-          <button className="convert-btn" onClick={() => navigate("/")}>
-            홈으로
-          </button>
-        </div>
-      </div>
+      {showLoadingModal && <LoadingModal message={loadingMessage} />}
+
+      <PageHeader title="변환 기록">
+        <button className="convert-btn" onClick={() => navigate("/")}>
+          홈으로
+        </button>
+      </PageHeader>
       <div className="main-content">
         <PdfList
           sortedHistory={sortedHistory}

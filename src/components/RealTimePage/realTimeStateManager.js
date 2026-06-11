@@ -4,6 +4,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 import { StreamingSTT } from "./streamingSTT";
+import { realtimeApi } from "../../api/realtimeApi";
 
 export const useRealTimeState = (initialData, initialJobId) => {
   // 상태 변수들
@@ -264,71 +265,33 @@ export const useRealTimeState = (initialData, initialJobId) => {
       if (navigate && jobId) {
         setTimeout(async () => {
           try {
-            // Import axios dynamically
-            const axios = (await import('axios')).default;
-            const API_URL = process.env.REACT_APP_API_URL;
-            
-            const headers = {};
-            const token = localStorage.getItem("accessToken");
-            if (token) {
-              headers["Authorization"] = `Bearer ${token}`;
-            }
-
             // Step 1: Stop API 호출
             setShowLoadingModal(true);
             setLoadingMessage("실시간 변환을 종료하는 중...");
 
-            const response = await axios.post(
-              `${API_URL}/api/realTime/stop-realtime?jobId=${jobId}`,
-              {},
-              { headers }
-            );
+            const stopResult = await realtimeApi.stopRealTime(jobId);
 
-            const imageUrls = response.data.image_urls || [];
+            const imageUrls = stopResult.image_urls || [];
             
-            // Step 2: 이미지 프리로딩
+            // Step 2: 이미지 로딩
+            // v1 파일 API는 인증이 필요하므로 blob으로 받아
+            // object URL로 변환한다 (프리로딩 겸용)
             if (imageUrls.length > 0) {
               setLoadingMessage("슬라이드 이미지를 불러오는 중...");
 
-              // 이미지 프리로딩 함수
-              const preloadImages = (urls) => {
-                return Promise.all(
-                  urls.map((url) => {
-                    return new Promise((resolve) => {
-                      const img = new Image();
-                      const fullUrl = url.startsWith('http') ? url : `${API_URL}${url}`;
-                      
-                      img.onload = () => resolve(url);
-                      img.onerror = () => {
-                        console.warn(`Failed to load image: ${fullUrl}`);
-                        resolve(url); // 실패해도 계속 진행
-                      };
-                      
-                      // 타임아웃 설정 (10초)
-                      setTimeout(() => {
-                        console.warn(`Image loading timeout: ${fullUrl}`);
-                        resolve(url);
-                      }, 10000);
-                      
-                      img.src = fullUrl;
-                    });
-                  })
-                );
-              };
+              const imageObjectUrls =
+                await realtimeApi.fetchFilesAsObjectUrls(imageUrls);
 
-              // 모든 이미지 로딩 완료 대기
-              await preloadImages(imageUrls);
-              
               setLoadingMessage("이미지 로딩이 완료되었습니다!");
-              
+
               // 잠깐 대기 후 페이지 이동
               setTimeout(() => {
                 setShowLoadingModal(false);
                 navigate("/real-time-editor", {
                   state: {
-                    imageUrls: imageUrls,
+                    imageUrls: imageObjectUrls,
                     jobId: jobId,
-                    resultJson: response.data.result_json || null,
+                    resultJson: stopResult.result_json || null,
                     pdfUrl: pdfUrl,
                     sleepPages: sleepPages
                   }

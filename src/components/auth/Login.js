@@ -4,6 +4,7 @@ import loginImage from "../../assets/images/login2.png";
 import { useAuth } from "../../context/AuthContext";
 import { useHistory } from "../../context/HistoryContext";
 import { showError, handleApiError } from "../../utils/errorHandler";
+import LoadingModal from "../common/LoadingModal";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -20,8 +21,6 @@ const Login = () => {
     setShowLoading(true);
 
     try {
-      console.log("로그인 시도:", { username, password });
-      
       const result = await login({ username, password });
       
       if (result.success) {
@@ -45,18 +44,7 @@ const Login = () => {
   return (
     <div className="flex min-h-screen w-full relative">
       {/* Loading Modal */}
-      {showLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
-            <img 
-              src="/loading_listen.gif" 
-              alt="로딩 중" 
-              className="w-[200px] h-[200px] object-contain mb-4"
-            />
-            <p className="text-gray-700 text-lg font-medium">{loadingMessage}</p>
-          </div>
-        </div>
-      )}
+      {showLoading && <LoadingModal message={loadingMessage} />}
 
       <div className="hidden lg:block w-[50%] bg-[#FBF8EF] flex items-center justify-center min-h-screen">
         <img 
@@ -79,10 +67,10 @@ const Login = () => {
         <form onSubmit={handleLogin} className="w-full max-w-[75%] lg:max-w-[30vw] space-y-[1.8rem] lg:space-y-[1.8vw]">
           <div className="space-y-[1rem] lg:space-y-[1vw]">
             <label htmlFor="username" className="block text-[1.1rem] lg:text-[1.1vw] font-medium text-gray-700">
-              아이디
+              이메일
             </label>
             <input
-              type="text"
+              type="email"
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}

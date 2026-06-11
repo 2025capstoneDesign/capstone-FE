@@ -1,6 +1,6 @@
 import React from "react";
 
-function SettingsSection({ keyword, setKeyword, noteType, setNoteType, handleSave }) {
+function SettingsSection({ keyword, setKeyword, noteType, setNoteType, language, setLanguage, handleSave }) {
   return (
     <div className="slide-container">
       <div className="slide-header">
@@ -47,13 +47,13 @@ function SettingsSection({ keyword, setKeyword, noteType, setNoteType, handleSav
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="noteType" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="language" className="block text-sm font-medium text-gray-700">
                 필기 언어 설정
               </label>
               <select
-                id="noteType"
-                value={noteType}
-                onChange={(e) => setNoteType(e.target.value)}
+                id="language"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#455E5C]"
               >
                 <option value="한국어">한국어</option>

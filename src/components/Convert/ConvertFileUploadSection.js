@@ -1,12 +1,63 @@
 import React, { useCallback } from "react";
-import word_icon from "../../../assets/images/docx.png";
-import pdf_icon from "../../../assets/images/pdf.png";
-import ppt_icon from "../../../assets/images/ppt.png";
-import mp3_icon from "../../../assets/images/mp3.png";
-import wav_icon from "../../../assets/images/wav.png";
-import upload_icon from "../../../assets/images/upload_image.png";
+import word_icon from "../../assets/images/docx.png";
+import pdf_icon from "../../assets/images/pdf.png";
+import ppt_icon from "../../assets/images/ppt.png";
+import mp3_icon from "../../assets/images/mp3.png";
+import wav_icon from "../../assets/images/wav.png";
+import upload_icon from "../../assets/images/upload_image.png";
 
-function FileUploadSection({
+/**
+ * 변환 페이지 좌측 파일 업로드 영역 (공통)
+ *
+ * 기존 UploadConvert/FileUploadSection.js 와
+ * RealTimeConvert/RealTimeFileUploadSection.js 의 쌍둥이 파일을 통합.
+ * 차이점(문구, accept, 지원 형식 목록, 버튼 동작)은 VARIANTS로 분리.
+ *
+ * mode: "upload" (강의록+음성 변환) | "realtime" (실시간 변환)
+ */
+const VARIANTS = {
+  upload: {
+    title: "강의록과 음성을 업로드하여 요약된 필기 내용을 확인해보세요",
+    dragTargetLabel: "파일",
+    multiple: true,
+    accept: ".doc,.docx,.pdf,.ppt,.pptx,.mp3,.wav, .m4a",
+    gridColsClass: "grid-cols-2",
+    headers: ["강의록", "음성"],
+    fileTypes: [
+      { icon: pdf_icon, label: "PDF" },
+      { icon: wav_icon, label: "WAV" },
+      { icon: ppt_icon, label: "PPT" },
+      { icon: mp3_icon, label: "MP3" },
+      { icon: word_icon, label: "Word" },
+    ],
+    buttonComment: "변환하기 버튼",
+    buttonClassName:
+      "bg-[#5B7F7C] text-white font-semibold py-2 px-4 rounded-lg my-5",
+    buttonLabel: "변환하기",
+    disableWhenEmpty: false,
+  },
+  realtime: {
+    title: "강의록을 업로드하여 실시간 강의를 시작해보세요",
+    dragTargetLabel: "강의록",
+    multiple: false,
+    accept: ".doc,.docx,.pdf,.ppt,.pptx",
+    gridColsClass: "grid-cols-1",
+    headers: ["지원하는 파일 형식"],
+    fileTypes: [
+      { icon: pdf_icon, label: "PDF" },
+      { icon: ppt_icon, label: "PPT" },
+      { icon: word_icon, label: "Word" },
+    ],
+    buttonComment: "실시간 변환 버튼",
+    buttonClassName:
+      "bg-[#5B7F7C] text-white font-semibold py-2 px-4 rounded-lg",
+    buttonLabel: "실시간 강의 변환",
+    disableWhenEmpty: true,
+  },
+};
+
+function ConvertFileUploadSection({
+  mode = "upload",
   files,
   fileInputRef,
   handleFileUpload,
@@ -14,6 +65,8 @@ function FileUploadSection({
   handleConvert,
   isLoading,
 }) {
+  const variant = VARIANTS[mode];
+
   const handleDrop = useCallback(
     (event) => {
       event.preventDefault();
@@ -57,6 +110,7 @@ function FileUploadSection({
       case "ppt":
       case "pptx":
         return ppt_icon;
+      case "mp3":
       case "m4a":
         return mp3_icon;
       case "wav":
@@ -67,11 +121,13 @@ function FileUploadSection({
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100%-3.5rem)]">
+    <div className="flex flex-col lg:flex-row h-[calc(100%-3.5rem)] min-h-0">
       {/* 왼쪽 업로드 영역 */}
-      <div className="flex-1 p-[5%] flex flex-col">
-        <h2 className="text-[1.4rem] font-semibold my-[3vh] text-center">
-          강의록과 음성을 업로드하여 요약된 필기 내용을 확인해보세요
+      <div className="flex-1 px-[5%] py-[1rem] flex flex-col min-h-0 overflow-y-auto">
+        {/* 가운데 정렬되는 콘텐츠 영역: 화면이 커도 위로 쏠리지 않도록 남는 공간을 위아래로 분배 */}
+        <div className="flex flex-col justify-center flex-1">
+        <h2 className="text-[1.4rem] font-semibold my-[2vh] text-center">
+          {variant.title}
         </h2>
         <div
           onClick={handleUploadClick}
@@ -81,10 +137,10 @@ function FileUploadSection({
           <input
             ref={fileInputRef}
             type="file"
-            multiple
+            multiple={variant.multiple}
             className="hidden"
             onChange={handleFileUpload}
-            accept=".doc,.docx,.pdf,.ppt,.pptx,.mp3,.wav, .m4a"
+            accept={variant.accept}
           />
           <div className="w-full lg:w-[70%] h-[22vh] mx-auto border-4 border-[#DEE5E5] rounded-xl flex flex-col justify-center items-center cursor-pointer hover:border-[#5B7F7C] transition-colors bg-[#F9F7F7]">
             <div className="mb-[0.8rem]">
@@ -97,82 +153,58 @@ function FileUploadSection({
             <p className="text-gray-500 text-[1.2rem] pt-[0.6rem] text-center px-[1rem]">
               <span className="text-[#5B7F7C] font-semibold">드래그</span>
               하거나 <span className="text-[#5B7F7C] font-semibold">클릭</span>
-              하여 파일을 업로드 하세요
+              하여 {variant.dragTargetLabel}을 업로드 하세요
             </p>
           </div>
         </div>
 
         {/* 파일 형식 아이콘들 */}
-        <div className="py-[1.5rem] w-full lg:w-[75%] mx-auto">
-          <div className="grid grid-cols-2 gap-4">
-            <span className="text-[1.1rem] text-[#455E5C] font-semibold border-b-4 border-[#DEE5E5] px-[1rem] py-[0.25rem]">
-              강의록
-            </span>
-            <span className="text-[1.1rem] text-[#455E5C] font-semibold border-b-4 border-[#DEE5E5] px-[1rem] py-[0.25rem]">
-              음성
-            </span>
+        <div className="py-[1rem] w-full lg:w-[75%] mx-auto">
+          <div className={`grid ${variant.gridColsClass} gap-4`}>
+            {variant.headers.map((header) => (
+              <span
+                key={header}
+                className="text-[1.1rem] text-[#455E5C] font-semibold border-b-4 border-[#DEE5E5] px-[1rem] py-[0.25rem]"
+              >
+                {header}
+              </span>
+            ))}
 
-            <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
-              <img
-                src={pdf_icon}
-                alt="PDF"
-                className="w-[2.5rem] h-[2.5rem] object-fit"
-              />
-              <span className="text-sm">PDF</span>
-            </div>
-            <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
-              <img
-                src={wav_icon}
-                alt="WAV"
-                className="w-[2.5rem] h-[2.5rem] object-fit"
-              />
-              <span className="text-sm">WAV</span>
-            </div>
-
-            <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
-              <img
-                src={ppt_icon}
-                alt="PPT"
-                className="w-[2.5rem] h-[2.5rem] object-fit"
-              />
-              <span className="text-sm">PPT</span>
-            </div>
-            <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
-              <img
-                src={mp3_icon}
-                alt="MP3"
-                className="w-[2.5rem] h-[2.5rem] object-fit"
-              />
-              <span className="text-sm">MP3</span>
-            </div>
-
-            <div className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]">
-              <img
-                src={word_icon}
-                alt="Word"
-                className="w-[2.5rem] h-[2.5rem] object-fit"
-              />
-              <span className="text-sm">Word</span>
-            </div>
+            {variant.fileTypes.map(({ icon, label }) => (
+              <div
+                key={label}
+                className="flex flex-row items-center gap-3 border-2 border-gray-200 rounded-lg px-[1.25rem] py-[0.4rem]"
+              >
+                <img
+                  src={icon}
+                  alt={label}
+                  className="w-[2.5rem] h-[2.5rem] object-fit"
+                />
+                <span className="text-sm">{label}</span>
+              </div>
+            ))}
           </div>
         </div>
+        </div>
 
-        {/* 변환하기 버튼 */}
-        <div className="flex justify-end mb-4 relative -top-14">
+        {/* 변환 버튼: 패널 하단 우측에 고정 */}
+        <div className="flex justify-end mt-auto">
           <button
-            className="bg-[#5B7F7C] text-white font-semibold py-2 px-4 rounded-lg my-5"
+            className={variant.buttonClassName}
             onClick={handleConvert}
-            disabled={isLoading}
+            disabled={
+              isLoading || (variant.disableWhenEmpty && files.length === 0)
+            }
           >
-            {isLoading ? "변환 중..." : "변환하기"}
+            {isLoading ? "변환 중..." : variant.buttonLabel}
           </button>
         </div>
       </div>
 
       {/* 오른쪽 업로드된 파일 목록 */}
-      <div className="w-full lg:w-[33%] p-[1rem] border-t lg:border-t-0 lg:border-l border-gray-200">
+      <div className="w-full lg:w-[33%] p-[1rem] border-t lg:border-t-0 lg:border-l border-gray-200 min-h-0 overflow-y-auto flex flex-col">
         {files.length === 0 ? (
-          <div className="text-center text-[1.2rem] text-gray-500 my-[3rem]">
+          <div className="text-center text-[1.2rem] text-gray-500 my-auto">
             아직 업로드된 파일이 없습니다
           </div>
         ) : (
@@ -223,4 +255,4 @@ function FileUploadSection({
   );
 }
 
-export default FileUploadSection;
+export default ConvertFileUploadSection;

@@ -1,5 +1,8 @@
 // 새로운 스트리밍 STT 시스템
 // WebSocket + AudioWorklet 기반 실시간 음성 인식
+// v1 스펙: ws://{host}/api/v1/realtime/sessions/{job_id}/stream?token=<access_token>
+
+import { realtimeApi } from "../../api/realtimeApi";
 
 export class StreamingSTT {
   constructor() {
@@ -34,21 +37,22 @@ export class StreamingSTT {
   setupWebSocket(jobId = null) {
     return new Promise((resolve, reject) => {
       try {
-        // WebSocket 서버 주소
-        const wsUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:8001';
+        // v1: jobId는 URL path에, 토큰은 query에 포함된다
+        if (!jobId) {
+          const error = new Error("jobId가 없어 WebSocket을 연결할 수 없습니다.");
+          if (this.onError) {
+            this.onError(error.message);
+          }
+          reject(error);
+          return;
+        }
+
+        const wsUrl = realtimeApi.getStreamUrl(jobId);
         this.webSocket = new WebSocket(wsUrl);
 
         this.webSocket.onopen = () => {
           console.log('WebSocket 연결됨');
-          
-          // 초기 연결 시 jobId 전송 (있는 경우)
-          if (jobId) {
-            this.webSocket.send(JSON.stringify({
-              "jobId": jobId
-            }));
-            console.log('JobId 전송됨:', jobId);
-          }
-          
+
           if (this.onConnectionChange) {
             this.onConnectionChange(true);
           }
@@ -59,12 +63,24 @@ export class StreamingSTT {
           try {
             const data = JSON.parse(event.data);
             console.log('서버로부터 받은 데이터:', data);
-            
+
+            // v1 서버 상태 메시지 처리
+            if (data.status === 'connected') {
+              console.log('세션 연결 확인됨:', data.jobId);
+              return;
+            }
+            if (data.status === 'error') {
+              if (this.onError) {
+                this.onError(`서버 오류: ${data.message}`);
+              }
+              return;
+            }
+
             // 슬라이드별 음성 인식 결과 처리
             if (this.onTranscriptUpdate) {
               this.onTranscriptUpdate(data);
             }
-            
+
             if (data.error && this.onError) {
               this.onError(`서버 오류: ${data.error}`);
             }
@@ -81,8 +97,14 @@ export class StreamingSTT {
           reject(error);
         };
 
-        this.webSocket.onclose = () => {
-          console.log('WebSocket 연결 종료됨');
+        this.webSocket.onclose = (event) => {
+          console.log('WebSocket 연결 종료됨', event.code);
+
+          // 1008: 인증 실패 또는 세션 소유권 없음
+          if (event.code === 1008 && this.onError) {
+            this.onError('인증이 만료되었거나 세션 권한이 없습니다. 다시 로그인해주세요.');
+          }
+
           if (this.onConnectionChange) {
             this.onConnectionChange(false);
           }

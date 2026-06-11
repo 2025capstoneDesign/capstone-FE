@@ -1,13 +1,14 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../../css/TestPage.css";
-import RealTimeFileUploadSection from "./RealTimeFileUploadSection";
-import RealTimeSummarySection from "./RealTimeSummarySection";
+import ConvertFileUploadSection from "../ConvertFileUploadSection";
+import ConvertSummarySection from "../ConvertSummarySection";
 import { useLoading } from "../../../context/LoadingContext";
 import { useHistory } from "../../../context/HistoryContext";
 import { showError } from "../../../utils/errorHandler";
+import LoadingModal from "../../common/LoadingModal";
 import PdfViewer from "../../RealTimePage/PdfViewer";
-import axios from "axios";
+import { realtimeApi } from "../../../api/realtimeApi";
 import progress1 from "../../../assets/images/progress_1.png";
 
 function RealTimeConvert() {
@@ -22,8 +23,6 @@ function RealTimeConvert() {
   const [showLoading, setShowLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] =
     useState("실시간 변환을 시작하는 중...");
-
-  const API_URL = process.env.REACT_APP_API_URL;
 
   // Modal state
   const [showProcessingModal, setShowProcessingModal] = useState(false);
@@ -42,58 +41,6 @@ function RealTimeConvert() {
   //     navigate("/login");
   //   }
   // }, [navigate]);
-
-  // 실시간 변환 요청
-  const startRealTime = async (pdfFile = null) => {
-    try {
-      const formData = new FormData();
-
-      if (pdfFile) {
-        formData.append("doc_file", pdfFile);
-      }
-
-      const headers = { "Content-Type": "multipart/form-data" };
-
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-
-      const response = await axios.post(
-        `${API_URL}/api/realTime/start-realtime`,
-        pdfFile ? formData : {},
-        { headers }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error("Error starting real-time process:", error);
-      throw error;
-    }
-  };
-
-  // 실시간 변환 종료 요청
-  const stopRealTime = async (jobId) => {
-    try {
-      const headers = {};
-
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-
-      const response = await axios.post(
-        `${API_URL}/api/realTime/stop-realtime?jobId=${jobId}`,
-        {},
-        { headers }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error("Error stopping real-time process:", error);
-      throw error;
-    }
-  };
 
   // 실시간 변환 결과 처리
   const { loading, pdfFile, convertedData, processingError, setConvertedData } =
@@ -145,6 +92,21 @@ function RealTimeConvert() {
     );
   }, []);
 
+  // 업로드된 PDF 미리보기 URL (기존: 매 렌더마다 createObjectURL → 메모리 누수 + PDF 재로딩)
+  const previewPdfFile = useMemo(
+    () => files.find((file) => file.name.toLowerCase().endsWith(".pdf")) || null,
+    [files]
+  );
+  const previewPdfUrl = useMemo(
+    () => (previewPdfFile ? URL.createObjectURL(previewPdfFile) : null),
+    [previewPdfFile]
+  );
+  useEffect(() => {
+    return () => {
+      if (previewPdfUrl) URL.revokeObjectURL(previewPdfUrl);
+    };
+  }, [previewPdfUrl]);
+
   const handleConvert = async () => {
     setError("");
 
@@ -174,9 +136,12 @@ function RealTimeConvert() {
         setLoadingMessage("실시간 변환을 시작하는 중...");
 
         // pdf 파일 업로드 후 실시간 변환 시작
-        const response = await startRealTime(docFile);
+        const response = await realtimeApi.startRealTime(docFile);
 
-        if (response.jobId) {
+        // v1 응답은 snake_case job_id (구버전 jobId도 호환 처리)
+        const jobId = response.job_id || response.jobId;
+
+        if (jobId) {
           setShowLoading(false);
           // 실시간 페이지로 이동
           navigate("/real-time-page", {
@@ -186,7 +151,7 @@ function RealTimeConvert() {
                 summaryData: {},
                 voiceData: {},
               },
-              jobId: response.jobId,
+              jobId: jobId,
               isRealTimeMode: true,
               showTutorial: true,
             },
@@ -234,35 +199,11 @@ function RealTimeConvert() {
   return (
     <div className="app-wrapper convert-page">
       {/* Loading Modal */}
-      {showLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
-            <img
-              src="/loading_listen.gif"
-              alt="로딩 중"
-              className="w-[200px] h-[200px] object-contain mb-4"
-            />
-            <p className="text-gray-700 text-lg font-medium">
-              {loadingMessage}
-            </p>
-          </div>
-        </div>
-      )}
+      {showLoading && <LoadingModal message={loadingMessage} />}
 
       {/* Processing Modal */}
       {showProcessingModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
-            <img
-              src="/loading_listen.gif"
-              alt="처리 중"
-              className="w-[200px] h-[200px] object-contain mb-4"
-            />
-            <p className="text-gray-700 text-lg font-medium">
-              {processingMessage}
-            </p>
-          </div>
-        </div>
+        <LoadingModal message={processingMessage} alt="처리 중" />
       )}
 
       <div className="sub-header">
@@ -274,7 +215,7 @@ function RealTimeConvert() {
             <img
               src={progress1}
               alt="진행 상태"
-              className="w-[800px] object-contain"
+              className="w-full max-w-[800px] object-contain hidden md:block"
             />
           </div>
           <div className="w-[300px] flex justify-end">
@@ -292,13 +233,13 @@ function RealTimeConvert() {
 
       <div className="main-content">
         <div className="slide-container">
-          <div className="slide-header"></div>
-          {files.length > 0 &&
-            files.find((file) => file.name.toLowerCase().endsWith(".pdf")) && (
+          {/* PdfViewer는 자체 헤더를 가지므로, 미리보기 상태에서는 바깥 헤더를 그리지 않음 (이중 헤더 방지) */}
+          {!previewPdfFile && <div className="slide-header"></div>}
+          {previewPdfFile ? (
+            /* PDF 업로드 후: 미리보기 + 하단 액션 바 (기존: 뷰어와 업로드 영역이 겹쳐 잘림) */
+            <>
               <PdfViewer
-                pdfUrl={URL.createObjectURL(
-                  files.find((file) => file.name.toLowerCase().endsWith(".pdf"))
-                )}
+                pdfUrl={previewPdfUrl}
                 pageNumber={pageNumber}
                 numPages={numPages}
                 onDocumentLoadSuccess={onDocumentLoadSuccess}
@@ -306,18 +247,41 @@ function RealTimeConvert() {
                 goPrevPage={goPrevPage}
                 goNextPage={goNextPage}
               />
-            )}
-          <RealTimeFileUploadSection
-            files={files}
-            fileInputRef={fileInputRef}
-            handleFileUpload={handleFileUpload}
-            handleDelete={handleDelete}
-            handleConvert={handleConvert}
-            isLoading={false}
-          />
+              <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-gray-200 bg-white">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-sm text-gray-700 truncate">
+                    {previewPdfFile.name}
+                  </span>
+                  <button
+                    className="text-sm text-gray-400 hover:text-gray-700 shrink-0 underline"
+                    onClick={() => handleDelete(previewPdfFile)}
+                  >
+                    파일 제거
+                  </button>
+                </div>
+                <button
+                  className="bg-[#5B7F7C] text-white font-semibold py-2 px-4 rounded-lg shrink-0"
+                  onClick={handleConvert}
+                >
+                  실시간 강의 변환
+                </button>
+              </div>
+            </>
+          ) : (
+            <ConvertFileUploadSection
+              mode="realtime"
+              files={files}
+              fileInputRef={fileInputRef}
+              handleFileUpload={handleFileUpload}
+              handleDelete={handleDelete}
+              handleConvert={handleConvert}
+              isLoading={false}
+            />
+          )}
         </div>
 
-        <RealTimeSummarySection
+        <ConvertSummarySection
+          mode="realtime"
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           highlightColor={highlightColor}

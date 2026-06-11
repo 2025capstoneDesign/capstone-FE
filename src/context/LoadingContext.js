@@ -11,11 +11,50 @@ import processService from "../api/processService";
 
 const LoadingContext = createContext();
 
+const DEFAULT_TASK_DETAILS = [
+  {
+    key: "speech",
+    label: "음성 인식",
+    progress: 0,
+    status: "pending",
+    message: "",
+  },
+  {
+    key: "slides",
+    label: "슬라이드 분석",
+    progress: 0,
+    status: "pending",
+    message: "",
+  },
+  {
+    key: "mapping",
+    label: "슬라이드 매핑",
+    progress: 0,
+    status: "pending",
+    message: "",
+  },
+  {
+    key: "summary",
+    label: "필기 생성",
+    progress: 0,
+    status: "pending",
+    message: "",
+  },
+  {
+    key: "save",
+    label: "결과 저장",
+    progress: 0,
+    status: "pending",
+    message: "",
+  },
+];
+
 export function LoadingProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [currentStage, setCurrentStage] = useState(0); // 0: 강의 듣는 중, 1: 요약 정리 중, 2: 필기 생성 중
+  const [currentStage, setCurrentStage] = useState(0); // 0: 자료분석, 1: 매핑, 2: 요약
   const [statusMessage, setStatusMessage] = useState("");
+  const [taskDetails, setTaskDetails] = useState(DEFAULT_TASK_DETAILS);
   const [convertedData, setConvertedData] = useState(null);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [pdfFile, setPdfFile] = useState(null);
@@ -31,6 +70,7 @@ export function LoadingProvider({ children }) {
       setProgress(0);
       setCurrentStage(0);
       setStatusMessage("");
+      setTaskDetails(DEFAULT_TASK_DETAILS);
       setProcessingError(null);
     }
   }, [loading]);
@@ -40,12 +80,12 @@ export function LoadingProvider({ children }) {
     if (!loading) return;
 
     // 진행 상태에 따라 현재 단계 업데이트
-    if (progress < 30) {
-      setCurrentStage(0); // Listening stage
-    } else if (progress < 60) {
-      setCurrentStage(1); // Summarizing stage
+    if (progress < 60) {
+      setCurrentStage(0); // Parallel analysis
+    } else if (progress < 75) {
+      setCurrentStage(1); // Mapping
     } else {
-      setCurrentStage(2); // Writing stage
+      setCurrentStage(2); // Summary
     }
   }, [loading, progress]);
 
@@ -122,6 +162,9 @@ export function LoadingProvider({ children }) {
 
           setProgress(currentProgress);
           setStatusMessage(statusData.message || "");
+          if (Array.isArray(statusData.details)) {
+            setTaskDetails(statusData.details);
+          }
 
           if (currentProgress === 100) {
             // 강의 변환 완료, 결과 데이터 가져오기
@@ -196,6 +239,13 @@ export function LoadingProvider({ children }) {
 
     setProgress(100);
     setLoading(false);
+    setTaskDetails((prev) =>
+      prev.map((task) => ({
+        ...task,
+        progress: 100,
+        status: "completed",
+      }))
+    );
     isProcessing.current = false;
 
     if (data) {
@@ -212,6 +262,7 @@ export function LoadingProvider({ children }) {
     setJobId(null);
     setProgress(0);
     setStatusMessage("");
+    setTaskDetails(DEFAULT_TASK_DETAILS);
   };
 
   // 상태를 완전히 초기화하는 함수 추가
@@ -221,6 +272,7 @@ export function LoadingProvider({ children }) {
     setProgress(0);
     setCurrentStage(0);
     setStatusMessage("");
+    setTaskDetails(DEFAULT_TASK_DETAILS);
     setConvertedData(null);
     setUploadedFiles([]);
     setPdfFile(null);
@@ -236,6 +288,7 @@ export function LoadingProvider({ children }) {
         progress,
         currentStage,
         statusMessage,
+        taskDetails,
         convertedData,
         setConvertedData,
         uploadedFiles,

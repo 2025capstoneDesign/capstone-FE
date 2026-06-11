@@ -140,8 +140,7 @@ npm install
 
 # 2. 환경 변수(.env) 설정
 # 예시
-REACT_APP_API_URL=http://localhost:8000
-REACT_APP_WS_URL=ws://localhost:8001
+REACT_APP_API_URL=http://localhost:18080
 
 # 3. 개발 서버 실행
 npm start

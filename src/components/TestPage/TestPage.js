@@ -9,6 +9,7 @@ import PdfViewer from "./PdfViewer";
 import SummaryPanel from "./SummaryPanel";
 import { useLoading } from "../../context/LoadingContext";
 import { useHistory } from "../../context/HistoryContext";
+import PageHeader from "../common/PageHeader";
 
 export default function TestPage() {
   const location = useLocation();
@@ -48,21 +49,6 @@ export default function TestPage() {
         isFromRealTime: false,
         message: null,
       };
-
-  console.log("TestPage - 현재 상태:", {
-    locationState: location.state,
-    convertedData: convertedData ? true : false,
-    contextPdfFile: contextPdfFile ? true : false,
-    historyData: historyData[0]
-      ? {
-          id: historyData[0].id,
-          pdfFile: historyData[0].pdfFile,
-        }
-      : null,
-    selectedJobId: jobId,
-  });
-
-  console.log("TestPage - SummaryPanel에 전달될 jobId:", jobId);
 
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
   useEffect(() => {
@@ -142,7 +128,7 @@ export default function TestPage() {
 
   // Handle navigation away from this component - don't revoke context-managed blob URLs
   const handleConvertClick = useCallback(() => {
-    navigate("/convert");
+    navigate("/upload-convert");
   }, [navigate]);
 
   // Add download functionality using the blob URL
@@ -159,17 +145,14 @@ export default function TestPage() {
 
   return (
     <div className="app-wrapper">
-      <div className="sub-header">
-        <h1 className="page-title">PDF 변환 결과</h1>
-        <div className="action-buttons">
-          <button className="convert-btn" onClick={handleConvertClick}>
-            다시 변환하기
-          </button>
-          <button className="download-btn" onClick={handleDownload}>
-            다운로드
-          </button>
-        </div>
-      </div>
+      <PageHeader title="PDF 변환 결과">
+        <button className="convert-btn" onClick={handleConvertClick}>
+          다시 변환하기
+        </button>
+        <button className="download-btn" onClick={handleDownload}>
+          다운로드
+        </button>
+      </PageHeader>
       <div className="main-content">
         <ToastContainer />
         <PdfViewer
@@ -182,15 +165,6 @@ export default function TestPage() {
           goNextPage={goNextPage}
           goToSpecificPage={goToSpecificPage}
           pdfData={{ summaryData, voiceData }}
-          jobId={jobId}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          highlightColor={highlightColor}
-          setHighlightColor={setHighlightColor}
-          setPageNumber={setPageNumber}
-          summaryData={summaryData}
-          voiceData={voiceData}
-          pageSectionRefs={pageSectionRefs}
           searchKeyword={searchKeyword}
           setSearchKeyword={setSearchKeyword}
         />

@@ -4,12 +4,10 @@ import convert_icon from "../../assets/images/convert_icon.png";
 import history_icon from "../../assets/images/history_icon2.png";
 import setting_icon from "../../assets/images/setting_icon.png";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 import ConvertSelectModal from "../Convert/ConvertMode/ConvertSelectModal";
 
 function Home() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const FeatureCard = ({ image, title, description, onClick }) => (
@@ -17,7 +15,7 @@ function Home() {
       className="w-full min-h-[16rem] relative group cursor-pointer"
       onClick={onClick}
     >
-      <div className="rounded-3xl border-2 border-[#DBE2EF] group-hover:border-gradient-hover group-hover:border-3 h-full transition-all duration-300 sm:p-[1rem]">
+      <div className="rounded-3xl border-2 border-[#DBE2EF] group-hover:border-gradient-hover h-full transition-all duration-300 sm:p-[1rem]">
         <div className="p-[1.5rem] md:p-[1rem]">
           <div className="flex flex-col items-center gap-[1rem] mb-[1rem]">
             <div className="w-[3.5rem] h-[3.5rem] md:w-[3.5rem] md:h-[3.5rem] rounded-full flex items-center justify-center shrink-0">
@@ -46,7 +44,7 @@ function Home() {
   return (
     <section className="w-full mt-[4.5rem]">
       {/* 메인 배너 */}
-      <Banner />
+      <Banner onConvertClick={handleConvertClick} />
 
       {/* 기능 소개 섹션 */}
       <div className="mt-[4rem] mb-[4rem] w-full max-w-[90rem] mx-auto">

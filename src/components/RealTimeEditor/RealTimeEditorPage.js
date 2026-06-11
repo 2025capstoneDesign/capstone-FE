@@ -9,6 +9,8 @@ import { parseRealTimeResponse } from "../RealTimePage/realTimeDataParser";
 import { useHistory } from "../../context/HistoryContext";
 import { useAuth } from "../../context/AuthContext";
 import { showError } from "../../utils/errorHandler";
+import LoadingModal from "../common/LoadingModal";
+import { realtimeApi } from "../../api/realtimeApi";
 import progress3 from "../../assets/images/progress_3.png";
 
 export default function RealTimeEditorPage() {
@@ -84,15 +86,10 @@ export default function RealTimeEditorPage() {
     setResultData(newResultData);
   };
 
-  // Set PDF URL - use received PDF URL if available, otherwise generate from jobId
+  // Set PDF URL only when it is carried from the upload flow.
   useEffect(() => {
-    if (receivedPdfUrl) {
-      setPdfUrl(receivedPdfUrl);
-    } else if (jobId) {
-      const API_URL = process.env.REACT_APP_API_URL;
-      setPdfUrl(`${API_URL}/file/${jobId}/original.pdf`);
-    }
-  }, [receivedPdfUrl, jobId]);
+    setPdfUrl(receivedPdfUrl || "");
+  }, [receivedPdfUrl]);
 
   const handleImageClick = (index) => {
     setSelectedImageIndices((prev) => {
@@ -109,41 +106,31 @@ export default function RealTimeEditorPage() {
       setShowLoading(true);
       setLoadingMessage("필기 생성 중...");
 
-      const API_URL = process.env.REACT_APP_API_URL;
-      const response = await fetch(`${API_URL}/api/realTime/post-process`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...getAuthHeader(),
-        },
-        body: JSON.stringify({
+      const result = await realtimeApi.postProcess(
+        {
           jobId,
           sleepSlides: selectedImageIndices.map((index) => index + 1),
-        }),
-      });
+        },
+        getAuthHeader()
+      );
 
-      if (response.ok) {
-        const result = await response.json();
-        setLoadingMessage("필기 생성이 완료되었습니다!");
-        await refreshHistory();
+      setLoadingMessage("필기 생성이 완료되었습니다!");
+      await refreshHistory();
 
-        setTimeout(() => {
-          setShowLoading(false);
-          navigate("/test", {
-            state: {
-              pdfFile: pdfUrl,
-              result: result.result || resultData,
-              isFromRealTime: true,
-              processedSlides: result.processed_slides || selectedImageIndices,
-              message:
-                result.message || "Post-processing completed successfully",
-              jobId: jobId,
-            },
-          });
-        }, 1500);
-      } else {
-        throw new Error("후처리 요청 실패");
-      }
+      setTimeout(() => {
+        setShowLoading(false);
+        navigate("/test", {
+          state: {
+            pdfFile: pdfUrl,
+            result: result.result || resultData,
+            isFromRealTime: true,
+            processedSlides: result.processed_slides || selectedImageIndices,
+            message:
+              result.message || "Post-processing completed successfully",
+            jobId: jobId,
+          },
+        });
+      }, 1500);
     } catch (error) {
       console.error("Post-process error:", error);
       showError("후처리 중 오류가 발생했습니다. 다시 시도해주세요.");
@@ -182,20 +169,7 @@ export default function RealTimeEditorPage() {
   return (
     <div className="app-wrapper">
       {/* Loading Modal */}
-      {showLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg flex flex-col items-center">
-            <img
-              src="/loading_listen.gif"
-              alt="로딩 중"
-              className="w-[200px] h-[200px] object-contain mb-4"
-            />
-            <p className="text-gray-700 text-lg font-medium">
-              {loadingMessage}
-            </p>
-          </div>
-        </div>
-      )}
+      {showLoading && <LoadingModal message={loadingMessage} />}
       <div className="sub-header">
         <div className="flex items-center w-full">
           <div className="w-[200px] flex items-center">
@@ -205,7 +179,7 @@ export default function RealTimeEditorPage() {
             <img
               src={progress3}
               alt="진행 상태"
-              className="w-[800px] object-contain"
+              className="w-full max-w-[800px] object-contain hidden md:block"
             />
           </div>
           <div className="w-[300px] flex justify-end gap-2">

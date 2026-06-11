@@ -1,7 +1,8 @@
 import React from "react";
 
+// imageUrls는 인증된 blob에서 만든 object URL 배열
+// (realTimeStateManager에서 fetchFilesAsObjectUrls로 변환됨)
 export default function ImageGridPanel({ imageUrls, selectedImageIndices, onImageClick }) {
-  const API_URL = process.env.REACT_APP_API_URL;
 
   return (
     <div className="slide-container">
@@ -55,7 +56,7 @@ export default function ImageGridPanel({ imageUrls, selectedImageIndices, onImag
               }}
             >
               <img
-                src={`${API_URL}${imageUrl}`}
+                src={imageUrl || undefined}
                 alt={`슬라이드 ${index + 1}`}
                 style={{
                   width: "100%",

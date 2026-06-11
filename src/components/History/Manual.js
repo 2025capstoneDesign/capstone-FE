@@ -26,19 +26,19 @@ export default function Manual() {
           {/* 열람하기 */}
           <br />
             <span className="text-[1.2rem] font-semibold"><RiQuillPenAiFill className="text-xl mb-1 inline mr-1 text-[#80cbc4]"/> PDF 열람하기</span>
-          <p class="text-gray-700 mt-1"><span class="text-sm px-2 py-1 text-black border-2 rounded-full">열람하기</span> 버튼을 클릭하여 변환된 PDF를 열람할 수 있습니다.</p>
-          <p class="text-gray-700">열람 시 <span class="font-semibold text-[#5B7F7C]">AI 필기</span>와 <span class="font-semibold text-[#5B7F7C]">음성 원본</span>을 함께 확인할 수 있습니다.</p>
+          <p className="text-gray-700 mt-1"><span className="text-sm px-2 py-1 text-black border-2 rounded-full">열람하기</span> 버튼을 클릭하여 변환된 PDF를 열람할 수 있습니다.</p>
+          <p className="text-gray-700">열람 시 <span className="font-semibold text-[#5B7F7C]">AI 필기</span>와 <span className="font-semibold text-[#5B7F7C]">음성 원본</span>을 함께 확인할 수 있습니다.</p>
           <br />
 
           {/* 다운로드 */}
           <span className="text-[1.2rem] font-semibold"><RiQuillPenAiFill className="text-xl mb-1 inline mr-1 text-[#80cbc4]"/> PDF 다운로드</span>
-          <p class="text-gray-700 mt-1"><PiDownloadSimpleBold className="text-xl mb-1 inline"/> 버튼을 클릭하여 변환된 PDF를 다운로드할 수 있습니다.</p>
+          <p className="text-gray-700 mt-1"><PiDownloadSimpleBold className="text-xl mb-1 inline"/> 버튼을 클릭하여 변환된 PDF를 다운로드할 수 있습니다.</p>
           <br />
 
           {/* 정렬기능 */}
           <span className="text-[1.2rem] font-semibold"><RiQuillPenAiFill className="text-xl mb-1 inline mr-1 text-[#80cbc4]"/> 정렬 기능</span>
-          <p class="text-gray-700 mt-1">상단의 정렬 버튼을 통해 PDF 목록을 <span class="font-semibold text-[#5B7F7C]">날짜순</span> 또는 <span class="font-semibold text-[#5B7F7C]">제목순</span>으로 정렬할 수 있습니다.</p>
-          <ul class="list-disc list-inside text-gray-700 mt-2 space-y-1">
+          <p className="text-gray-700 mt-1">상단의 정렬 버튼을 통해 PDF 목록을 <span className="font-semibold text-[#5B7F7C]">날짜순</span> 또는 <span className="font-semibold text-[#5B7F7C]">제목순</span>으로 정렬할 수 있습니다.</p>
+          <ul className="list-disc list-inside text-gray-700 mt-2 space-y-1">
             <li><MdDateRange className="text-xl mb-1 inline mr-1"/><strong>날짜순:</strong> 최신 변환 파일이 상단에 표시됩니다.</li>
             <li><BsAlphabetUppercase className="text-xl mb-1 inline mr-1"/><strong>제목순:</strong> 파일명의 알파벳 순서대로 정렬됩니다.</li>
           </ul>
