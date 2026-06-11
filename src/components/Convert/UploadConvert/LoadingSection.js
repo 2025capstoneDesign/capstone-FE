@@ -103,8 +103,8 @@ function LoadingSection() {
   };
 
   return (
-    <div className="flex-1 p-[5%] flex flex-col">
-      <h2 className="text-[1.4rem] font-semibold my-[3vh] text-center">
+    <div className="flex-1 px-[5%] py-[1rem] flex flex-col min-h-0 overflow-y-auto">
+      <h2 className="text-[1.4rem] font-semibold my-[2vh] text-center">
         변환 중입니다. 잠시만 기다려주세요.
       </h2>
 
@@ -124,15 +124,7 @@ function LoadingSection() {
                 >
                   {step.phase}
                 </div>
-                <div
-                  className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center transition-all duration-300 ${
-                    isActive
-                      ? "bg-[#EEF7F5] ring-2 ring-[#5B7F7C]/30"
-                      : isDone
-                      ? "bg-[#5B7F7C]/5"
-                      : "bg-gray-50"
-                  }`}
-                >
+                <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
                   <img
                     src={step.image}
                     alt={step.alt}

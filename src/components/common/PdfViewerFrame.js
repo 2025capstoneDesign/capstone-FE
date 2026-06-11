@@ -26,6 +26,23 @@ export default function PdfViewerFrame({
   // 로딩 상태를 추적하여 필요한 경우 로딩 표시
   const [isLoading, setIsLoading] = useState(false);
 
+  // 창 크기에 따라 PDF 렌더 폭 갱신 (기존: 마운트 시점 값 고정 → 리사이즈 미반응)
+  const [pageWidth, setPageWidth] = useState(window.innerWidth * 0.53);
+
+  useEffect(() => {
+    let timer = null;
+    const handleResize = () => {
+      // 리사이즈 동안 과도한 리렌더 방지 (디바운스)
+      clearTimeout(timer);
+      timer = setTimeout(() => setPageWidth(window.innerWidth * 0.53), 150);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   // PDF URL이 변경될 때 로딩 상태를 초기화
   useEffect(() => {
     setIsLoading(true);
@@ -69,7 +86,7 @@ export default function PdfViewerFrame({
             pageNumber={pageNumber}
             renderTextLayer={false}
             renderAnnotationLayer={false}
-            width={window.innerWidth * 0.53}
+            width={pageWidth}
           />
         </Document>
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../../css/TestPage.css";
 import ConvertFileUploadSection from "../ConvertFileUploadSection";
@@ -91,6 +91,21 @@ function RealTimeConvert() {
       prevFiles.filter((file) => file.name !== fileToDelete.name)
     );
   }, []);
+
+  // 업로드된 PDF 미리보기 URL (기존: 매 렌더마다 createObjectURL → 메모리 누수 + PDF 재로딩)
+  const previewPdfFile = useMemo(
+    () => files.find((file) => file.name.toLowerCase().endsWith(".pdf")) || null,
+    [files]
+  );
+  const previewPdfUrl = useMemo(
+    () => (previewPdfFile ? URL.createObjectURL(previewPdfFile) : null),
+    [previewPdfFile]
+  );
+  useEffect(() => {
+    return () => {
+      if (previewPdfUrl) URL.revokeObjectURL(previewPdfUrl);
+    };
+  }, [previewPdfUrl]);
 
   const handleConvert = async () => {
     setError("");
@@ -200,7 +215,7 @@ function RealTimeConvert() {
             <img
               src={progress1}
               alt="진행 상태"
-              className="w-[800px] object-contain"
+              className="w-full max-w-[800px] object-contain hidden md:block"
             />
           </div>
           <div className="w-[300px] flex justify-end">
@@ -218,13 +233,13 @@ function RealTimeConvert() {
 
       <div className="main-content">
         <div className="slide-container">
-          <div className="slide-header"></div>
-          {files.length > 0 &&
-            files.find((file) => file.name.toLowerCase().endsWith(".pdf")) && (
+          {/* PdfViewer는 자체 헤더를 가지므로, 미리보기 상태에서는 바깥 헤더를 그리지 않음 (이중 헤더 방지) */}
+          {!previewPdfFile && <div className="slide-header"></div>}
+          {previewPdfFile ? (
+            /* PDF 업로드 후: 미리보기 + 하단 액션 바 (기존: 뷰어와 업로드 영역이 겹쳐 잘림) */
+            <>
               <PdfViewer
-                pdfUrl={URL.createObjectURL(
-                  files.find((file) => file.name.toLowerCase().endsWith(".pdf"))
-                )}
+                pdfUrl={previewPdfUrl}
                 pageNumber={pageNumber}
                 numPages={numPages}
                 onDocumentLoadSuccess={onDocumentLoadSuccess}
@@ -232,16 +247,37 @@ function RealTimeConvert() {
                 goPrevPage={goPrevPage}
                 goNextPage={goNextPage}
               />
-            )}
-          <ConvertFileUploadSection
-            mode="realtime"
-            files={files}
-            fileInputRef={fileInputRef}
-            handleFileUpload={handleFileUpload}
-            handleDelete={handleDelete}
-            handleConvert={handleConvert}
-            isLoading={false}
-          />
+              <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-gray-200 bg-white">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-sm text-gray-700 truncate">
+                    {previewPdfFile.name}
+                  </span>
+                  <button
+                    className="text-sm text-gray-400 hover:text-gray-700 shrink-0 underline"
+                    onClick={() => handleDelete(previewPdfFile)}
+                  >
+                    파일 제거
+                  </button>
+                </div>
+                <button
+                  className="bg-[#5B7F7C] text-white font-semibold py-2 px-4 rounded-lg shrink-0"
+                  onClick={handleConvert}
+                >
+                  실시간 강의 변환
+                </button>
+              </div>
+            </>
+          ) : (
+            <ConvertFileUploadSection
+              mode="realtime"
+              files={files}
+              fileInputRef={fileInputRef}
+              handleFileUpload={handleFileUpload}
+              handleDelete={handleDelete}
+              handleConvert={handleConvert}
+              isLoading={false}
+            />
+          )}
         </div>
 
         <ConvertSummarySection

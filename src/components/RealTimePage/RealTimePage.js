@@ -164,7 +164,7 @@ export default function RealTimePage() {
             <img
               src={progress2}
               alt="진행 상태"
-              className="w-[800px] object-contain"
+              className="w-full max-w-[800px] object-contain hidden md:block"
             />
           </div>
           <div className="w-[300px] flex justify-end gap-2">

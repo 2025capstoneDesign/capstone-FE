@@ -5,7 +5,7 @@ import logo2 from "../../assets/images/logo2.png";
 import "../../css/Auth.css";
 import { useAuth } from "../../context/AuthContext";
 import { useHistory } from "../../context/HistoryContext";
-import { showError, handleApiError } from "../../utils/errorHandler";
+import { showError, showSuccess, handleApiError } from "../../utils/errorHandler";
 import LoadingModal from "../common/LoadingModal";
 
 const Register = () => {
@@ -40,18 +40,13 @@ const Register = () => {
     }
 
     try {
-      console.log("회원가입 시도:", {
-        email: formData.email,
-        password: formData.password,
-      });
-
       const result = await register({
         email: formData.email,
         password: formData.password,
       });
 
       if (result.success) {
-        showError("회원가입이 완료되었습니다.");
+        showSuccess("회원가입이 완료되었습니다.");
         // Fetch history after successful registration
         setLoadingMessage("기록을 불러오는 중...");
         await refreshHistory();

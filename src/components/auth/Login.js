@@ -21,8 +21,6 @@ const Login = () => {
     setShowLoading(true);
 
     try {
-      console.log("로그인 시도:", { username, password });
-      
       const result = await login({ username, password });
       
       if (result.success) {
@@ -69,10 +67,10 @@ const Login = () => {
         <form onSubmit={handleLogin} className="w-full max-w-[75%] lg:max-w-[30vw] space-y-[1.8rem] lg:space-y-[1.8vw]">
           <div className="space-y-[1rem] lg:space-y-[1vw]">
             <label htmlFor="username" className="block text-[1.1rem] lg:text-[1.1vw] font-medium text-gray-700">
-              아이디
+              이메일
             </label>
             <input
-              type="text"
+              type="email"
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}

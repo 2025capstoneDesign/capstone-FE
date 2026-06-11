@@ -47,7 +47,7 @@ const ConvertSelectModal = ({ isOpen, onClose }) => {
       <div className="flex space-x-4">
         <button
           onClick={handleUploadConvert}
-          className="bg-white w-1/2 py-3 px-4 border-2 border text-black rounded-lg hover:border-[#5B7F7C] transition-colors"
+          className="bg-white w-1/2 py-3 px-4 border-2 text-black rounded-lg hover:border-[#5B7F7C] transition-colors"
         >
           <img 
             src={fileupload} 
@@ -58,7 +58,7 @@ const ConvertSelectModal = ({ isOpen, onClose }) => {
         </button>
         <button
           onClick={handleRealTimeConvert}
-          className="bg-white w-1/2 py-3 px-4 border-2 border text-black rounded-lg hover:border-[#5B7F7C] transition-colors"
+          className="bg-white w-1/2 py-3 px-4 border-2 text-black rounded-lg hover:border-[#5B7F7C] transition-colors"
         >
           <img 
             src={realtime} 

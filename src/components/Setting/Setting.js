@@ -9,19 +9,23 @@ function Setting() {
     const navigate = useNavigate();
     const [keyword, setKeyword] = useState("");
     const [noteType, setNoteType] = useState("서술형 필기");
+    const [language, setLanguage] = useState("한국어");
 
     useEffect(() => {
         // localStorage에서 저장된 설정 불러오기
         const savedKeyword = localStorage.getItem("defaultKeyword");
         const savedNoteType = localStorage.getItem("defaultNoteType");
-        
+        const savedLanguage = localStorage.getItem("defaultLanguage");
+
         if (savedKeyword) setKeyword(savedKeyword);
         if (savedNoteType) setNoteType(savedNoteType);
+        if (savedLanguage) setLanguage(savedLanguage);
     }, []);
 
     const handleSave = () => {
         localStorage.setItem("defaultKeyword", keyword);
         localStorage.setItem("defaultNoteType", noteType);
+        localStorage.setItem("defaultLanguage", language);
         alert("설정이 저장되었습니다.");
     };
     
@@ -39,6 +43,8 @@ function Setting() {
                     setKeyword={setKeyword}
                     noteType={noteType}
                     setNoteType={setNoteType}
+                    language={language}
+                    setLanguage={setLanguage}
                     handleSave={handleSave}
                 />
                 <ManualSection />

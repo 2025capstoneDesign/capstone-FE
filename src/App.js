@@ -1,7 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./components/Main/Home";
-import ConvertSelectModal from "./components/Convert/ConvertMode/ConvertSelectModal";
 import Convert from "./components/Convert/UploadConvert/Convert";
 import RealTimeConvert from "./components/Convert/RealTimeConvert/RealTimeConvert";
 import RealTimePage from "./components/RealTimePage/RealTimePage";
@@ -28,7 +27,6 @@ function App() {
                 <div className="flex-1 w-full mx-auto">
                   <Routes>
                     <Route path="/" element={<Home />} />
-                    <Route path="/convert" element={<ConvertSelectModal />} />
                     <Route path="/upload-convert" element={<Convert />} />
                     <Route
                       path="/realtime-convert"

@@ -50,21 +50,6 @@ export default function TestPage() {
         message: null,
       };
 
-  console.log("TestPage - 현재 상태:", {
-    locationState: location.state,
-    convertedData: convertedData ? true : false,
-    contextPdfFile: contextPdfFile ? true : false,
-    historyData: historyData[0]
-      ? {
-          id: historyData[0].id,
-          pdfFile: historyData[0].pdfFile,
-        }
-      : null,
-    selectedJobId: jobId,
-  });
-
-  console.log("TestPage - SummaryPanel에 전달될 jobId:", jobId);
-
   // 컴포넌트 마운트 시 스크롤을 맨 위로 이동
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -143,7 +128,7 @@ export default function TestPage() {
 
   // Handle navigation away from this component - don't revoke context-managed blob URLs
   const handleConvertClick = useCallback(() => {
-    navigate("/convert");
+    navigate("/upload-convert");
   }, [navigate]);
 
   // Add download functionality using the blob URL

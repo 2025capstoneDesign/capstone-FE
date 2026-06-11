@@ -110,6 +110,7 @@ function ConvertFileUploadSection({
       case "ppt":
       case "pptx":
         return ppt_icon;
+      case "mp3":
       case "m4a":
         return mp3_icon;
       case "wav":
@@ -172,7 +173,7 @@ function ConvertFileUploadSection({
             {variant.fileTypes.map(({ icon, label }) => (
               <div
                 key={label}
-                className="flex flex-row items-center gap-2 border-3 border-gray-200 rounded-lg px-[1rem]"
+                className="flex flex-row items-center gap-3 border-2 border-gray-200 rounded-lg px-[1.25rem] py-[0.4rem]"
               >
                 <img
                   src={icon}

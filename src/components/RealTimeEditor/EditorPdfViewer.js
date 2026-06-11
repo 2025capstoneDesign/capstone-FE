@@ -15,6 +15,22 @@ export default function EditorPdfViewer({
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
+  // 창 크기에 따라 PDF 렌더 폭 갱신
+  const [pageWidth, setPageWidth] = useState(window.innerWidth * 0.53);
+
+  useEffect(() => {
+    let timer = null;
+    const handleResize = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => setPageWidth(window.innerWidth * 0.53), 150);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   // PDF URL이 변경될 때 로딩 상태를 초기화
   useEffect(() => {
     setIsLoading(true);
@@ -113,7 +129,7 @@ export default function EditorPdfViewer({
             pageNumber={pageNumber}
             renderTextLayer={false}
             renderAnnotationLayer={false}
-            width={window.innerWidth * 0.53}
+            width={pageWidth}
           />
         </Document>
 

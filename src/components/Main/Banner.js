@@ -1,26 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import bannerImage from "../../assets/images/banner_image2.png";
 import overlayImage from "../../assets/images/overlay3.png";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import ConvertSelectModal from "../Convert/ConvertMode/ConvertSelectModal";
 
-const Banner = () => {
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
+const Banner = ({ onConvertClick }) => {
   const handleButtonClick = () => {
-    // if (isAuthenticated()) {
-    //   setIsModalOpen(true);
-    // } else {
-    //   navigate('/login');
-    // }
-    navigate("/realtime-convert");
+    // 변환 방식 선택 모달을 띄운다 (모달은 Home에서 렌더, 로그인 체크는 모달 내부에서 처리)
+    if (onConvertClick) onConvertClick();
   };
 
   return (
-    <div className="relative w-full h-[35vh] md:h-[45vh] lg:h-[45vh] overflow-hidden">
+    <div className="relative w-full h-[42vh] md:h-[55vh] lg:h-[55vh] overflow-hidden">
       {/* 그라데이션 배경 */}
       <div
         className="absolute inset-0"
@@ -43,13 +32,13 @@ const Banner = () => {
       {/* 컨텐츠 */}
       <div className="relative z-10 h-full flex flex-col justify-center">
         <div className="w-full px-[8%]">
-          <h1 className="text-[1.5rem] leading-[0.2rem] md:text-[2rem] xl-[2.5rem] font-[350] text-white tracking-wide">
+          <h1 className="text-[1.5rem] md:text-[2rem] xl:text-[2.5rem] font-[350] text-white tracking-wide">
             필기요정과 함께!
           </h1>
           <h1 className="py-2 md:py-4 text-[2.5rem] md:text-[3.2rem] lg:text-[3.2rem] text-white font-[580] tracking-wide">
             자동 필기 생성 서비스
           </h1>
-          <p className="mt-[1rem] md:mt-[1.8rem] lg:mt-[2rem] xl-[2.5rem] text-white font-[350] text-[1rem] md:text-[1.2rem] lg:text-[1.3rem] tracking-wide leading-relaxed">
+          <p className="mt-[1rem] md:mt-[1.8rem] lg:mt-[2rem] xl:mt-[2.5rem] text-white font-[350] text-[1rem] md:text-[1.2rem] lg:text-[1.3rem] tracking-wide leading-relaxed">
             강의록과 녹음본으로 새로운{" "}
             <span className="text-orange-300 font-[450]">나만의 강의록</span>을
             생성할 수 있습니다.
@@ -77,11 +66,6 @@ const Banner = () => {
           />
         </div>
       </div>
-
-      <ConvertSelectModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
     </div>
   );
 };

@@ -14,7 +14,16 @@ export const showError = (message, error = null) => {
   if (error) {
     console.error(message, error);
   }
-  
+
+  window.alert(message);
+};
+
+/**
+ * Show a success/info message to the user.
+ * (현재는 alert 기반 — 추후 toast로 교체 시 이 함수만 바꾸면 됨)
+ * @param {string} message - The message to display
+ */
+export const showSuccess = (message) => {
   window.alert(message);
 };
 
@@ -62,6 +71,7 @@ export const handleApiError = (error, defaultMessage = "An error occurred. Pleas
 
 export default {
   showError,
+  showSuccess,
   handleApiError,
   getApiErrorMessage
 };

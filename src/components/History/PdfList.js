@@ -251,7 +251,7 @@ export default function PdfList({
         </div>
       </div>
 
-      <div className="p-5">
+      <div className="p-5 flex-1 min-h-0 overflow-y-auto">
         {/* Loading file in progress */}
         {loading && uploadedFiles && uploadedFiles.length > 0 && (
           <div className="flex flex-col p-4 rounded-lg bg-white border border-gray-200 shadow-sm mb-3 transition-all">

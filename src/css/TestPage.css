@@ -198,6 +198,25 @@ body {
   width: 100%;
 }
 
+/* PDF 페이지가 컨테이너 높이를 넘으면 비율을 유지한 채 축소 (하단 잘림 방지) */
+.pdf-viewer .react-pdf__Page {
+  height: 100%;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+  box-sizing: border-box;
+  background: transparent !important;
+}
+
+.pdf-viewer .react-pdf__Page__canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+}
+
 .pdf-page {
   max-height: calc(100vh - 230px);
   margin: 10px 0;
