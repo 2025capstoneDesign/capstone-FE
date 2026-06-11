@@ -155,10 +155,9 @@ export default function PdfList({
 
   // Show progress stages
   const getProgressStage = (progress) => {
-    if (progress < 60) return "음성/슬라이드 분석 중...";
-    if (progress < 75) return "슬라이드 매핑 중...";
-    if (progress < 95) return "필기 생성 중...";
-    return "결과 저장 중...";
+    if (progress < 60) return "자료분석 중...";
+    if (progress < 75) return "매핑 중...";
+    return "요약 중...";
   };
 
   const handleCheckboxChange = (itemId) => {

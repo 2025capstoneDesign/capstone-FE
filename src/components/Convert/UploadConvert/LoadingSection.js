@@ -8,15 +8,31 @@ import {
   TbFileAnalytics,
   TbMicrophone,
   TbRoute,
-  TbSparkles,
   TbWriting,
 } from "react-icons/tb";
 
-const phaseLabels = [
-  "자료 분석",
-  "슬라이드 매핑",
-  "필기 생성",
-  "결과 저장",
+const phaseSteps = [
+  {
+    key: "analysis",
+    phase: "자료분석",
+    label: "강의 듣는 중...",
+    image: "/loading_listen.gif",
+    alt: "강의 듣는 중",
+  },
+  {
+    key: "mapping",
+    phase: "매핑",
+    label: "슬라이드 맞추는 중...",
+    image: "/loading_analyze.png",
+    alt: "슬라이드 맞추는 중",
+  },
+  {
+    key: "summary",
+    phase: "요약",
+    label: "필기 생성 중...",
+    image: "/loading_write.png",
+    alt: "필기 생성 중",
+  },
 ];
 
 const taskIcons = {
@@ -24,12 +40,57 @@ const taskIcons = {
   slides: TbFileAnalytics,
   mapping: TbRoute,
   summary: TbWriting,
-  save: TbSparkles,
+};
+
+const taskDisplay = {
+  speech: {
+    label: "강의 듣는 중...",
+    fallbackMessage: "강의 내용을 분석하고 있어요",
+  },
+  slides: {
+    label: "자료 읽는 중...",
+    fallbackMessage: "슬라이드를 살펴보고 있어요",
+  },
+  mapping: {
+    label: "슬라이드 맞추는 중...",
+    fallbackMessage: "강의 흐름과 슬라이드를 맞추고 있어요",
+  },
+  summary: {
+    label: "필기 생성 중...",
+    fallbackMessage: "필기 내용을 정리하고 있어요",
+  },
+};
+
+const visibleTasksByStage = [
+  ["speech", "slides"],
+  ["mapping"],
+  ["summary"],
+];
+
+const getVisibleTasks = (taskDetails, currentStage) => {
+  const tasksByKey = taskDetails.reduce((acc, task) => {
+    acc[task.key] = task;
+    return acc;
+  }, {});
+
+  const visibleKeys =
+    visibleTasksByStage[currentStage] || visibleTasksByStage[2];
+
+  return visibleKeys.map((key) => ({
+    key,
+    ...tasksByKey[key],
+    ...taskDisplay[key],
+  }));
 };
 
 function LoadingSection() {
   const { progress, currentStage, statusMessage, taskDetails } = useLoading();
   const navigate = useNavigate();
+  const visibleTasks = getVisibleTasks(taskDetails, currentStage);
+  const displayStatusMessage =
+    statusMessage && statusMessage.includes("저장")
+      ? "마무리 중입니다..."
+      : statusMessage;
 
   const getTaskTone = (task) => {
     if (task.status === "completed") {
@@ -48,9 +109,52 @@ function LoadingSection() {
       </h2>
 
       {/* 진행 상태 컨테이너 */}
-      <div className="w-full px-4 py-10">
+      <div className="w-full px-4 py-8">
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          {phaseSteps.map((step, index) => {
+            const isActive = currentStage === index;
+            const isDone = currentStage > index;
+
+            return (
+              <div key={step.key} className="flex flex-col items-center">
+                <div
+                  className={`text-xs font-semibold mb-2 ${
+                    isActive || isDone ? "text-[#2F5F5B]" : "text-gray-400"
+                  }`}
+                >
+                  {step.phase}
+                </div>
+                <div
+                  className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    isActive
+                      ? "bg-[#EEF7F5] ring-2 ring-[#5B7F7C]/30"
+                      : isDone
+                      ? "bg-[#5B7F7C]/5"
+                      : "bg-gray-50"
+                  }`}
+                >
+                  <img
+                    src={step.image}
+                    alt={step.alt}
+                    className={`w-16 h-16 sm:w-20 sm:h-20 object-contain transition-opacity duration-300 ${
+                      isActive || isDone ? "opacity-100" : "opacity-30"
+                    }`}
+                  />
+                </div>
+                <div
+                  className={`mt-3 h-10 flex items-center text-center text-sm font-semibold leading-snug ${
+                    isActive ? "text-[#2F5F5B]" : "text-gray-400"
+                  }`}
+                >
+                  {step.label}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         {/* 진행 바 컨테이너 */}
-        <div className="relative w-full h-3 bg-gray-200 rounded-full mb-8 overflow-hidden">
+        <div className="relative w-full h-3 bg-gray-200 rounded-full mb-7 overflow-hidden">
           {/* 실제 진행 바 */}
           <div
             className="absolute top-0 left-0 h-3 bg-[#5B7F7C] rounded-full transition-all duration-500"
@@ -65,33 +169,38 @@ function LoadingSection() {
           {/* 단계 구분선 */}
           <div className="absolute top-0 left-[60%] w-0.5 h-3 bg-white/80 rounded"></div>
           <div className="absolute top-0 left-[75%] w-0.5 h-3 bg-white/80 rounded"></div>
-          <div className="absolute top-0 left-[95%] w-0.5 h-3 bg-white/80 rounded"></div>
         </div>
 
-        {/* 서버에서 전달된 상태 메시지 */}
-        {statusMessage && (
-          <div className="text-center text-[#5B7F7C] font-medium mb-8 min-h-6">
-            {statusMessage}
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-8">
-          {phaseLabels.map((label, index) => (
+        <div className="grid grid-cols-3 gap-2 mb-8">
+          {phaseSteps.map((step, index) => (
             <div
-              key={label}
+              key={step.key}
               className={`h-10 flex items-center justify-center rounded-md text-sm font-semibold border ${
                 currentStage === index
                   ? "border-[#5B7F7C] text-[#2F5F5B] bg-[#EEF7F5]"
+                  : currentStage > index
+                  ? "border-[#5B7F7C]/20 text-[#2F5F5B] bg-white"
                   : "border-gray-200 text-gray-400 bg-white"
               }`}
             >
-              {label}
+              {step.phase}
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {taskDetails.map((task) => {
+        {/* 서버에서 전달된 상태 메시지 */}
+        {displayStatusMessage && (
+          <div className="text-center text-[#5B7F7C] font-medium mb-8 min-h-6">
+            {displayStatusMessage}
+          </div>
+        )}
+
+        <div
+          className={`grid grid-cols-1 gap-3 ${
+            currentStage === 0 ? "lg:grid-cols-2" : ""
+          }`}
+        >
+          {visibleTasks.map((task) => {
             const Icon = taskIcons[task.key] || TbFileAnalytics;
             const isDone = task.status === "completed";
 
@@ -127,6 +236,7 @@ function LoadingSection() {
                     </div>
                     <div className="mt-2 text-xs text-current/75 min-h-4 truncate">
                       {task.message ||
+                        task.fallbackMessage ||
                         (task.status === "pending"
                           ? "대기 중"
                           : "처리 중")}

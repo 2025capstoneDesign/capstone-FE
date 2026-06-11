@@ -52,7 +52,7 @@ const DEFAULT_TASK_DETAILS = [
 export function LoadingProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [currentStage, setCurrentStage] = useState(0); // 0: 자료 분석, 1: 매핑, 2: 필기 생성, 3: 저장
+  const [currentStage, setCurrentStage] = useState(0); // 0: 자료분석, 1: 매핑, 2: 요약
   const [statusMessage, setStatusMessage] = useState("");
   const [taskDetails, setTaskDetails] = useState(DEFAULT_TASK_DETAILS);
   const [convertedData, setConvertedData] = useState(null);
@@ -84,10 +84,8 @@ export function LoadingProvider({ children }) {
       setCurrentStage(0); // Parallel analysis
     } else if (progress < 75) {
       setCurrentStage(1); // Mapping
-    } else if (progress < 95) {
-      setCurrentStage(2); // Summary
     } else {
-      setCurrentStage(3); // Save
+      setCurrentStage(2); // Summary
     }
   }, [loading, progress]);
 

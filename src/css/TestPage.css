@@ -44,10 +44,12 @@ body {
 .app-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  /* 고정 헤더(70px)를 제외한 화면 높이에 정확히 맞춤 */
+  height: calc(100vh - 70px);
   width: 100%;
   margin-top: 70px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* 헤더 스타일
@@ -139,7 +141,6 @@ body {
   padding: 0 0 25px;
   /* gap: 25px; */
   min-height: 0;
-  max-height: calc(100vh - 180px);
   overflow: hidden;
 }
 

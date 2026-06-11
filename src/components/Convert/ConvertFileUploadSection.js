@@ -120,10 +120,12 @@ function ConvertFileUploadSection({
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100%-3.5rem)]">
+    <div className="flex flex-col lg:flex-row h-[calc(100%-3.5rem)] min-h-0">
       {/* 왼쪽 업로드 영역 */}
-      <div className="flex-1 p-[5%] flex flex-col">
-        <h2 className="text-[1.4rem] font-semibold my-[3vh] text-center">
+      <div className="flex-1 px-[5%] py-[1rem] flex flex-col min-h-0 overflow-y-auto">
+        {/* 가운데 정렬되는 콘텐츠 영역: 화면이 커도 위로 쏠리지 않도록 남는 공간을 위아래로 분배 */}
+        <div className="flex flex-col justify-center flex-1">
+        <h2 className="text-[1.4rem] font-semibold my-[2vh] text-center">
           {variant.title}
         </h2>
         <div
@@ -156,7 +158,7 @@ function ConvertFileUploadSection({
         </div>
 
         {/* 파일 형식 아이콘들 */}
-        <div className="py-[1.5rem] w-full lg:w-[75%] mx-auto">
+        <div className="py-[1rem] w-full lg:w-[75%] mx-auto">
           <div className={`grid ${variant.gridColsClass} gap-4`}>
             {variant.headers.map((header) => (
               <span
@@ -182,9 +184,10 @@ function ConvertFileUploadSection({
             ))}
           </div>
         </div>
+        </div>
 
-        {/* 변환 버튼 */}
-        <div className="flex justify-end mb-4 relative -top-14">
+        {/* 변환 버튼: 패널 하단 우측에 고정 */}
+        <div className="flex justify-end mt-auto">
           <button
             className={variant.buttonClassName}
             onClick={handleConvert}
@@ -198,9 +201,9 @@ function ConvertFileUploadSection({
       </div>
 
       {/* 오른쪽 업로드된 파일 목록 */}
-      <div className="w-full lg:w-[33%] p-[1rem] border-t lg:border-t-0 lg:border-l border-gray-200">
+      <div className="w-full lg:w-[33%] p-[1rem] border-t lg:border-t-0 lg:border-l border-gray-200 min-h-0 overflow-y-auto flex flex-col">
         {files.length === 0 ? (
-          <div className="text-center text-[1.2rem] text-gray-500 my-[3rem]">
+          <div className="text-center text-[1.2rem] text-gray-500 my-auto">
             아직 업로드된 파일이 없습니다
           </div>
         ) : (
